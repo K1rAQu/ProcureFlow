@@ -1,0 +1,35 @@
+services:
+  procurement-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: procurement-management-system:latest
+    container_name: procurement-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/procurement.db
+      - UPLOAD_DIR=/app/var/uploads
+      - APP_URL=http://localhost:3000
+      - DEFAULT_LOCALE=en
+      - GEO_RESTRICT_MODE=off
+      # Optional: SMTP / Google OAuth variables
+      # - GOOGLE_CLIENT_ID=
+      # - GOOGLE_CLIENT_SECRET=
+      # - CORPORATE_EMAIL_DOMAIN=
+      # - SMTP_HOST=
+      # - SMTP_PORT=587
+      # - SMTP_USER=
+      # - SMTP_PASS=
+      # - SMTP_FROM=
+    volumes:
+      - procurement-data:/app/data
+      - procurement-uploads:/app/var/uploads
+
+volumes:
+  procurement-data:
+    driver: local
+  procurement-uploads:
+    driver: local

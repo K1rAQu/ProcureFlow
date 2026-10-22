@@ -1,0 +1,166 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button, Field, Input, Select } from "./ui";
+import { IconFilter, IconSearch, IconX } from "./icons";
+import { useT } from "./i18n-provider";
+
+export function NomenclatureFilters({
+  action = "/nomenclature",
+  values,
+}: {
+  action?: string;
+  values: Record<string, string | undefined>;
+}) {
+  const t = useT();
+  const router = useRouter();
+
+  // Рахуємо кількість додаткових активних фільтрів (окрім рядка пошуку)
+  const activeExtraFiltersCount = [
+    values.status && values.status !== "all_active" ? values.status : null,
+    values.mine === "1" ? "mine" : null,
+    values.sort && values.sort !== "updated" ? values.sort : null,
+  ].filter(Boolean).length;
+
+  const [expanded, setExpanded] = useState<boolean>(activeExtraFiltersCount > 0);
+  const [query, setQuery] = useState<string>(values.q ?? "");
+
+  const hasAnyFilter = Boolean(values.q || activeExtraFiltersCount > 0);
+
+  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const params = new URLSearchParams();
+
+    for (const [key, value] of formData.entries()) {
+      const str = String(value).trim();
+      if (str && str !== "all_active" && str !== "updated" && str !== "0") {
+        params.set(key, str);
+      }
+    }
+
+    router.push(`${action}?${params.toString()}`);
+  }
+
+  function onClearSearch() {
+    setQuery("");
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(values)) {
+      if (v && k !== "q" && k !== "page") params.set(k, v);
+    }
+    router.push(`${action}?${params.toString()}`);
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4 shadow-xs">
+      <form onSubmit={onSubmit} className="space-y-3">
+        {/* Верхній рядок: Швидкий наскрізний пошук + кнопка Фільтри */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          <div className="relative flex-1">
+            <Input
+              name="q"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Швидкий пошук за назвою, артикулом, кодом 1С/БАС або виробником..."
+              className="pl-9 pr-8 py-2 text-sm w-full"
+            />
+            <span className="pointer-events-none absolute left-3 top-2.5 text-slate-400">
+              <IconSearch className="h-4 w-4" />
+            </span>
+            {query ? (
+              <button
+                type="button"
+                onClick={onClearSearch}
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 rounded p-0.5"
+                title="Очистити пошук"
+              >
+                <IconX className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Button type="submit" variant="primary" size="md">
+              <IconSearch className="h-4 w-4" />
+              <span>Знайти</span>
+            </Button>
+
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition cursor-pointer ${
+                expanded || activeExtraFiltersCount > 0
+                  ? "border-[#12325c] bg-blue-50 text-[#12325c]"
+                  : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+              title="Розширені фільтри та сортування"
+            >
+              <IconFilter className="h-3.5 w-3.5" />
+              <span>Фільтри</span>
+              {activeExtraFiltersCount > 0 ? (
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#12325c] px-1 text-[10px] font-bold text-white">
+                  {activeExtraFiltersCount}
+                </span>
+              ) : null}
+              <span className="text-[10px] text-slate-400">{expanded ? "▲" : "▼"}</span>
+            </button>
+
+            {hasAnyFilter ? (
+              <Link
+                href={action}
+                className="inline-flex h-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-rose-600 transition"
+                title="Скинути всі фільтри"
+              >
+                <IconX className="h-4 w-4" />
+              </Link>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Розкривна панель додаткових параметрів */}
+        {expanded ? (
+          <div className="animate-fade-in border-t border-slate-100 pt-3 mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-xs">
+            {/* Статус номенклатури */}
+            <Field label={t("common.status")}>
+              <Select name="status" defaultValue={values.status ?? "all_active"}>
+                <option value="all_active">
+                  {t("nom.status.active")} + {t("nom.status.pending")}
+                </option>
+                <option value="active">{t("nom.status.active")} (схвалені)</option>
+                <option value="pending">{t("nom.status.pending")} (на модерації)</option>
+                <option value="archived">{t("nom.status.archived")}</option>
+                <option value="all">{t("common.all")} (включаючи архів)</option>
+              </Select>
+            </Field>
+
+            {/* Джерело / Мої */}
+            <Field label="Джерело позицій">
+              <Select name="mine" defaultValue={values.mine ?? "0"}>
+                <option value="0">Весь довідник компанії</option>
+                <option value="1">⭐️ Мої номенклатури (створені/замовлені мною)</option>
+              </Select>
+            </Field>
+
+            {/* Сортування */}
+            <Field label={t("common.sort")}>
+              <Select name="sort" defaultValue={values.sort ?? "updated"}>
+                <option value="updated">За датою оновлення (спочатку свіжі)</option>
+                <option value="name">{t("item.name")} (за алфавітом А-Я)</option>
+                <option value="usage">{t("nom.usage")} (найпопулярніші)</option>
+              </Select>
+            </Field>
+
+            {/* Кнопка застосувати */}
+            <div className="sm:col-span-2 lg:col-span-3 flex items-end justify-end gap-2 pt-1 border-t border-slate-100 mt-1">
+              <Button type="submit" variant="secondary" size="md">
+                <span>Застосувати параметри</span>
+              </Button>
+            </div>
+          </div>
+        ) : null}
+      </form>
+    </div>
+  );
+}
