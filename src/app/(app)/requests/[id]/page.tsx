@@ -7,7 +7,7 @@ import { Badge, Button, Card, CardHeader, EmptyState, PageHeader } from "@/compo
 import { PriorityBadge, StatusBadge } from "@/components/status";
 import { RequestLifecycleStepper } from "@/components/request-stepper";
 import { RequestWorkflowPanel } from "@/components/request-workflow";
-import { AutoRefresher } from "@/components/auto-refresher";
+import { RefreshControl } from "@/components/refresh-control";
 import { PrintButton } from "@/components/print-button";
 import { IconCheck, IconClock, IconCopy, IconMessageSquare, IconPrinter, IconUser } from "@/components/icons";
 import { HttpError } from "@/lib/auth";
@@ -71,8 +71,6 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
-      <AutoRefresher intervalSeconds={15} />
-
       {/* Офіційна шапка документа — відображається ТІЛЬКИ при друку */}
       <div className="hidden print:block pb-4 mb-4 border-b-2 border-slate-900">
         <div className="flex items-start justify-between">
@@ -104,6 +102,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           description={`Створено: ${detail.authorName} (${detail.authorEmail}) · ${formatDateTime(detail.createdAt)}`}
           actions={
             <div className="flex flex-wrap items-center gap-2">
+              <RefreshControl />
               <PrintButton />
               {user.permissions.includes("requests.create") ? (
                 <Link

@@ -5,7 +5,7 @@ import { IconPlus } from "@/components/icons";
 import { RequestFilters } from "@/components/request-filters";
 import { RequestsTable } from "@/components/requests-table";
 import { RequestsKanban } from "@/components/requests-kanban";
-import { AutoRefresher } from "@/components/auto-refresher";
+import { RefreshControl } from "@/components/refresh-control";
 import { ViewModeToggle } from "@/components/view-mode-toggle";
 import { ExportCsvButton } from "@/components/export-button";
 import { listRequests } from "@/lib/requests-service";
@@ -80,12 +80,12 @@ export default async function MyRequestsPage({
 
   return (
     <>
-      <AutoRefresher intervalSeconds={20} />
       <PageHeader
         title={t("request.myTitle")}
         description={`${t("common.total")}: ${result.total}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
+            <RefreshControl />
             <ExportCsvButton endpoint="/api/export/requests" defaultParams={{ mine: "1" }} />
             <ViewModeToggle currentView={view} />
 

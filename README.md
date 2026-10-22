@@ -33,6 +33,7 @@ Unlike bloated enterprise ERPs, ProcureFlow is **blazing fast, lightweight, and 
 * **Shop-Floor Hardened:** Automatic inactivity session timeout (prevents unauthorized access on shared plant terminals), client-side image compression (WebP), and print-ready requisition specs.
 * **1-Click Database Backups:** Hot SQLite backup generation directly from the UI, with immediate download and automated maintenance tools.
 * **Centralized Enterprise Localization:** Full bilingual support (`EN` / `UK`). Deployment environment variable (`DEFAULT_LOCALE`) + dynamic Admin panel setting (`System Settings` → `System Language`) that instantly sets the language for all users across the company without altering database tables.
+* **Smart Real-time Sync & SSE:** Lightweight Server-Sent Events (`ENABLE_REALTIME=true`) push instantaneous update notices without brute-force page reloads, paired with an explicit manual "Refresh" control and graceful degradation for serverless platforms.
 * **Security First:** `HttpOnly` SameSite sessions, Google OAuth 2.0 with corporate domain fencing (`@company.com`), CSRF/idempotency protection against double clicks, Magic-Byte MIME verification, and stealth `noindex` headers.
 
 ---

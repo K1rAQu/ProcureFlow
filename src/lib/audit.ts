@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "@/db";
 import { auditLog, notifications } from "@/db/schema";
+import { emitSystemEvent } from "./events";
 
 export type AuditInput = {
   userId: number | null;
@@ -22,6 +23,14 @@ export async function writeAudit(input: AuditInput): Promise<void> {
     payload: input.payload ?? null,
     ip: input.ip ?? null,
   });
+
+  try {
+    emitSystemEvent({
+      action: input.action,
+      entityType: input.entityType,
+      entityId: input.entityId,
+    });
+  } catch {}
 }
 
 export type NotificationInput = {
