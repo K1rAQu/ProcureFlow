@@ -4,12 +4,12 @@ import { useT } from "./i18n-provider";
 import { IconCheck, IconClock, IconX } from "./icons";
 
 const STEPS = [
-  { key: "draft", label: "Чернетка" },
-  { key: "submitted", label: "Подано" },
-  { key: "in_review", label: "В обробці" },
-  { key: "purchasing", label: "Закупівля" },
-  { key: "ordered", label: "Замовлено" },
-  { key: "completed", label: "Виконано" },
+  { key: "draft" },
+  { key: "submitted" },
+  { key: "in_review" },
+  { key: "purchasing" },
+  { key: "ordered" },
+  { key: "completed" },
 ];
 
 const STEP_INDEX: Record<string, number> = {
@@ -33,14 +33,10 @@ export function RequestLifecycleStepper({ status }: { status: string }) {
         </span>
         <div>
           <p className="text-sm font-bold">
-            {status === "rejected"
-              ? (t("status.rejected") === "Rejected" ? "Request Rejected" : "Заявку відхилено")
-              : (t("status.cancelled") === "Cancelled" ? "Request Cancelled" : "Заявку скасовано")}
+            {status === "rejected" ? t("stepper.rejectedTitle") : t("stepper.cancelledTitle")}
           </p>
           <p className="font-normal text-rose-700">
-            {t("status.rejected") === "Rejected"
-              ? "Further procurement stages have been locked."
-              : "Перехід до подальших етапів закупівлі заблоковано."}
+            {status === "rejected" ? t("stepper.rejectedDesc") : t("stepper.cancelledDesc")}
           </p>
         </div>
       </div>
@@ -54,11 +50,11 @@ export function RequestLifecycleStepper({ status }: { status: string }) {
     <div className="rounded-xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-          {t("status.completed") === "Completed" ? "Request Lifecycle" : "Життєвий цикл заявки"}
+          {t("stepper.lifecycle")}
         </span>
         {isNeedsInfo ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800 animate-pulse">
-            {t("status.completed") === "Completed" ? "⚠️ Waiting for clarification" : "⚠️ Очікується відповідь на уточнення"}
+            {t("stepper.waitingClarification")}
           </span>
         ) : null}
       </div>

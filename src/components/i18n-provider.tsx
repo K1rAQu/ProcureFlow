@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
-import { DEFAULT_LOCALE, type Locale, type Messages } from "@/lib/i18n";
+import { DEFAULT_LOCALE, localizedName, translate, type Locale, type Messages } from "@/lib/i18n";
 
 type I18nValue = {
   locale: Locale;
@@ -24,8 +24,13 @@ export function I18nProvider({
 }
 
 export function useT() {
-  const { messages } = useContext(I18nContext);
-  return useCallback((key: string) => messages[key] ?? key, [messages]);
+  const { messages, locale } = useContext(I18nContext);
+  return useCallback(
+    (key: string, params?: Record<string, string | number>) => {
+      return translate(messages, key, undefined, params);
+    },
+    [messages, locale],
+  );
 }
 
 export function useLocale(): Locale {
@@ -35,9 +40,8 @@ export function useLocale(): Locale {
 export function useLocalizedName() {
   const locale = useLocale();
   return useCallback(
-    (entity: { nameRu: string; nameUk: string } | null | undefined) => {
-      if (!entity) return "—";
-      return locale === "uk" ? entity.nameUk || entity.nameRu : entity.nameRu || entity.nameUk;
+    (entity: { code?: string; nameRu?: string; nameUk?: string; name?: string } | null | undefined) => {
+      return localizedName(locale, entity);
     },
     [locale],
   );

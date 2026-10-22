@@ -11,6 +11,7 @@ import { ViewModeToggle } from "@/components/view-mode-toggle";
 import { ExportCsvButton } from "@/components/export-button";
 import { listRequests } from "@/lib/requests-service";
 import { loadDirectories, pageContext, readNumberParam, readParam } from "@/lib/page";
+import { localizedName } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -144,7 +145,7 @@ export default async function AllRequestsPage({
                   : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
               }`}
             >
-              {locale === "uk" ? department.nameUk : department.nameRu}
+              {localizedName(locale, department)}
             </Link>
           ))}
         </div>

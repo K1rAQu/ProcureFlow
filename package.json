@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "seed": "node scripts/seed-clean-demo.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs",
-    "test": "node --test tests/workflow.test.ts tests/dedupe.test.ts tests/permissions.test.ts tests/bas-code.test.ts tests/units.test.ts",
+    "test": "node --test tests/workflow.test.ts tests/dedupe.test.ts tests/permissions.test.ts tests/bas-code.test.ts tests/units.test.ts tests/i18n.test.ts",
     "test:e2e": "node tests/e2e.mjs http://127.0.0.1:3000",
     "test:smoke": "node tests/ui-smoke.mjs http://127.0.0.1:3000"
   },

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button, Card, CardHeader } from "./ui";
 import { useConfirm } from "./confirm-provider";
-import { useLocale, useT } from "./i18n-provider";
+import { useT } from "./i18n-provider";
 
 type Stats = {
   dbSizeBytes: number;
@@ -22,24 +22,23 @@ type BackupFile = {
 };
 
 function formatBytes(bytes: number): string {
-  if (bytes <= 0) return "0 Б";
-  if (bytes < 1024) return `${bytes} Б`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} МБ`;
+  if (bytes <= 0) return "0 B";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 function formatDate(iso: string): string {
   try {
     const d = new Date(iso);
-    return `${d.toLocaleDateString("uk-UA")} ${d.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   } catch {
     return iso;
   }
 }
 
 export function MaintenancePanel() {
-  const locale = useLocale();
-  const isUk = locale === "uk";
+  const t = useT();
   const [stats, setStats] = useState<Stats | null>(null);
   const [backups, setBackups] = useState<BackupFile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -79,13 +78,14 @@ export function MaintenancePanel() {
       if (res.ok) {
         const data = (await res.json()) as { filename: string; sizeBytes: number };
         setMessage(
-          isUk
-            ? `Резервну копію «${data.filename}» (${formatBytes(data.sizeBytes)}) успішно збережено на сервері.`
-            : `Backup snapshot "${data.filename}" (${formatBytes(data.sizeBytes)}) saved on server.`,
+          t("admin.maintenance.backupSuccess", {
+            filename: data.filename,
+            size: formatBytes(data.sizeBytes),
+          }),
         );
         await loadData();
       } else {
-        setMessage(isUk ? "Помилка під час створення резервної копії." : "Failed to create database backup.");
+        setMessage(t("admin.maintenance.backupError"));
       }
     } finally {
       setBusyAction(null);
@@ -94,11 +94,9 @@ export function MaintenancePanel() {
 
   async function handleDeleteBackup(filename: string) {
     const ok = await confirm({
-      title: isUk ? "Видалення резервної копії" : "Delete Backup Snapshot",
-      message: isUk
-        ? `Ви дійсно бажаєте видалити файл копії «${filename}» із сервера?`
-        : `Are you sure you want to delete backup file "${filename}" from the server?`,
-      confirmText: isUk ? "Видалити файл" : "Delete File",
+      title: t("admin.maintenance.deleteTitle"),
+      message: t("admin.maintenance.deleteConfirm", { filename }),
+      confirmText: t("admin.maintenance.deleteButton"),
       tone: "danger",
     });
     if (!ok) return;
@@ -110,7 +108,7 @@ export function MaintenancePanel() {
         method: "DELETE",
       });
       if (res.ok) {
-        setMessage(isUk ? `Файл «${filename}» видалено із сервера.` : `File "${filename}" deleted from server.`);
+        setMessage(t("admin.maintenance.deleteSuccess", { filename }));
         await loadData();
       }
     } finally {
@@ -129,7 +127,7 @@ export function MaintenancePanel() {
       });
       if (res.ok) {
         const data = (await res.json()) as { count: number };
-        setMessage(isUk ? `Очищено ${data.count} застарілих сесій.` : `Purged ${data.count} expired sessions.`);
+        setMessage(t("admin.maintenance.cleanSessionsSuccess", { count: data.count }));
         await loadData();
       }
     } finally {
@@ -139,11 +137,9 @@ export function MaintenancePanel() {
 
   async function handleVacuum() {
     const ok = await confirm({
-      title: isUk ? "Оптимізація бази даних" : "Database Defragmentation (VACUUM)",
-      message: isUk
-        ? "Виконати операцію VACUUM та скидання журналу WAL? Це дефрагментує файл та звільнить невикористане місце на диску."
-        : "Execute VACUUM & checkpoint WAL journal? This reclaims unused disk space.",
-      confirmText: isUk ? "Виконати оптимізацію" : "Run VACUUM",
+      title: t("admin.maintenance.vacuumTitle"),
+      message: t("admin.maintenance.vacuumConfirm"),
+      confirmText: t("admin.maintenance.vacuumButton"),
     });
     if (!ok) return;
 
@@ -156,7 +152,7 @@ export function MaintenancePanel() {
         body: JSON.stringify({ action: "vacuum" }),
       });
       if (res.ok) {
-        setMessage(isUk ? "Оптимізацію та дефрагментацію бази успішно завершено." : "Database optimization & VACUUM completed successfully.");
+        setMessage(t("admin.maintenance.vacuumSuccess"));
         await loadData();
       }
     } finally {
@@ -169,8 +165,8 @@ export function MaintenancePanel() {
       {/* Картка резервного копіювання */}
       <Card>
         <CardHeader
-          title={isUk ? "Резервне копіювання бази даних" : "Database Backups & Snapshots"}
-          description={isUk ? "Збереження копій локально на сервері поруч із базою (папка data/backups/)" : "Backups are stored locally on server alongside database (folder data/backups/)"}
+          title={t("admin.maintenance.backupsTitle")}
+          description={t("admin.maintenance.backupsDesc")}
           actions={
             <Button
               type="button"
@@ -181,7 +177,11 @@ export function MaintenancePanel() {
               className="flex items-center gap-1.5"
             >
               <span>💾</span>
-              <span>{busyAction === "create_backup" ? (isUk ? "Створення копії..." : "Creating snapshot...") : (isUk ? "Створити резервну копію на сервері" : "Create Server Backup Now")}</span>
+              <span>
+                {busyAction === "create_backup"
+                  ? t("admin.maintenance.creating")
+                  : t("admin.maintenance.createButton")}
+              </span>
             </Button>
           }
         />
@@ -195,21 +195,29 @@ export function MaintenancePanel() {
           {/* Статистичні плашки */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">{isUk ? "Робоча база (.db)" : "Active Database (.db)"}</span>
+              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+                {t("admin.maintenance.statDb")}
+              </span>
               <p className="text-lg font-bold text-slate-800 mt-1">
                 {loading ? "..." : formatBytes(stats?.dbSizeBytes ?? 0)}
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">{isUk ? "Вкладення (фото)" : "Attachments (Uploads)"}</span>
+              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+                {t("admin.maintenance.statUploads")}
+              </span>
               <p className="text-lg font-bold text-slate-800 mt-1">
-                {loading ? "..." : `${stats?.uploadsCount ?? 0} ${isUk ? "шт." : "files"} (${formatBytes(stats?.uploadsSizeBytes ?? 0)})`}
+                {loading
+                  ? "..."
+                  : `${t("admin.maintenance.piecesCount", { count: stats?.uploadsCount ?? 0 })} (${formatBytes(stats?.uploadsSizeBytes ?? 0)})`}
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5">
-              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">{isUk ? "Збережених копій" : "Saved Backups"}</span>
+              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">
+                {t("admin.maintenance.statBackups")}
+              </span>
               <p className="text-lg font-bold text-slate-800 mt-1">
-                {loading ? "..." : `${backups.length} ${isUk ? "файлів" : "files"}`}
+                {loading ? "..." : t("admin.maintenance.filesCount", { count: backups.length })}
               </p>
             </div>
           </div>
@@ -218,26 +226,26 @@ export function MaintenancePanel() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                {isUk ? "Збережені файли резервних копій на сервері" : "Saved backup files on server"}
+                {t("admin.maintenance.tableTitle")}
               </span>
-              <span className="text-[11px] text-slate-400">{isUk ? "Шлях:" : "Path:"} data/backups/</span>
+              <span className="text-[11px] text-slate-400">
+                {t("admin.maintenance.pathPrefix")} data/backups/
+              </span>
             </div>
 
             {backups.length === 0 ? (
               <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400 bg-slate-50/40">
-                {isUk
-                  ? "На сервері ще немає збережених копій. Натисніть кнопку «Створити резервну копію на сервері», щоб записати перший знімок."
-                  : "No backups saved on server yet. Click 'Create Server Backup Now' to create your first snapshot."}
+                {t("admin.maintenance.noBackups")}
               </div>
             ) : (
               <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
                 <table className="w-full text-left text-xs">
                   <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                     <tr>
-                      <th className="px-4 py-3">{isUk ? "Файл копії" : "Backup File"}</th>
-                      <th className="px-4 py-3">{isUk ? "Дата та час створення" : "Created At"}</th>
-                      <th className="px-4 py-3">{isUk ? "Розмір" : "Size"}</th>
-                      <th className="px-4 py-3 text-right">{isUk ? "Дії" : "Actions"}</th>
+                      <th className="px-4 py-3">{t("admin.maintenance.colFile")}</th>
+                      <th className="px-4 py-3">{t("admin.maintenance.colCreated")}</th>
+                      <th className="px-4 py-3">{t("admin.maintenance.colSize")}</th>
+                      <th className="px-4 py-3 text-right">{t("admin.maintenance.colActions")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -255,20 +263,20 @@ export function MaintenancePanel() {
                               href={`/api/admin/backup?file=${encodeURIComponent(b.filename)}`}
                               download
                               className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 font-medium text-slate-700 shadow-2xs hover:bg-slate-50 hover:text-slate-900 transition"
-                              title={isUk ? "Завантажити копію на ваш комп'ютер" : "Download snapshot to computer"}
+                              title={t("admin.maintenance.downloadTooltip")}
                             >
                               <span>📥</span>
-                              <span>{isUk ? "Завантажити" : "Download"}</span>
+                              <span>{t("admin.maintenance.download")}</span>
                             </a>
                             <button
                               type="button"
                               disabled={busyAction === `delete_${b.filename}`}
                               onClick={() => handleDeleteBackup(b.filename)}
                               className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 font-medium text-rose-700 hover:bg-rose-100 transition disabled:opacity-50"
-                              title={isUk ? "Видалити цю копію із сервера" : "Delete snapshot from server"}
+                              title={t("admin.maintenance.deleteTooltip")}
                             >
                               <span>🗑️</span>
-                              <span>{isUk ? "Видалити" : "Delete"}</span>
+                              <span>{t("admin.maintenance.delete")}</span>
                             </button>
                           </div>
                         </td>
@@ -285,17 +293,19 @@ export function MaintenancePanel() {
       {/* Картка очищення та обслуговування */}
       <Card>
         <CardHeader
-          title={isUk ? "Очищення та оптимізація бази даних" : "Database Cleanup & Optimization"}
-          description={isUk ? "Технічне обслуговування сховища та сесій" : "Storage maintenance and session purge"}
+          title={t("admin.maintenance.cleanupTitle")}
+          description={t("admin.maintenance.cleanupDesc")}
         />
         <div className="p-5 space-y-4">
           <div className="divide-y divide-slate-100">
             {/* Очищення сесій */}
             <div className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-slate-800">{isUk ? "Очищення застарілих авторизаційних сесій" : "Purge Expired Sessions"}</p>
+                <p className="text-xs font-semibold text-slate-800">
+                  {t("admin.maintenance.cleanSessionsTitle")}
+                </p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {isUk ? "Видаляє прострочені сесії входу з бази даних. Наразі застарілих: " : "Removes expired login tokens from database. Currently expired: "}
+                  {t("admin.maintenance.cleanSessionsDesc")}
                   <span className="font-semibold text-slate-700">{loading ? "..." : stats?.expiredSessionsCount}</span>.
                 </p>
               </div>
@@ -307,16 +317,20 @@ export function MaintenancePanel() {
                 onClick={handleCleanSessions}
                 className="shrink-0"
               >
-                {busyAction === "sessions" ? (isUk ? "Очищення..." : "Purging...") : (isUk ? "Очистити старі сесії" : "Purge Expired Sessions")}
+                {busyAction === "sessions"
+                  ? t("admin.maintenance.purging")
+                  : t("admin.maintenance.cleanSessionsButton")}
               </Button>
             </div>
 
             {/* VACUUM */}
             <div className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-slate-800">{isUk ? "Оптимізація та дефрагментація файлу бази (VACUUM)" : "Database Defragmentation (VACUUM)"}</p>
+                <p className="text-xs font-semibold text-slate-800">
+                  {t("admin.maintenance.vacuumCardTitle")}
+                </p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {isUk ? "Скидає буфер транзакцій WAL і стискає файл бази на диску, повертаючи вільний простір операційній системі." : "Checkpoints WAL journal and defragments database file on disk, reclaiming unused space."}
+                  {t("admin.maintenance.vacuumCardDesc")}
                 </p>
               </div>
               <Button
@@ -327,18 +341,26 @@ export function MaintenancePanel() {
                 onClick={handleVacuum}
                 className="shrink-0"
               >
-                {busyAction === "vacuum" ? (isUk ? "Оптимізація..." : "Running...") : (isUk ? "Виконати VACUUM" : "Run VACUUM")}
+                {busyAction === "vacuum"
+                  ? t("admin.maintenance.running")
+                  : t("admin.maintenance.vacuumRunButton")}
               </Button>
             </div>
 
             {/* Статистика закритих заявок */}
             <div className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-slate-800">{isUk ? "Архівний стан заявок" : "Request Archive Statistics"}</p>
+                <p className="text-xs font-semibold text-slate-800">
+                  {t("admin.maintenance.archiveTitle")}
+                </p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {isUk
-                    ? `Усього завершених або скасованих заявок: ${loading ? "..." : stats?.closedRequestsCount} (з ${stats?.totalRequests} загалом).`
-                    : `Total completed or cancelled requests: ${loading ? "..." : stats?.closedRequestsCount} (of ${stats?.totalRequests} total).`}
+                  {t("admin.maintenance.archiveDesc")}
+                  <span className="font-semibold text-slate-700">{loading ? "..." : stats?.closedRequestsCount}</span>
+                  {" ("}
+                  <span className="text-slate-500">
+                    {t("common.of")} {loading ? "..." : stats?.totalRequests}
+                  </span>
+                  {")"}
                 </p>
               </div>
             </div>

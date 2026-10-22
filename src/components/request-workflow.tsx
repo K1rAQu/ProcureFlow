@@ -15,7 +15,7 @@ import {
   IconUser,
   IconX,
 } from "./icons";
-import { useLocalizedName, useLocale, useT } from "./i18n-provider";
+import { useLocalizedName, useT } from "./i18n-provider";
 import { useConfirm } from "./confirm-provider";
 
 type TransitionOption = { to: string; requiresComment?: boolean };
@@ -28,109 +28,39 @@ const FORWARD_ORDER = ["submitted", "in_review", "purchasing", "ordered", "compl
 const FORWARD_META: Record<
   string,
   {
-    titleEn: string;
-    titleUk: string;
-    subtitleEn: string;
-    subtitleUk: string;
     icon: string;
     bgClass: string;
     hoverClass: string;
   }
 > = {
   submitted: {
-    titleEn: "Submit for Approval",
-    titleUk: "Подати на погодження",
-    subtitleEn: "Send request to procurement department",
-    subtitleUk: "Передати заявку у відділ закупівель",
     icon: "🚀",
     bgClass: "bg-[#12325c]",
     hoverClass: "hover:bg-[#0b1b33]",
   },
   in_review: {
-    titleEn: "Take into Processing",
-    titleUk: "Взяти заявку в обробку",
-    subtitleEn: "Start review and quotation prep",
-    subtitleUk: "Розпочати розгляд та підготовку закупівлі",
     icon: "📋",
     bgClass: "bg-[#12325c]",
     hoverClass: "hover:bg-[#0b1b33]",
   },
   purchasing: {
-    titleEn: "Move to Purchasing",
-    titleUk: "Передати в закупівлю",
-    subtitleEn: "Supplier sourcing & invoice approvals",
-    subtitleUk: "Пошук постачальників та погодження рахунків",
     icon: "🛒",
     bgClass: "bg-[#12325c]",
     hoverClass: "hover:bg-[#0b1b33]",
   },
   ordered: {
-    titleEn: "Mark as Ordered",
-    titleUk: "Позначити як замовлено",
-    subtitleEn: "Invoice paid / order placed with vendor",
-    subtitleUk: "Рахунок оплачено або товар відвантажено",
     icon: "📦",
     bgClass: "bg-indigo-600",
     hoverClass: "hover:bg-indigo-700",
   },
   completed: {
-    titleEn: "Confirm Receipt & Complete",
-    titleUk: "Підтвердити отримання / Завершити",
-    subtitleEn: "Items received and verified at facility",
-    subtitleUk: "Матеріали отримано на склад та перевірено",
     icon: "✓",
     bgClass: "bg-emerald-600",
     hoverClass: "hover:bg-emerald-700",
   },
 };
 
-const STATUS_DESCRIPTIONS: Record<string, { en: string; uk: string }> = {
-  draft: {
-    en: "Draft. Request has not yet been submitted for review.",
-    uk: "Чернетка. Заявка ще не надіслана в обробку.",
-  },
-  submitted: {
-    en: "Submitted. Awaiting review by procurement department.",
-    uk: "Надіслана. Очікує прийняття в роботу закупником.",
-  },
-  in_review: {
-    en: "In Review. Buyer is reviewing items and preparing vendor quotes.",
-    uk: "В обробці. Закупник перевіряє позиції та підбирає варіанти.",
-  },
-  needs_info: {
-    en: "Needs Info. Clarification requested from requester.",
-    uk: "Потребує уточнення. Очікується відповідь від автора заявки.",
-  },
-  purchasing: {
-    en: "Purchasing. Sourcing suppliers and approving invoices.",
-    uk: "У закупівлі. Відбувається погодження постачальника та оплата.",
-  },
-  ordered: {
-    en: "Ordered. Goods purchased and en route to facility.",
-    uk: "Замовлено. Товар придбано та очікується доставка.",
-  },
-  completed: {
-    en: "Completed. Order fulfilled, delivered, and accepted.",
-    uk: "Завершена. Замовлення повністю виконано та прийнято.",
-  },
-  rejected: {
-    en: "Rejected. Declined by procurement or management.",
-    uk: "Відхилена. Заявку відхилено відділом закупівель.",
-  },
-  cancelled: {
-    en: "Cancelled. Request has been cancelled.",
-    uk: "Скасована. Заявку відкликано або скасовано.",
-  },
-};
-
-const PIPELINE_STEPS = [
-  { key: "draft", labelEn: "Draft", labelUk: "Чернетка" },
-  { key: "submitted", labelEn: "Submitted", labelUk: "Подано" },
-  { key: "in_review", labelEn: "In Review", labelUk: "В обробці" },
-  { key: "purchasing", labelEn: "Purchasing", labelUk: "Закупівля" },
-  { key: "ordered", labelEn: "Ordered", labelUk: "Замовлено" },
-  { key: "completed", labelEn: "Completed", labelUk: "Виконано" },
-];
+const PIPELINE_STEPS = ["draft", "submitted", "in_review", "purchasing", "ordered", "completed"];
 
 const STEP_INDEX: Record<string, number> = {
   draft: 0,
@@ -178,7 +108,6 @@ export function RequestWorkflowPanel({
   editable?: boolean;
 }) {
   const t = useT();
-  const locale = useLocale();
   const confirm = useConfirm();
   const localized = useLocalizedName();
   const router = useRouter();
@@ -263,14 +192,13 @@ export function RequestWorkflowPanel({
         <div className="border-b border-slate-100 bg-slate-50/80 px-5 py-4">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              {locale === "uk" ? "Поточний стан заявки" : "Current Request Status"}
+              {t("workflow.currentStatus")}
             </span>
             <StatusBadge status={status} />
           </div>
 
           <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
-            {(locale === "uk" ? STATUS_DESCRIPTIONS[status]?.uk : STATUS_DESCRIPTIONS[status]?.en) ??
-              t(`status.${status}`)}
+            {t(`workflow.statusDesc.${status}`)}
           </p>
 
           {/* Міні-пайплайн прогресу (якщо не відхилено/скасовано) */}
@@ -278,24 +206,20 @@ export function RequestWorkflowPanel({
             <div className="mt-3.5 pt-3 border-t border-slate-200/60">
               <div className="flex items-center justify-between gap-1 mb-1.5">
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                  {locale === "uk"
-                    ? `Етап ${currentStepIdx + 1} з ${PIPELINE_STEPS.length}`
-                    : `Step ${currentStepIdx + 1} of ${PIPELINE_STEPS.length}`}
+                  {t("workflow.stepOf", { current: currentStepIdx + 1, total: PIPELINE_STEPS.length })}
                 </span>
                 <span className="text-[11px] font-medium text-slate-700">
-                  {locale === "uk"
-                    ? PIPELINE_STEPS[currentStepIdx]?.labelUk
-                    : PIPELINE_STEPS[currentStepIdx]?.labelEn}
+                  {t(`status.${PIPELINE_STEPS[currentStepIdx]}`)}
                 </span>
               </div>
               <div className="grid grid-cols-6 gap-1.5">
-                {PIPELINE_STEPS.map((step, idx) => {
+                {PIPELINE_STEPS.map((stepKey, idx) => {
                   const isPast = idx < currentStepIdx;
                   const isCurrent = idx === currentStepIdx;
                   return (
                     <div
-                      key={step.key}
-                      title={locale === "uk" ? step.labelUk : step.labelEn}
+                      key={stepKey}
+                      title={t(`status.${stepKey}`)}
                       className={`h-1.5 rounded-full transition-all ${
                         isPast
                           ? "bg-[#12325c]"
@@ -318,15 +242,13 @@ export function RequestWorkflowPanel({
           {forwardTransitions.length > 0 ? (
             <div className="space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                {locale === "uk" ? "Наступний крок" : "Next Action"}
+                {t("workflow.nextAction")}
               </span>
               <div className="space-y-2">
                 {forwardTransitions.map((tr) => {
                   const meta = FORWARD_META[tr.to];
-                  const title = meta ? (locale === "uk" ? meta.titleUk : meta.titleEn) : t(`status.${tr.to}`);
-                  const subtitle = meta
-                    ? (locale === "uk" ? meta.subtitleUk : meta.subtitleEn)
-                    : (locale === "uk" ? "Перевести заявку на наступний етап" : "Move to next stage");
+                  const title = t(`workflow.action.${tr.to}.title`);
+                  const subtitle = t(`workflow.action.${tr.to}.subtitle`);
                   const icon = meta?.icon || "➔";
                   const bgClass = meta?.bgClass || "bg-[#12325c]";
                   const hoverClass = meta?.hoverClass || "hover:bg-[#0b1b33]";
@@ -372,7 +294,7 @@ export function RequestWorkflowPanel({
           {clarificationTransition ? (
             <div className="space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Уточнення інформації
+                {t("workflow.clarificationTitle")}
               </span>
               <button
                 type="button"
@@ -383,14 +305,14 @@ export function RequestWorkflowPanel({
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="text-base leading-none">💬</span>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold leading-tight">Запросити уточнення в автора...</p>
+                    <p className="text-xs font-bold leading-tight">{t("workflow.requestClarification")}</p>
                     <p className="text-[11px] text-amber-800 leading-tight truncate">
-                      Потрібні деталі по позиціях, кількості чи аналогах
+                      {t("workflow.requestClarificationDesc")}
                     </p>
                   </div>
                 </div>
                 <span className="text-xs font-semibold text-amber-700 group-hover:underline shrink-0">
-                  Запит
+                  {t("workflow.requestBadge")}
                 </span>
               </button>
             </div>
@@ -416,7 +338,7 @@ export function RequestWorkflowPanel({
                   }}
                 >
                   <IconClock className="h-4 w-4" />
-                  <span>Перевести в «{t(`status.${tr.to}`)}»</span>
+                  <span>{t("workflow.moveToStatus", { status: t(`status.${tr.to}`) })}</span>
                 </Button>
               ))}
             </div>
@@ -434,7 +356,7 @@ export function RequestWorkflowPanel({
                     className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-100/70 px-3 py-2 text-xs font-semibold text-rose-700 transition cursor-pointer"
                   >
                     <span>✕</span>
-                    <span>Відхилити заявку...</span>
+                    <span>{t("workflow.rejectRequest")}</span>
                   </button>
                 ) : null}
 
@@ -445,7 +367,7 @@ export function RequestWorkflowPanel({
                     onClick={() => setActiveModalTransition(cancellationTransition)}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600 transition cursor-pointer"
                   >
-                    <span>Скасувати</span>
+                    <span>{t("workflow.cancelRequest")}</span>
                   </button>
                 ) : null}
               </div>
@@ -456,8 +378,8 @@ export function RequestWorkflowPanel({
           {transitions.length === 0 ? (
             <p className="text-xs text-slate-400 text-center py-1">
               {isTerminal
-                ? "Заявку закрито. Подальші переходи заблоковані."
-                : "Немає доступних дій зміни статусу для вашої ролі."}
+                ? t("workflow.closedLocked")
+                : t("workflow.noActionsForRole")}
             </p>
           ) : null}
 
@@ -467,7 +389,7 @@ export function RequestWorkflowPanel({
               <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    Відповідальний закупник
+                    {t("workflow.assignBuyer")}
                   </span>
                   {!isTerminal &&
                   canAssign &&
@@ -485,7 +407,7 @@ export function RequestWorkflowPanel({
                       }}
                       className="text-[11px] font-semibold text-[#12325c] hover:underline"
                     >
-                      ⚡ Взяти на себе
+                      {t("workflow.takeOwnership")}
                     </button>
                   ) : null}
                 </div>
@@ -518,11 +440,11 @@ export function RequestWorkflowPanel({
                       </span>
                       <span className="font-semibold text-slate-800 truncate">
                         {assignees.find((person) => String(person.id) === currentAssignee)?.fullName ||
-                          (currentAssignee ? `Закупник #${currentAssignee}` : t("request.noAssignee"))}
+                          (currentAssignee ? t("workflow.buyerLabel", { id: currentAssignee }) : t("request.noAssignee"))}
                       </span>
                     </div>
                     {isTerminal ? (
-                      <span className="text-[10px] text-slate-400 font-medium shrink-0">🔒 закрито</span>
+                      <span className="text-[10px] text-slate-400 font-medium shrink-0">{t("workflow.closedBadge")}</span>
                     ) : null}
                   </div>
                 )}
@@ -538,14 +460,14 @@ export function RequestWorkflowPanel({
                 className="flex items-center justify-center gap-2 w-full rounded-xl bg-blue-50/90 hover:bg-blue-100 px-3.5 py-2.5 text-xs font-bold text-[#12325c] ring-1 ring-blue-200 transition shadow-2xs"
               >
                 <span>✏️</span>
-                <span>Редагувати заявку та позиції</span>
+                <span>{t("workflow.editRequest")}</span>
               </Link>
               <p className="mt-1.5 text-center text-[11px] text-slate-500">
                 {status === "needs_info"
-                  ? "⚠️ Запит уточнення: внесіть правки та поверніть заявку в обробку"
+                  ? t("workflow.editHintNeedsInfo")
                   : status === "draft"
-                    ? "Чернетка: доступні будь-які зміни"
-                    : "Редагування позицій доступне до взяття в закупівлю"}
+                    ? t("workflow.editHintDraft")
+                    : t("workflow.editHintActive")}
               </p>
             </div>
           ) : null}
@@ -559,7 +481,7 @@ export function RequestWorkflowPanel({
                 onClick={() => setSplitOpen((value) => !value)}
               >
                 <span>⚡</span>
-                <span>{splitOpen ? "Приховати розділення заявки" : "Розділити позиції в нову заявку..."}</span>
+                <span>{splitOpen ? t("workflow.hideSplit") : t("workflow.splitIntoNew")}</span>
               </button>
 
               {splitOpen ? (
@@ -632,7 +554,7 @@ export function RequestWorkflowPanel({
                       }
                     }}
                   >
-                    Відокремити в нову заявку ({splitItems.length})
+                    {t("workflow.splitButton", { count: splitItems.length })}
                   </Button>
                 </div>
               ) : null}
@@ -657,8 +579,12 @@ export function RequestWorkflowPanel({
       {canComment ? (
         <Card>
           <CardHeader
-            title={status === "needs_info" && isAuthor ? "Відповідь на уточнення" : "Коментар або питання"}
-            description="Запис буде надіслано в історію заявки"
+            title={
+              status === "needs_info" && isAuthor
+                ? t("workflow.clarificationAnswerTitle")
+                : t("workflow.commentsTitle")
+            }
+            description={t("workflow.commentsDesc")}
           />
           <div className="space-y-3 p-5">
             <Textarea
@@ -666,8 +592,8 @@ export function RequestWorkflowPanel({
               value={message}
               placeholder={
                 status === "needs_info" && isAuthor
-                  ? "Надайте детальну відповідь щодо зазначених питань..."
-                  : "Напишіть внутрішній коментар або запитання..."
+                  ? t("workflow.answerPlaceholder")
+                  : t("workflow.commentPlaceholder")
               }
               onChange={(event) => setMessage(event.target.value)}
             />
@@ -702,21 +628,23 @@ export function RequestWorkflowPanel({
         }}
         title={
           activeModalTransition?.to === "needs_info"
-            ? "Запит додаткової інформації у автора"
+            ? t("workflow.modalNeedsInfoTitle")
             : activeModalTransition?.to === "rejected"
-              ? "Відхилення заявки"
+              ? t("workflow.modalRejectedTitle")
               : activeModalTransition?.to === "cancelled"
-                ? "Скасування заявки"
-                : `Зміна статусу на «${t(`status.${activeModalTransition?.to || ""}`)}»`
+                ? t("workflow.modalCancelledTitle")
+                : t("workflow.modalTransitionTitle", {
+                    status: t(`status.${activeModalTransition?.to || ""}`),
+                  })
         }
         description={
           activeModalTransition?.to === "needs_info"
-            ? "Вкажіть, що саме потрібно уточнити або виправити в заявці. Автор отримає сповіщення."
+            ? t("workflow.modalNeedsInfoDesc")
             : activeModalTransition?.to === "rejected"
-              ? "Опишіть офіційну причину відхилення. Вона зафіксується в історії заявки."
+              ? t("workflow.modalRejectedDesc")
               : activeModalTransition?.to === "cancelled"
-                ? "Підтвердіть скасування заявки. Перехід у подальші статуси буде заблоковано."
-                : "Вкажіть коментар до переходу статусу."
+                ? t("workflow.modalCancelledDesc")
+                : t("workflow.modalTransitionDesc")
         }
         footer={
           <div className="flex items-center justify-end gap-2.5 w-full">
@@ -730,7 +658,7 @@ export function RequestWorkflowPanel({
                 setModalComment("");
               }}
             >
-              Скасувати
+              {t("common.cancel")}
             </Button>
             <Button
               type="button"
@@ -748,12 +676,12 @@ export function RequestWorkflowPanel({
               }}
             >
               {activeModalTransition?.to === "needs_info"
-                ? "Надіслати запит автору"
+                ? t("workflow.modalSendInquiry")
                 : activeModalTransition?.to === "rejected"
-                  ? "Підтвердити відхилення"
+                  ? t("workflow.modalConfirmRejection")
                   : activeModalTransition?.to === "cancelled"
-                    ? "Підтвердити скасування"
-                    : "Підтвердити"}
+                    ? t("workflow.modalConfirmCancellation")
+                    : t("common.confirm")}
             </Button>
           </div>
         }
@@ -761,10 +689,10 @@ export function RequestWorkflowPanel({
         <div className="space-y-3">
           <label className="block text-xs font-semibold text-slate-700">
             {activeModalTransition?.to === "needs_info"
-              ? "Зауваження та питання до автора:"
+              ? t("workflow.modalNeedsInfoLabel")
               : activeModalTransition?.to === "rejected"
-                ? "Причина відхилення (обов'язково):"
-                : "Коментар або пояснення:"}
+                ? t("workflow.modalRejectedLabel")
+                : t("workflow.modalCommentLabel")}
           </label>
           <Textarea
             rows={4}
@@ -772,10 +700,10 @@ export function RequestWorkflowPanel({
             value={modalComment}
             placeholder={
               activeModalTransition?.to === "needs_info"
-                ? "Наприклад: Чи погодите аналог від бренду X, або уточніть точну довжину/діаметр..."
+                ? t("workflow.modalNeedsInfoPlaceholder")
                 : activeModalTransition?.to === "rejected"
-                  ? "Наприклад: Перевищення ліміту бюджету / Відсутня виробнича потреба..."
-                  : "Введіть коментар..."
+                  ? t("workflow.modalRejectedPlaceholder")
+                  : t("workflow.modalCommentPlaceholder")
             }
             onChange={(e) => setModalComment(e.target.value)}
           />
