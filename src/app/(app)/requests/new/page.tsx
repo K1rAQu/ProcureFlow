@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/ui";
 import { RequestForm } from "@/components/request-form";
+import { localizedName } from "@/lib/i18n";
 import { loadDirectories, pageContext, readNumberParam } from "@/lib/page";
 import { getRequestDetail } from "@/lib/requests-service";
 import { getSettings } from "@/lib/settings";
@@ -12,7 +13,7 @@ export default async function NewRequestPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { user, t } = await pageContext();
+  const { user, locale, t } = await pageContext();
   if (!user.permissions.includes("requests.create")) redirect("/");
 
   const params = (await searchParams) ?? {};
@@ -30,6 +31,8 @@ export default async function NewRequestPage({
   const { departments, workshops, units } = await loadDirectories();
   const settings = await getSettings();
 
+  const defaultUnit = locale === "en" ? "pcs" : "шт";
+
   const initialItems = copySource?.items?.length
     ? copySource.items.map((item, idx) => ({
         key: `copy-${item.id}-${idx}`,
@@ -38,7 +41,7 @@ export default async function NewRequestPage({
         partNumber: item.partNumber ?? "",
         manufacturer: item.manufacturer ?? "",
         quantity: String(Number(item.quantity) || 1),
-        unit: item.unit || "шт",
+        unit: item.unit || defaultUnit,
         url: item.url ?? "",
         comment: item.comment ?? "",
         images: item.images.map((fileId) => ({ id: fileId, url: `/api/files/${fileId}`, name: "" })),
@@ -59,9 +62,9 @@ export default async function NewRequestPage({
       />
       <RequestForm
         requiredFields={settings.requiredItemFields}
-        departments={departments.map((item) => ({ id: item.id, nameRu: item.nameRu, nameUk: item.nameUk }))}
-        workshops={workshops.map((item) => ({ id: item.id, nameRu: item.nameRu, nameUk: item.nameUk }))}
-        units={units.map((item) => ({ id: item.id, name: item.nameUk || item.nameRu, description: item.description }))}
+        departments={departments.map((item) => ({ id: item.id, nameRu: item.nameRu, nameUk: item.nameUk, code: item.code }))}
+        workshops={workshops.map((item) => ({ id: item.id, nameRu: item.nameRu, nameUk: item.nameUk, code: item.code }))}
+        units={units.map((item) => ({ id: item.id, name: localizedName(locale, item), description: item.description, code: item.code }))}
         copiedFromNumber={copySource?.number}
         initial={{
           departmentId: copySource ? copySource.departmentId : (user.departmentId ?? null),

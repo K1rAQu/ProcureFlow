@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { Card, EmptyState, PageHeader } from "@/components/ui";
 import { RequestForm } from "@/components/request-form";
 import { HttpError } from "@/lib/auth";
+import { localizedName } from "@/lib/i18n";
 import { loadDirectories, pageContext } from "@/lib/page";
 import { getRequestDetail } from "@/lib/requests-service";
 import { getSettings } from "@/lib/settings";
@@ -10,7 +11,7 @@ import { canEditRequest, type RequestStatus } from "@/lib/workflow";
 export const dynamic = "force-dynamic";
 
 export default async function EditRequestPage({ params }: { params: Promise<{ id: string }> }) {
-  const { user, t } = await pageContext();
+  const { user, locale, t } = await pageContext();
   const id = Number((await params).id);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
@@ -46,9 +47,9 @@ export default async function EditRequestPage({ params }: { params: Promise<{ id
       <RequestForm
         mode="edit"
         requiredFields={settings.requiredItemFields}
-        departments={departments.map((item) => ({ id: item.id, nameRu: item.nameRu, nameUk: item.nameUk }))}
-        workshops={workshops.map((item) => ({ id: item.id, nameRu: item.nameRu, nameUk: item.nameUk }))}
-        units={units.map((item) => ({ id: item.id, name: item.nameUk || item.nameRu, description: item.description }))}
+        departments={departments.map((item) => ({ id: item.id, nameRu: item.nameRu, nameUk: item.nameUk, code: item.code }))}
+        workshops={workshops.map((item) => ({ id: item.id, nameRu: item.nameRu, nameUk: item.nameUk, code: item.code }))}
+        units={units.map((item) => ({ id: item.id, name: localizedName(locale, item), description: item.description, code: item.code }))}
         initial={{
           id: detail.id,
           departmentId: detail.departmentId,

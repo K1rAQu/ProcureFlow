@@ -19,14 +19,14 @@ import {
   IconTrash,
   IconX,
 } from "./icons";
-import { useLocalizedName, useT } from "./i18n-provider";
+import { useLocale, useLocalizedName, useT } from "./i18n-provider";
 import { useConfirm } from "./confirm-provider";
 import { NomenclatureBulkPicker, type BulkItemPayload } from "./nomenclature-bulk-picker";
 import { PRIORITIES } from "@/lib/workflow";
 import { cn } from "@/lib/format";
 import { compressImage } from "@/lib/client-image";
 
-export type DirectoryOption = { id: number; nameRu: string; nameUk: string };
+export type DirectoryOption = { id: number; nameRu: string; nameUk: string; code?: string };
 
 export type ItemImage = { id: number; url: string; name: string };
 
@@ -80,7 +80,7 @@ export type RequestFormInitial = {
 
 let itemKeySeed = 0;
 
-function emptyItem(): ItemDraft {
+function emptyItem(defaultUnit = "pcs"): ItemDraft {
   itemKeySeed += 1;
   return {
     key: `row-${itemKeySeed}`,
@@ -89,7 +89,7 @@ function emptyItem(): ItemDraft {
     partNumber: "",
     manufacturer: "",
     quantity: "1",
-    unit: "шт",
+    unit: defaultUnit,
     url: "",
     comment: "",
     images: [],
@@ -118,6 +118,8 @@ export function RequestForm({
   copiedFromNumber?: string | null;
 }) {
   const t = useT();
+  const locale = useLocale();
+  const defaultUnit = locale === "en" ? "pcs" : "шт";
   const confirm = useConfirm();
   const localized = useLocalizedName();
   const router = useRouter();
@@ -126,7 +128,7 @@ export function RequestForm({
   const [workshopId, setWorkshopId] = useState<string>(initial?.workshopId ? String(initial.workshopId) : "");
   const [priority, setPriority] = useState<string>(initial?.priority ?? "normal");
   const [comment, setComment] = useState<string>(initial?.comment ?? "");
-  const [items, setItems] = useState<ItemDraft[]>(initial?.items?.length ? initial.items : [emptyItem()]);
+  const [items, setItems] = useState<ItemDraft[]>(initial?.items?.length ? initial.items : [emptyItem(defaultUnit)]);
 
   const [conflicts, setConflicts] = useState<Record<number, DuplicateMatch[]>>({});
   const [error, setError] = useState<string | null>(null);
@@ -176,7 +178,7 @@ export function RequestForm({
       );
       const now = new Date();
       setSavedAt(
-        now.toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+        now.toLocaleTimeString(locale === "en" ? "en-US" : "uk-UA", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
       );
     }, 600);
     return () => clearTimeout(timer);
@@ -209,7 +211,7 @@ export function RequestForm({
         partNumber: s.partNumber,
         manufacturer: s.manufacturer,
         quantity: s.quantity,
-        unit: s.unit || "шт",
+        unit: s.unit || defaultUnit,
         url: s.url,
         comment: "",
         images: s.imageId ? [{ id: s.imageId, url: `/api/files/${s.imageId}`, name: "" }] : [],
@@ -258,7 +260,7 @@ export function RequestForm({
     });
     setFieldErrors(errors);
     if (Object.keys(errors).length) {
-      setError("Будь ласка, заповніть усі обов'язкові поля, виділені червоним");
+      setError(t("request.validationError"));
       const firstError = document.querySelector(".border-rose-400, .text-rose-600");
       firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
       return false;
@@ -286,7 +288,7 @@ export function RequestForm({
         partNumber: item.partNumber || null,
         manufacturer: item.manufacturer || null,
         quantity: item.quantity,
-        unit: item.unit || "шт",
+        unit: item.unit || defaultUnit,
         unitPrice: null,
         currency: null,
         url: item.url || null,
@@ -372,7 +374,7 @@ export function RequestForm({
               setRestored(false);
             }}
           >
-            Скинути
+            {t("common.reset")}
           </button>
         </div>
       ) : null}
@@ -391,15 +393,15 @@ export function RequestForm({
               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#12325c] text-xs font-bold text-white">
                 1
               </span>
-              <span>Основні параметри</span>
+              <span>{t("request.generalParams")}</span>
             </span>
           }
-          description="Вкажіть підрозділ, пріоритетність та бажані терміни поставки"
+          description={t("request.generalParamsDesc")}
           actions={
             savedAt ? (
               <span className="flex items-center gap-1.5 text-xs text-slate-500">
                 <IconClock className="h-3.5 w-3.5 text-emerald-600" />
-                Автозбережено о {savedAt}
+                {t("request.draftSavedAt", { time: savedAt })}
               </span>
             ) : null
           }
@@ -413,7 +415,7 @@ export function RequestForm({
                 setDepartmentId(event.target.value);
               }}
             >
-              <option value="">— Оберіть напрям —</option>
+              <option value="">{t("request.selectDepartment")}</option>
               {departments.map((department) => (
                 <option key={department.id} value={department.id}>
                   {localized(department)}
@@ -429,7 +431,7 @@ export function RequestForm({
                 setWorkshopId(event.target.value);
               }}
             >
-              <option value="">— Оберіть цех / ділянку —</option>
+              <option value="">{t("request.selectWorkshop")}</option>
               {workshops.map((workshop) => (
                 <option key={workshop.id} value={workshop.id}>
                   {localized(workshop)}
@@ -452,11 +454,11 @@ export function RequestForm({
               ))}
             </Select>
           </Field>
-          <Field label={t("request.comment")} className="sm:col-span-2 lg:col-span-3" hint="Додаткова інформація для відділу постачання">
+          <Field label={t("request.comment")} className="sm:col-span-2 lg:col-span-3" hint={t("request.commentHint")}>
             <Textarea
               value={comment ?? ""}
               rows={2}
-              placeholder="Наприклад: потрібно для планового ремонту, доставка на центральний склад"
+              placeholder={t("request.commentPlaceholder")}
               onChange={(event) => {
                 setDirty(true);
                 setComment(event.target.value);
@@ -495,7 +497,7 @@ export function RequestForm({
                 size="sm"
                 onClick={() => {
                   setDirty(true);
-                  setItems((current) => [...current, emptyItem()]);
+                  setItems((current) => [...current, emptyItem(defaultUnit)]);
                 }}
               >
                 <IconPlus className="h-3.5 w-3.5" /> {t("request.addItem")}
@@ -519,7 +521,7 @@ export function RequestForm({
               onRemove={() => {
                 setDirty(true);
                 setItems((current) =>
-                  current.length === 1 ? [emptyItem()] : current.filter((_, position) => position !== index),
+                  current.length === 1 ? [emptyItem(defaultUnit)] : current.filter((_, position) => position !== index),
                 );
                 setConflicts({});
               }}
@@ -544,10 +546,10 @@ export function RequestForm({
             size="sm"
             onClick={() => {
               setDirty(true);
-              setItems((current) => [...current, emptyItem()]);
+              setItems((current) => [...current, emptyItem(defaultUnit)]);
             }}
           >
-            <IconPlus className="h-4 w-4" /> Додати ще одну позицію
+            <IconPlus className="h-4 w-4" /> {t("request.addItem")}
           </Button>
           <div className="text-right text-xs text-slate-500">
             {t("request.items")}: <span className="font-semibold text-slate-800">{items.length}</span>
@@ -606,7 +608,7 @@ export function RequestForm({
                   disabled={busy || !hasDirectories}
                   onClick={async () => {
                     const ok = await confirm({
-                      title: "Подання заявки",
+                      title: t("request.submitTitle"),
                       message: t("request.submitConfirm"),
                       confirmText: t("request.submit"),
                       cancelText: t("common.back"),
@@ -633,7 +635,8 @@ export function RequestForm({
   );
 }
 
-const COMMON_UNITS = ["шт", "м", "компл", "кг", "л", "пач"];
+const COMMON_UNITS_EN = ["pcs", "m", "set", "kg", "L", "pack"];
+const COMMON_UNITS_UK = ["шт", "м", "компл", "кг", "л", "пач"];
 
 function ItemRow({
   index,
@@ -661,6 +664,9 @@ function ItemRow({
   onMove: (direction: number) => void;
 }) {
   const t = useT();
+  const locale = useLocale();
+  const defaultUnit = locale === "en" ? "pcs" : "шт";
+  const commonUnits = locale === "en" ? COMMON_UNITS_EN : COMMON_UNITS_UK;
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [open, setOpen] = useState(false);
@@ -741,7 +747,7 @@ function ItemRow({
       name: hit.name,
       partNumber: hit.partNumber ?? "",
       manufacturer: hit.manufacturer ?? "",
-      unit: hit.unit || "шт",
+      unit: hit.unit || defaultUnit,
       url: hit.url ?? "",
       confirmNewNomenclature: false,
       images:
@@ -880,7 +886,7 @@ function ItemRow({
               {searching && hits.length === 0 ? (
                 <div className="flex items-center gap-2 px-4 py-3 text-xs text-slate-400">
                   <span className="h-3 w-3 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
-                  Пошук у номенклатурі...
+                  {t("nom.searching")}
                 </div>
               ) : null}
               {hits.map((hit) => (
@@ -908,7 +914,7 @@ function ItemRow({
                     <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
                       {hit.basCode ? (
                         <span className="rounded bg-sky-50 px-1 font-mono font-medium text-sky-700">
-                          1С: {hit.basCode}
+                          1C: {hit.basCode}
                         </span>
                       ) : null}
                       {hit.partNumber ? (
@@ -963,14 +969,14 @@ function ItemRow({
           <Field label={t("item.unit")} hint={t("item.unitHint")}>
             <Input
               value={item.unit}
-              placeholder="pcs"
+              placeholder={defaultUnit}
               onChange={(event) => onPatch({ unit: event.target.value })}
             />
           </Field>
           <div className="mt-1 flex flex-wrap gap-1">
             {(availableUnits.length > 0
               ? availableUnits.map((u) => ({ name: u.name, description: u.description }))
-              : COMMON_UNITS.map((u) => ({ name: u, description: null }))
+              : commonUnits.map((u) => ({ name: u, description: null }))
             ).map((unit) => (
               <button
                 key={unit.name}
@@ -1081,7 +1087,7 @@ function ItemRow({
               {t("nom.duplicateWarning")}
             </p>
             {checkingDuplicates ? (
-              <span className="text-[11px] text-amber-700 animate-pulse">Оновлення збігів...</span>
+              <span className="text-[11px] text-amber-700 animate-pulse">{t("nom.checkingDuplicates")}</span>
             ) : null}
           </div>
           <ul className="mt-2 space-y-1.5">
@@ -1099,7 +1105,7 @@ function ItemRow({
                     <span className="text-slate-500">· {duplicate.manufacturer}</span>
                   ) : null}
                   <span className="rounded bg-amber-200/80 px-1 text-[10px] font-bold">
-                    {Math.round(duplicate.score * 100)}% збіг
+                    {Math.round(duplicate.score * 100)}% {t("nom.match")}
                   </span>
                 </div>
                 <button

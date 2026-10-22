@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { Button, Input } from "./ui";
 import { IconBox, IconCheck, IconPlus, IconSearch, IconX } from "./icons";
 import { cn } from "@/lib/format";
-import { useT } from "./i18n-provider";
+import { useLocale, useT } from "./i18n-provider";
 
 export type BulkItemPayload = {
   nomenclatureId: number;
@@ -42,6 +42,8 @@ export function NomenclatureBulkPicker({
   onAdd: (items: BulkItemPayload[]) => void;
 }) {
   const t = useT();
+  const locale = useLocale();
+  const defaultUnit = locale === "en" ? "pcs" : "шт";
   const [tab, setTab] = useState<"mine" | "all">("mine");
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<NomenclatureItem[]>([]);
@@ -133,7 +135,7 @@ export function NomenclatureBulkPicker({
         name: item.name,
         partNumber: item.partNumber ?? "",
         manufacturer: item.manufacturer ?? "",
-        unit: item.unit || "шт",
+        unit: item.unit || defaultUnit,
         url: item.url ?? "",
         quantity: quantity.trim() ? quantity : "1",
         imageId: item.imageId,
@@ -246,7 +248,7 @@ export function NomenclatureBulkPicker({
           {loading ? (
             <div className="py-12 text-center text-xs text-slate-400">
               <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-              <p className="mt-2 font-medium">Завантаження позицій довідника...</p>
+              <p className="mt-2 font-medium">{t("nom.bulkLoading")}</p>
             </div>
           ) : items.length === 0 ? (
             <div className="py-12 text-center">
@@ -255,25 +257,25 @@ export function NomenclatureBulkPicker({
               </span>
               <p className="mt-3 text-sm font-semibold text-slate-800">
                 {query.trim()
-                  ? `За запитом «${query}» нічого не знайдено`
+                  ? t("nom.bulkNoneFound", { query })
                   : tab === "mine"
-                    ? "У вас поки що немає власних збережених або раніше замовлених позицій"
-                    : "Довідник номенклатури порожній"}
+                    ? t("nom.bulkMineEmpty")
+                    : t("nom.bulkCatalogEmpty")}
               </p>
               <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
                 {tab === "mine" && !query.trim() ? (
                   <>
-                    Ви можете переглянути повний перелік товарів на вкладці{" "}
+                    {t("nom.bulkViewAllHint")}{" "}
                     <button
                       type="button"
                       onClick={() => setTab("all")}
                       className="font-bold text-indigo-600 underline hover:text-indigo-800"
                     >
-                      «Весь довідник»
+                      {t("nom.bulkAll")}
                     </button>
                   </>
                 ) : (
-                  "Спробуйте змінити пошуковий запит або перемкнути вкладку."
+                  t("nom.bulkChangeQuery")
                 )}
               </p>
             </div>
@@ -327,7 +329,7 @@ export function NomenclatureBulkPicker({
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {item.partNumber && (
                           <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-700">
-                            Арт: {item.partNumber}
+                            {t("item.partNumberShort")}: {item.partNumber}
                           </span>
                         )}
                         {item.basCode && (
@@ -342,7 +344,7 @@ export function NomenclatureBulkPicker({
                         )}
                         {item.lastPrice && (
                           <span className="text-[10px] text-slate-500">
-                            ~{item.lastPrice} {item.lastCurrency || "грн"}
+                            ~{item.lastPrice} {item.lastCurrency || (locale === "uk" ? "грн" : "UAH")}
                           </span>
                         )}
                       </div>
@@ -360,7 +362,7 @@ export function NomenclatureBulkPicker({
                           type="button"
                           onClick={() => stepQuantity(item.id, -1)}
                           className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-xs font-bold text-slate-700 hover:bg-slate-200 transition active:scale-95"
-                          title="Зменшити кількість"
+                          title={t("item.decreaseQty")}
                         >
                           −
                         </button>
@@ -376,12 +378,12 @@ export function NomenclatureBulkPicker({
                           type="button"
                           onClick={() => stepQuantity(item.id, 1)}
                           className="flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 text-xs font-bold text-slate-700 hover:bg-slate-200 transition active:scale-95"
-                          title="Збільшити кількість"
+                          title={t("item.increaseQty")}
                         >
                           +
                         </button>
                         <span className="px-1.5 text-xs font-semibold text-slate-500">
-                          {item.unit || "шт"}
+                          {item.unit || defaultUnit}
                         </span>
                       </div>
                     ) : (
@@ -391,7 +393,7 @@ export function NomenclatureBulkPicker({
                         className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-indigo-700 transition"
                       >
                         <IconPlus className="h-3.5 w-3.5" />
-                        <span>Обрати ({item.unit || "шт"})</span>
+                        <span>{t("common.add")} ({item.unit || defaultUnit})</span>
                       </button>
                     )}
                   </div>
