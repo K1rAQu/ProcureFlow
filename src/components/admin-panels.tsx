@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge, Button, Card, CardHeader, Field, Input, Select, Textarea } from "./ui";
 import { IconTrash } from "./icons";
-import { useT } from "./i18n-provider";
+import { useLocalizedName, useT } from "./i18n-provider";
 import { useConfirm } from "./confirm-provider";
 import { PERMISSION_GROUPS } from "@/lib/permissions";
 import { REQUEST_STATUSES } from "@/lib/workflow";
@@ -69,19 +69,17 @@ export function UsersPanel({
   departments: DirectoryRow[];
 }) {
   const t = useT();
+  const localized = useLocalizedName();
   const { busy, error, send } = useApi();
   const [userList, setUserList] = useState(users);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
-    password: "",
     roleId: roles[0]?.id ?? 0,
     workshopId: "",
     departmentId: "",
   });
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<number | null>(null);
-  const [password, setPassword] = useState("");
 
   useEffect(() => {
     setUserList(users);
@@ -105,13 +103,6 @@ export function UsersPanel({
           <Field label={t("auth.email")} required>
             <Input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
           </Field>
-          <Field label={t("auth.password")} required hint="min. 8">
-            <Input
-              type="text"
-              value={form.password}
-              onChange={(event) => setForm({ ...form, password: event.target.value })}
-            />
-          </Field>
           <Field label={t("admin.role")} required>
             <Select
               value={form.roleId}
@@ -119,7 +110,7 @@ export function UsersPanel({
             >
               {roles.map((role) => (
                 <option key={role.id} value={role.id}>
-                  {role.nameUk || role.nameRu}
+                  {localized({ code: role.code, nameUk: role.nameUk, nameRu: role.nameRu })}
                 </option>
               ))}
             </Select>
@@ -129,7 +120,7 @@ export function UsersPanel({
               <option value="">—</option>
               {workshops.map((workshop) => (
                 <option key={workshop.id} value={workshop.id}>
-                  {workshop.nameUk || workshop.nameRu}
+                  {localized({ code: workshop.code, nameUk: workshop.nameUk, nameRu: workshop.nameRu })}
                 </option>
               ))}
             </Select>
@@ -142,7 +133,7 @@ export function UsersPanel({
               <option value="">—</option>
               {departments.map((department) => (
                 <option key={department.id} value={department.id}>
-                  {department.nameUk || department.nameRu}
+                  {localized({ code: department.code, nameUk: department.nameUk, nameRu: department.nameRu })}
                 </option>
               ))}
             </Select>
@@ -151,7 +142,7 @@ export function UsersPanel({
             <Button
               type="button"
               size="sm"
-              disabled={busy || !form.fullName || !form.email || form.password.length < 8}
+              disabled={busy || !form.fullName || !form.email}
               onClick={async () => {
                 const ok = await send("/api/admin/users", "POST", {
                   ...form,
@@ -159,7 +150,7 @@ export function UsersPanel({
                   departmentId: form.departmentId ? Number(form.departmentId) : null,
                 });
                 if (ok) {
-                  setForm({ fullName: "", email: "", password: "", roleId: roles[0]?.id ?? 0, workshopId: "", departmentId: "" });
+                  setForm({ fullName: "", email: "", roleId: roles[0]?.id ?? 0, workshopId: "", departmentId: "" });
                   setOpen(false);
                 }
               }}
@@ -180,7 +171,6 @@ export function UsersPanel({
               <th className="px-4 py-2">{t("admin.role")}</th>
               <th className="px-4 py-2">{t("request.workshop")}</th>
               <th className="px-4 py-2">{t("admin.active")}</th>
-              <th className="px-4 py-2 text-right">{t("common.actions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -200,7 +190,7 @@ export function UsersPanel({
                   >
                     {roles.map((role) => (
                       <option key={role.id} value={role.id}>
-                        {role.nameUk || role.nameRu}
+                        {localized({ code: role.code, nameUk: role.nameUk, nameRu: role.nameRu })}
                       </option>
                     ))}
                   </Select>
@@ -220,7 +210,7 @@ export function UsersPanel({
                     <option value="">—</option>
                     {workshops.map((workshop) => (
                       <option key={workshop.id} value={workshop.id}>
-                        {workshop.nameUk || workshop.nameRu}
+                        {localized({ code: workshop.code, nameUk: workshop.nameUk, nameRu: workshop.nameRu })}
                       </option>
                     ))}
                   </Select>
@@ -239,36 +229,6 @@ export function UsersPanel({
                     {user.isActive ? t("common.yes") : t("common.no")}
                   </label>
                 </td>
-                <td className="px-4 py-2 text-right">
-                  {editing === user.id ? (
-                    <span className="flex items-center justify-end gap-1">
-                      <Input
-                        className="w-40 py-1 text-xs"
-                        placeholder={t("admin.newPassword")}
-                        value={password}
-                        onChange={(event) => setPassword(event.target.value)}
-                      />
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={password.length < 8}
-                        onClick={async () => {
-                          const ok = await send(`/api/admin/users/${user.id}`, "PATCH", { password });
-                          if (ok) {
-                            setPassword("");
-                            setEditing(null);
-                          }
-                        }}
-                      >
-                        {t("common.save")}
-                      </Button>
-                    </span>
-                  ) : (
-                    <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(user.id)}>
-                      {t("admin.newPassword")}
-                    </Button>
-                  )}
-                </td>
               </tr>
             ))}
           </tbody>
@@ -281,6 +241,7 @@ export function UsersPanel({
 
 export function RolesPanel({ roles }: { roles: RoleRow[] }) {
   const t = useT();
+  const localized = useLocalizedName();
   const { busy, error, send } = useApi();
   const [selected, setSelected] = useState<number>(roles[0]?.id ?? 0);
   const [newRole, setNewRole] = useState({ code: "", name: "" });
@@ -309,7 +270,7 @@ export function RolesPanel({ roles }: { roles: RoleRow[] }) {
               }`}
             >
               <span>
-                <span className="block font-medium text-slate-800">{item.nameUk || item.nameRu}</span>
+                <span className="block font-medium text-slate-800">{localized({ code: item.code, nameUk: item.nameUk, nameRu: item.nameRu })}</span>
                 <span className="block text-[11px] text-slate-400">{item.code}</span>
               </span>
               {item.isSystem ? <Badge tone="slate">system</Badge> : null}
@@ -401,9 +362,9 @@ export function DirectoryPanel({
   title,
   items,
   codePlaceholder = "code-1",
-  namePlaceholder = "Назва",
+  namePlaceholder,
   nameLabel,
-  descriptionPlaceholder = "Опис",
+  descriptionPlaceholder,
 }: {
   kind: "workshops" | "departments" | "units";
   title: string;
@@ -414,18 +375,22 @@ export function DirectoryPanel({
   descriptionPlaceholder?: string;
 }) {
   const t = useT();
+  const localized = useLocalizedName();
   const confirm = useConfirm();
   const { busy, error, send, setError } = useApi();
   const [rows, setRows] = useState(items);
   const [form, setForm] = useState({ code: "", name: "", description: "", sortOrder: 100 });
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  const actualNamePlaceholder = namePlaceholder ?? t("admin.name");
+  const actualDescPlaceholder = descriptionPlaceholder ?? t("nom.description");
+
   useEffect(() => {
     setRows(items);
   }, [items]);
 
   const handleDelete = async (item: DirectoryRow) => {
-    const label = item.nameUk || item.nameRu || item.code;
+    const label = localized(item) || item.code;
     const ok = await confirm({
       title: t("admin.deleteConfirmTitle"),
       message: t("admin.deleteConfirmMsg", { label, code: item.code }),
@@ -454,14 +419,14 @@ export function DirectoryPanel({
         <Field label={nameLabel ?? t("admin.name")} required>
           <Input
             value={form.name}
-            placeholder={namePlaceholder}
+            placeholder={actualNamePlaceholder}
             onChange={(event) => setForm({ ...form, name: event.target.value })}
           />
         </Field>
         <Field label={t("nom.description")}>
           <Input
             value={form.description}
-            placeholder={descriptionPlaceholder}
+            placeholder={actualDescPlaceholder}
             onChange={(event) => setForm({ ...form, description: event.target.value })}
           />
         </Field>
@@ -532,7 +497,7 @@ export function DirectoryPanel({
                   <Input
                     className="py-1 text-xs"
                     defaultValue={item.description ?? ""}
-                    placeholder="Опис"
+                    placeholder={actualDescPlaceholder}
                     onBlur={(event) => {
                       const val = event.target.value.trim();
                       if (val !== (item.description ?? "")) {
@@ -577,7 +542,7 @@ export function DirectoryPanel({
                 <td className="px-4 py-2 text-right">
                   <button
                     type="button"
-                    title="Видалити"
+                    title={t("common.delete")}
                     disabled={busy || deletingId === item.id}
                     onClick={() => handleDelete(item)}
                     className="rounded p-1.5 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:opacity-40"

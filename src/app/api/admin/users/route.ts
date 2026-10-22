@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       .values({
         email: payload.email,
         fullName: payload.fullName,
-        passwordHash: await hashPassword(payload.password),
+        passwordHash: payload.password ? await hashPassword(payload.password) : null,
         roleId: payload.roleId,
         workshopId: payload.workshopId ?? null,
         departmentId: payload.departmentId ?? null,

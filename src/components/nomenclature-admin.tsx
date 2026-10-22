@@ -4,10 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, CardHeader, Field, Input, Select, Textarea } from "./ui";
 import { Modal } from "./modal";
-import { useT } from "./i18n-provider";
+import { useLocale, useT } from "./i18n-provider";
 import { useConfirm } from "./confirm-provider";
 import { CURRENCIES } from "@/lib/workflow";
 import { compressImage } from "@/lib/client-image";
+
+const COMMON_UNITS_EN = ["pcs", "m", "kg", "L", "set", "pack", "t", "roll", "m²", "m³", "box"];
+const COMMON_UNITS_UK = ["шт", "м", "кг", "л", "компл", "пач", "т", "рул", "м²", "м³", "ящ"];
 
 type Image = { id: number; url: string };
 
@@ -79,6 +82,9 @@ function ImageUploader({ images, onChange }: { images: Image[]; onChange: (next:
 
 export function NewNomenclatureButton() {
   const t = useT();
+  const locale = useLocale();
+  const defaultUnit = locale === "en" ? "pcs" : "шт";
+  const commonUnits = locale === "en" ? COMMON_UNITS_EN : COMMON_UNITS_UK;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
@@ -89,7 +95,7 @@ export function NewNomenclatureButton() {
     url: "",
     description: "",
     specs: "",
-    unit: "шт",
+    unit: defaultUnit,
     lastPrice: "",
     lastCurrency: "UAH",
   });
@@ -124,7 +130,7 @@ export function NewNomenclatureButton() {
         url: "",
         description: "",
         specs: "",
-        unit: "шт",
+        unit: defaultUnit,
         lastPrice: "",
         lastCurrency: "UAH",
       });
@@ -197,11 +203,11 @@ export function NewNomenclatureButton() {
             <Input
               list="unit-options"
               value={form.unit}
-              placeholder="шт"
+              placeholder={defaultUnit}
               onChange={(event) => setForm({ ...form, unit: event.target.value })}
             />
             <datalist id="unit-options">
-              {["шт", "м", "кг", "л", "компл", "пач", "т", "рул", "м²", "м³", "ящ"].map((u) => (
+              {commonUnits.map((u) => (
                 <option key={u} value={u} />
               ))}
             </datalist>
@@ -249,7 +255,7 @@ export function NewNomenclatureButton() {
                   <li key={duplicate.id}>
                     {duplicate.name}
                     {duplicate.partNumber ? ` · ${duplicate.partNumber}` : ""}
-                    {duplicate.basCode ? ` · 1С: ${duplicate.basCode}` : ""} (
+                    {duplicate.basCode ? ` · 1C: ${duplicate.basCode}` : ""} (
                     {Math.round(duplicate.score * 100)}%)
                   </li>
                 ))}
@@ -356,6 +362,9 @@ export function NomenclatureEditor({
   images: Image[];
 }) {
   const t = useT();
+  const locale = useLocale();
+  const defaultUnit = locale === "en" ? "pcs" : "шт";
+  const commonUnits = locale === "en" ? COMMON_UNITS_EN : COMMON_UNITS_UK;
   const router = useRouter();
   const [form, setForm] = useState(initial);
   const [images, setImages] = useState<Image[]>(initialImages);
@@ -393,11 +402,11 @@ export function NomenclatureEditor({
           <Input
             list="unit-options-edit"
             value={form.unit}
-            placeholder="шт"
+            placeholder={defaultUnit}
             onChange={(event) => setForm({ ...form, unit: event.target.value })}
           />
           <datalist id="unit-options-edit">
-            {["шт", "м", "кг", "л", "компл", "пач", "т", "рул", "м²", "м³", "ящ"].map((u) => (
+            {commonUnits.map((u) => (
               <option key={u} value={u} />
             ))}
           </datalist>
@@ -514,7 +523,7 @@ export function MergePanel({ currentId }: { currentId: number }) {
               <span className="truncate">
                 {hit.name}
                 {hit.partNumber ? ` · ${hit.partNumber}` : ""}
-                {hit.basCode ? ` · 1С: ${hit.basCode}` : ""}
+                {hit.basCode ? ` · 1C: ${hit.basCode}` : ""}
               </span>
               <Button
                 type="button"

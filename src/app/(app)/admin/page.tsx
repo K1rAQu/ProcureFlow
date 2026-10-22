@@ -72,9 +72,9 @@ export default async function AdminPage({
           title={t("admin.units")}
           items={units}
           codePlaceholder="pcs"
-          namePlaceholder="шт"
-          nameLabel="Скорочення (напр. шт)"
-          descriptionPlaceholder="Штуки"
+          namePlaceholder={t("admin.unitPlaceholder")}
+          nameLabel={t("admin.unitAbbrLabel")}
+          descriptionPlaceholder={t("admin.unitDescPlaceholder")}
         />
       ) : null}
       {tab === "pending" ? <PendingTab /> : null}

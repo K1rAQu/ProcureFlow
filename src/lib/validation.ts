@@ -194,7 +194,7 @@ export const directoryUpdateSchema = z.object({
 export const userCreateSchema = z.object({
   email: emailValidator,
   fullName: trimmed(255).min(2),
-  password: z.string().min(8).max(200),
+  password: z.string().min(8).max(200).optional(),
   roleId: z.number().int().positive(),
   workshopId: z.number().int().positive().nullable().optional(),
   departmentId: z.number().int().positive().nullable().optional(),
