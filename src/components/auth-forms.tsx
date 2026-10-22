@@ -39,10 +39,7 @@ export function LoginForm({
 }) {
   const t = useT();
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(initialError ? errorMessage(initialError, t) : null);
-  const [busy, setBusy] = useState(false);
   const [devBusy, setDevBusy] = useState(false);
 
   async function handleDevGoogleLogin() {
@@ -52,7 +49,7 @@ export function LoginForm({
       const response = await fetch("/api/auth/google/dev", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "admin@google.com", fullName: "Google Адміністратор" }),
+        body: JSON.stringify({ email: "admin@google.com", fullName: "Google Administrator" }),
       });
       if (response.ok) {
         router.replace("/");
@@ -69,92 +66,44 @@ export function LoginForm({
   }
 
   return (
-    <div className="space-y-5">
-      {/* Кнопка входу через Google */}
-      <div>
-        <a
-          href="/api/auth/google"
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-2xs transition hover:border-slate-400 hover:bg-slate-50 active:scale-[0.99]"
-        >
-          <IconGoogle className="h-5 w-5" />
-          <span>{t("auth.googleSignIn")}</span>
-        </a>
-
-        {!isGoogleConfigured ? (
-          <div className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-900">
-            <p className="font-semibold">💡 {t("auth.googleNotConfigured")}</p>
-            <p className="mt-1 text-[11px] text-amber-700">
-              Вкажіть <code>GOOGLE_CLIENT_ID</code> та <code>GOOGLE_CLIENT_SECRET</code> у файлі <code>.env</code> для роботи реального OAuth 2.0.
-            </p>
-            <div className="mt-2.5 border-t border-amber-200/80 pt-2">
-              <button
-                type="button"
-                disabled={devBusy || busy}
-                onClick={handleDevGoogleLogin}
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:opacity-50"
-              >
-                {devBusy ? t("common.loading") : `⚡ ${t("auth.googleDevSignIn")}`}
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </div>
-
-      <div className="relative flex items-center justify-center">
-        <div className="w-full border-t border-slate-200" />
-        <span className="absolute bg-white px-3 text-xs font-medium text-slate-400">
-          {t("auth.orEmail")}
-        </span>
-      </div>
-
-      <form
-        className="space-y-4"
-        onSubmit={async (event) => {
-          event.preventDefault();
-          if (busy) return;
-          setBusy(true);
-          setError(null);
-          const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-          });
-          if (response.ok) {
-            router.replace("/");
-            router.refresh();
-            return;
-          }
-          const data = (await response.json().catch(() => ({ error: "error" }))) as { error: string };
-          setError(errorMessage(data.error, t));
-          setBusy(false);
-        }}
+    <div className="space-y-4 pt-2">
+      {/* Кнопка входу виключно через Google / Gmail */}
+      <a
+        href="/api/auth/google"
+        className="flex w-full items-center justify-center gap-3.5 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-xs transition hover:border-slate-400 hover:bg-slate-50 hover:shadow-md active:scale-[0.99]"
       >
-        <Field label={t("auth.email")} required>
-          <Input
-            type="email"
-            required
-            autoComplete="username"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="user@example.com"
-          />
-        </Field>
-        <Field label={t("auth.password")} required>
-          <Input
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </Field>
-        {error ? (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 ring-1 ring-rose-200">{error}</p>
-        ) : null}
-        <Button type="submit" disabled={busy} className="w-full">
-          {busy ? t("common.loading") : t("auth.signIn")}
-        </Button>
-      </form>
+        <IconGoogle className="h-5 w-5 shrink-0" />
+        <span className="text-sm font-semibold">{t("auth.googleSignIn")}</span>
+      </a>
+
+      {error ? (
+        <p className="rounded-xl bg-rose-50 p-3.5 text-xs font-medium text-rose-700 ring-1 ring-rose-200">
+          {error}
+        </p>
+      ) : null}
+
+      <p className="text-center text-xs text-slate-500 leading-relaxed px-2">
+        {t("auth.googleOnlyHint")}
+      </p>
+
+      {!isGoogleConfigured ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 space-y-2">
+          <p className="font-semibold">💡 {t("auth.googleNotConfigured")}</p>
+          <p className="text-[11px] text-amber-700 leading-normal">
+            {t("auth.googleEnvHint")}
+          </p>
+          <div className="border-t border-amber-200/80 pt-2.5">
+            <button
+              type="button"
+              disabled={devBusy}
+              onClick={handleDevGoogleLogin}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:opacity-50"
+            >
+              {devBusy ? t("common.loading") : `⚡ ${t("auth.googleDevSignIn")}`}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

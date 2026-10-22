@@ -41,10 +41,10 @@ export default async function LoginPage({
               <p className="mt-2 max-w-sm text-sm text-slate-300">{t("app.subtitle")}</p>
             </div>
             <ul className="space-y-2 text-xs text-slate-300">
-              <li>• Єдина база номенклатури та швидке повторне замовлення</li>
-              <li>• Маршрутизація: Імпорт / Україна та виробничі цехи</li>
-              <li>• Вхід та реєстрація за допомогою Google-акаунту</li>
-              <li>• Прозорі статуси, історія та права доступу</li>
+              <li>• {t("auth.benefit1")}</li>
+              <li>• {t("auth.benefit2")}</li>
+              <li>• {t("auth.benefit3")}</li>
+              <li>• {t("auth.benefit4")}</li>
             </ul>
           </div>
           <div className="p-8 sm:p-10 relative">
