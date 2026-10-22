@@ -6,7 +6,8 @@ import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/db";
 import { roles, sessions, users } from "@/db/schema";
 import type { Permission } from "./permissions";
-import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE, type Locale } from "./i18n";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "./i18n";
+import { getSettings } from "./settings";
 
 const scrypt = promisify(scryptCallback) as (
   password: string,
@@ -172,11 +173,19 @@ export function isCorporateEmailAllowed(email: string): boolean {
   return domain === corporateDomain;
 }
 
-/** Активная локаль интерфейса: cookie имеет приоритет над профилем пользователя. */
-export async function resolveLocale(user?: SessionUser | null): Promise<Locale> {
-  const cookieStore = await cookies();
-  const fromCookie = cookieStore.get(LOCALE_COOKIE)?.value;
-  if (isLocale(fromCookie)) return fromCookie;
-  if (user && isLocale(user.locale)) return user.locale;
-  return DEFAULT_LOCALE;
+/**
+ * Активна мова інтерфейсу для всієї системи.
+ * Визначається централізовано:
+ * 1. Налаштуванням в базі даних (встановлює адміністратор у /admin -> Налаштування системи)
+ * 2. Змінною середовища DEFAULT_LOCALE в .env (встановлює той, хто розгортає додаток)
+ * 3. За замовчуванням: 'en'
+ */
+export async function resolveLocale(_user?: SessionUser | null): Promise<Locale> {
+  try {
+    const sysSettings = await getSettings();
+    if (sysSettings.defaultLocale && isLocale(sysSettings.defaultLocale)) {
+      return sysSettings.defaultLocale;
+    }
+  } catch {}
+  return process.env.DEFAULT_LOCALE === "uk" ? "uk" : "en";
 }

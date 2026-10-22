@@ -240,10 +240,12 @@ export const roleUpdateSchema = z.object({
 });
 
 export const settingsSchema = z.object({
+  defaultLocale: z.enum(LOCALES).optional(),
   editableStatuses: z.array(z.enum(REQUEST_STATUSES)).optional(),
   requiredItemFields: z.array(z.enum(["partNumber", "unitPrice", "currency", "url", "photo"])).optional(),
   autoApproveNomenclature: z.boolean().optional(),
   maxUploadMb: z.number().int().min(1).max(50).optional(),
+  sessionTimeoutMinutes: z.number().int().min(0).max(1440).optional(),
 });
 
 export type RequestPayload = z.infer<typeof requestPayloadSchema>;

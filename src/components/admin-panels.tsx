@@ -606,6 +606,7 @@ export function SettingsPanel({
   settings,
 }: {
   settings: {
+    defaultLocale?: string;
     editableStatuses: string[];
     requiredItemFields: string[];
     autoApproveNomenclature: boolean;
@@ -617,6 +618,7 @@ export function SettingsPanel({
   const { busy, error, send } = useApi();
   const [state, setState] = useState({
     ...settings,
+    defaultLocale: settings.defaultLocale ?? "en",
     sessionTimeoutMinutes: settings.sessionTimeoutMinutes ?? 30,
   });
   const [saved, setSaved] = useState(false);
@@ -624,7 +626,41 @@ export function SettingsPanel({
   return (
     <Card>
       <CardHeader title={t("admin.settings")} />
-      <div className="space-y-4 p-4">
+      <div className="space-y-5 p-4">
+        {/* Centralized System Language Setting */}
+        <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3.5">
+          <label className="mb-0.5 block text-xs font-semibold text-slate-800">
+            {t("admin.settingLanguage")}
+          </label>
+          <p className="mb-3 text-[11px] text-slate-500">
+            {t("admin.settingLanguageHint")}
+          </p>
+          <div className="flex flex-wrap gap-5">
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+              <input
+                type="radio"
+                name="defaultLocale"
+                value="en"
+                checked={state.defaultLocale === "en"}
+                onChange={() => setState((s) => ({ ...s, defaultLocale: "en" }))}
+                className="text-[#12325c] focus:ring-[#12325c]"
+              />
+              🇬🇧 {t("admin.settingLangEn")}
+            </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
+              <input
+                type="radio"
+                name="defaultLocale"
+                value="uk"
+                checked={state.defaultLocale === "uk"}
+                onChange={() => setState((s) => ({ ...s, defaultLocale: "uk" }))}
+                className="text-[#12325c] focus:ring-[#12325c]"
+              />
+              🇺🇦 {t("admin.settingLangUk")}
+            </label>
+          </div>
+        </div>
+
         <div>
           <p className="mb-1 text-xs font-medium text-slate-600">{t("admin.settingEditable")}</p>
           <div className="flex flex-wrap gap-2">
@@ -715,6 +751,11 @@ export function SettingsPanel({
             onClick={async () => {
               const ok = await send("/api/admin/settings", "PATCH", state);
               setSaved(ok);
+              if (ok && state.defaultLocale !== settings.defaultLocale) {
+                setTimeout(() => {
+                  window.location.reload();
+                }, 300);
+              }
             }}
           >
             {t("common.save")}

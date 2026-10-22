@@ -76,7 +76,6 @@ export function SidebarNav({
         </button>
         <span className="text-sm font-semibold text-slate-800">{t("app.name")}</span>
         <span className="flex items-center gap-2">
-          <LocaleSwitcher />
           <NotificationsBell />
           {user.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element

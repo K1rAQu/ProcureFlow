@@ -723,6 +723,20 @@ async function seed() {
     args: [userMap["buyer@company.com"], oneHourAgo]
   });
 
+  // Seed default system settings (centralized system language)
+  const defaultSettings = JSON.stringify({
+    defaultLocale: process.env.DEFAULT_LOCALE === "uk" ? "uk" : "en",
+    editableStatuses: ["draft", "needs_info"],
+    requiredItemFields: [],
+    autoApproveNomenclature: true,
+    maxUploadMb: 8,
+    sessionTimeoutMinutes: 30
+  });
+  await client.execute({
+    sql: `INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('system', ?, ?);`,
+    args: [defaultSettings, now]
+  });
+
   await client.execute("PRAGMA foreign_keys = ON;");
   console.log("Realistic demo database successfully seeded!");
   console.log("Demo Accounts:");

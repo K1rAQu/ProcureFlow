@@ -3,8 +3,10 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { settings } from "@/db/schema";
 import { DEFAULT_EDITABLE_STATUSES, type RequestStatus } from "./workflow";
+import { type Locale } from "./i18n";
 
 export type SystemSettings = {
+  defaultLocale: Locale;
   editableStatuses: RequestStatus[];
   requiredItemFields: ("partNumber" | "unitPrice" | "currency" | "url" | "photo")[];
   autoApproveNomenclature: boolean;
@@ -13,6 +15,7 @@ export type SystemSettings = {
 };
 
 export const DEFAULT_SETTINGS: SystemSettings = {
+  defaultLocale: process.env.DEFAULT_LOCALE === "uk" ? "uk" : "en",
   editableStatuses: DEFAULT_EDITABLE_STATUSES,
   requiredItemFields: [],
   autoApproveNomenclature: true,
@@ -23,9 +26,13 @@ export const DEFAULT_SETTINGS: SystemSettings = {
 const SETTINGS_KEY = "system";
 
 export async function getSettings(): Promise<SystemSettings> {
-  const rows = await db.select().from(settings).where(eq(settings.key, SETTINGS_KEY)).limit(1);
-  const stored = rows[0]?.value as Partial<SystemSettings> | undefined;
-  return { ...DEFAULT_SETTINGS, ...(stored ?? {}) };
+  try {
+    const rows = await db.select().from(settings).where(eq(settings.key, SETTINGS_KEY)).limit(1);
+    const stored = rows[0]?.value as Partial<SystemSettings> | undefined;
+    return { ...DEFAULT_SETTINGS, ...(stored ?? {}) };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
 }
 
 export async function saveSettings(patch: Partial<SystemSettings>): Promise<SystemSettings> {
@@ -37,3 +44,4 @@ export async function saveSettings(patch: Partial<SystemSettings>): Promise<Syst
     .onConflictDoUpdate({ target: settings.key, set: { value: next, updatedAt: new Date() } });
   return next;
 }
+

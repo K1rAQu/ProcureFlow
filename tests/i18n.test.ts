@@ -36,3 +36,17 @@ test("localizedName dynamically maps directory codes for English and Ukrainian",
   assert.equal(localizedName("en", workshop), "Assembly Shop #1");
   assert.equal(localizedName("uk", workshop), "Цех збирання №1");
 });
+
+test("settingsSchema validates defaultLocale correctly", async () => {
+  const { settingsSchema } = await import("../src/lib/validation.ts");
+  const parsedEn = settingsSchema.parse({ defaultLocale: "en" });
+  assert.equal(parsedEn.defaultLocale, "en");
+
+  const parsedUk = settingsSchema.parse({ defaultLocale: "uk" });
+  assert.equal(parsedUk.defaultLocale, "uk");
+
+  assert.throws(() => {
+    settingsSchema.parse({ defaultLocale: "de" });
+  });
+});
+

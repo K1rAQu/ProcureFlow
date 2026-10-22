@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth-forms";
 import { I18nProvider } from "@/components/i18n-provider";
-import { LocaleSwitcher } from "@/components/nav";
 import { getCurrentUser, resolveLocale } from "@/lib/auth";
 import { isSystemInitialized } from "@/lib/bootstrap";
 import { isGoogleOAuthConfigured } from "@/lib/google-auth";
@@ -48,12 +47,9 @@ export default async function LoginPage({
             </ul>
           </div>
           <div className="p-8 sm:p-10 relative">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">{t("auth.login")}</h2>
-                <p className="text-xs text-slate-500">{t("app.subtitle")}</p>
-              </div>
-              <LocaleSwitcher />
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-slate-900">{t("auth.login")}</h2>
+              <p className="text-xs text-slate-500">{t("app.subtitle")}</p>
             </div>
             {params.reason === "timeout" ? (
               <div className="mb-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900 shadow-2xs">
