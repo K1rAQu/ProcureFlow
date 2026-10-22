@@ -475,7 +475,7 @@ export function RequestForm({
               <span>Позиції до закупівлі ({items.length})</span>
             </span>
           }
-          description="Шукайте позиції за назвою або артикулом. Код БАС підтягується автоматично."
+          description="Шукайте позиції за назвою або артикулом. Артикул 1С підтягується автоматично."
           actions={
             <div className="flex flex-wrap items-center gap-2">
               <Button
@@ -560,8 +560,8 @@ export function RequestForm({
       ) : null}
 
       {/* Закріплена панель дій внизу сторінки */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-300/80 bg-white/95 px-4 py-3 shadow-lg backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="fixed bottom-0 right-0 left-0 lg:left-64 z-30 border-t border-slate-200 bg-white/95 px-4 sm:px-6 lg:px-8 py-3.5 shadow-lg backdrop-blur-md no-print">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <div className="text-xs text-slate-500">
               Позицій: <span className="font-semibold text-slate-800">{items.length}</span>
@@ -576,7 +576,7 @@ export function RequestForm({
             ) : null}
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-end gap-3">
             {mode === "edit" ? (
               <Button
                 type="button"
@@ -906,7 +906,7 @@ function ItemRow({
                     <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500">
                       {hit.basCode ? (
                         <span className="rounded bg-sky-50 px-1 font-mono font-medium text-sky-700">
-                          БАС: {hit.basCode}
+                          1С: {hit.basCode}
                         </span>
                       ) : null}
                       {hit.partNumber ? (

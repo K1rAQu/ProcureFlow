@@ -63,7 +63,7 @@ export function NomenclatureFilters({
               name="q"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Швидкий пошук за назвою, артикулом, кодом 1С/БАС або виробником..."
+              placeholder="Швидкий пошук за назвою, артикулом, кодом 1С або виробником..."
               className="pl-9 pr-8 py-2 text-sm w-full"
             />
             <span className="pointer-events-none absolute left-3 top-2.5 text-slate-400">

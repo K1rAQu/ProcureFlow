@@ -224,7 +224,7 @@ export function NomenclatureBulkPicker({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Швидкий пошук за назвою, артикулом, кодом 1С/БАС або брендом..."
+              placeholder="Швидкий пошук за назвою, артикулом, кодом 1С або брендом..."
               className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-9 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#12325c] focus:outline-none focus:ring-1 focus:ring-[#12325c]"
             />
             {query ? (

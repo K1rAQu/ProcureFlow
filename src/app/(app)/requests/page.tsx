@@ -10,6 +10,7 @@ import { ViewModeToggle } from "@/components/view-mode-toggle";
 import { ExportCsvButton } from "@/components/export-button";
 import { listRequests } from "@/lib/requests-service";
 import { loadDirectories, pageContext, readNumberParam, readParam } from "@/lib/page";
+import { localizedName } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,8 @@ export default async function MyRequestsPage({
   const view: "kanban" | "table" = rawView === "table" ? "table" : "kanban";
 
   const currentStatus = readParam(params, "status");
+  const activeDepartment = readParam(params, "departmentId");
+  const activePriority = readParam(params, "priority");
 
   const result = await listRequests(user, {
     scope: "own",
@@ -66,6 +69,13 @@ export default async function MyRequestsPage({
     { label: "У закупівлі", value: "purchasing" },
     { label: "Завершені", value: "completed" },
     { label: "Чернетки", value: "draft" },
+  ];
+
+  const priorityTabs = [
+    { label: t("priority.all"), value: undefined },
+    { label: t("priority.normal"), value: "normal" },
+    { label: t("priority.high"), value: "high" },
+    { label: t("priority.urgent"), value: "urgent" },
   ];
 
   return (
@@ -112,24 +122,84 @@ export default async function MyRequestsPage({
         />
       </div>
 
-      {/* Швидкі статус-вкладки */}
-      <div className="mb-4 flex flex-wrap gap-1.5 border-b border-slate-200/80 pb-3">
-        {statusTabs.map((tab) => {
-          const active = currentStatus === tab.value || (!currentStatus && tab.value === undefined);
-          return (
-            <Link
-              key={tab.label}
-              href={buildUrl({ status: tab.value, page: "1" })}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-                active
-                  ? "bg-[#12325c] text-white shadow-2xs"
-                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          );
-        })}
+      {/* Швидкі фільтри: Напрями, Статуси та Пріоритети (тогл-світч) */}
+      <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-slate-200/80 pb-3">
+        {/* Напрями закупівлі */}
+        {departments.length > 0 ? (
+          <>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Link
+                href={buildUrl({ departmentId: undefined, page: "1" })}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                  !activeDepartment
+                    ? "bg-[#12325c] text-white shadow-2xs"
+                    : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                {t("common.all")} напрями
+              </Link>
+              {departments.map((department) => (
+                <Link
+                  key={department.id}
+                  href={buildUrl({ departmentId: String(department.id), page: "1" })}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    activeDepartment === String(department.id)
+                      ? "bg-[#12325c] text-white shadow-2xs"
+                      : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                  }`}
+                >
+                  {localizedName(locale, department)}
+                </Link>
+              ))}
+            </div>
+            <div className="hidden lg:block h-6 w-px bg-slate-300 mx-1 shrink-0" aria-hidden="true" />
+          </>
+        ) : null}
+
+        {/* Статусні фільтри */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {statusTabs.map((tab) => {
+            const active = currentStatus === tab.value || (!currentStatus && tab.value === undefined);
+            return (
+              <Link
+                key={tab.label}
+                href={buildUrl({ status: tab.value, page: "1" })}
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
+                  active
+                    ? "bg-slate-800 text-white shadow-2xs"
+                    : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="hidden lg:block h-6 w-px bg-slate-300 mx-1 shrink-0" aria-hidden="true" />
+
+        {/* Пріоритети (тогл-світч) */}
+        <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+          {priorityTabs.map((tab) => {
+            const active = activePriority === tab.value || (!activePriority && tab.value === undefined);
+            let activeClass = "bg-slate-800 text-white shadow-2xs font-semibold";
+            if (tab.value === "urgent") activeClass = "bg-rose-600 text-white shadow-2xs font-semibold";
+            else if (tab.value === "high") activeClass = "bg-amber-500 text-white shadow-2xs font-semibold";
+            else if (tab.value === "normal") activeClass = "bg-[#12325c] text-white shadow-2xs font-semibold";
+
+            return (
+              <Link
+                key={tab.label}
+                href={buildUrl({ priority: tab.value, page: "1" })}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                  active ? activeClass : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* Відображення контенту: Таблиця або Канбан */}

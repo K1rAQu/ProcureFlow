@@ -249,7 +249,7 @@ export function NewNomenclatureButton() {
                   <li key={duplicate.id}>
                     {duplicate.name}
                     {duplicate.partNumber ? ` · ${duplicate.partNumber}` : ""}
-                    {duplicate.basCode ? ` · БАС: ${duplicate.basCode}` : ""} (
+                    {duplicate.basCode ? ` · 1С: ${duplicate.basCode}` : ""} (
                     {Math.round(duplicate.score * 100)}%)
                   </li>
                 ))}
@@ -514,7 +514,7 @@ export function MergePanel({ currentId }: { currentId: number }) {
               <span className="truncate">
                 {hit.name}
                 {hit.partNumber ? ` · ${hit.partNumber}` : ""}
-                {hit.basCode ? ` · БАС: ${hit.basCode}` : ""}
+                {hit.basCode ? ` · 1С: ${hit.basCode}` : ""}
               </span>
               <Button
                 type="button"

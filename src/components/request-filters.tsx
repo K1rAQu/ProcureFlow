@@ -40,6 +40,7 @@ export function RequestFilters({
 
   const [expanded, setExpanded] = useState<boolean>(activeExtraFiltersCount > 0);
   const [query, setQuery] = useState<string>(values.q ?? "");
+  const [priority, setPriority] = useState<string>(values.priority ?? "all");
 
   const hasAnyFilter = Boolean(values.q || activeExtraFiltersCount > 0);
 
@@ -81,7 +82,7 @@ export function RequestFilters({
               name="q"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Швидкий пошук за № заявки, товаром, артикулом, кодом БАС або автором..."
+              placeholder={t("request.searchPlaceholder")}
               className="pl-9 pr-8 py-2 text-sm w-full"
             />
             <span className="pointer-events-none absolute left-3 top-2.5 text-slate-400">
@@ -175,16 +176,40 @@ export function RequestFilters({
               </Select>
             </Field>
 
-            {/* Пріоритет */}
+            {/* Пріоритет (тогл-світч) */}
             <Field label={t("request.priority")}>
-              <Select name="priority" defaultValue={values.priority ?? "all"}>
-                <option value="all">Усі пріоритети</option>
-                {PRIORITIES.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {t(`priority.${priority}`)}
-                  </option>
+              <input type="hidden" name="priority" value={priority} />
+              <div className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+                <button
+                  type="button"
+                  onClick={() => setPriority("all")}
+                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                    priority === "all"
+                      ? "bg-white text-slate-900 shadow-2xs font-semibold ring-1 ring-slate-200"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {t("priority.all")}
+                </button>
+                {PRIORITIES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setPriority(item)}
+                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
+                      priority === item
+                        ? item === "urgent"
+                          ? "bg-rose-600 text-white shadow-2xs font-semibold"
+                          : item === "high"
+                            ? "bg-amber-500 text-white shadow-2xs font-semibold"
+                            : "bg-[#12325c] text-white shadow-2xs font-semibold"
+                        : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    {t(`priority.${item}`)}
+                  </button>
                 ))}
-              </Select>
+              </div>
             </Field>
 
             {/* Дати */}

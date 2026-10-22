@@ -294,7 +294,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                 <tr className="bg-slate-100 font-bold border-b border-slate-400 text-slate-900">
                   <th className="p-2 border-r border-slate-300 w-10 text-center">№</th>
                   <th className="p-2 border-r border-slate-300">Найменування та примітки</th>
-                  <th className="p-2 border-r border-slate-300 w-36">Артикул / БАС</th>
+                  <th className="p-2 border-r border-slate-300 w-36">Артикул / 1С</th>
                   <th className="p-2 border-r border-slate-300 w-32">Виробник</th>
                   <th className="p-2 border-r border-slate-300 w-24 text-right">Кількість</th>
                   <th className="p-2 w-16 text-center">Од. вим.</th>
@@ -316,7 +316,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                       {item.partNumber || item.basCode ? (
                         <>
                           {item.partNumber ?? ""}
-                          {item.basCode ? ` (БАС: ${item.basCode})` : ""}
+                          {item.basCode ? ` (1С: ${item.basCode})` : ""}
                         </>
                       ) : (
                         "—"
@@ -420,7 +420,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                             )}
                             {item.basCode ? (
                               <span className="inline-flex items-center gap-1 rounded-md bg-sky-50 px-2 py-0.5 font-mono text-xs font-bold text-sky-800 ring-1 ring-sky-300">
-                                <span>БАС:</span>
+                                <span>1С:</span>
                                 <span>{item.basCode}</span>
                               </span>
                             ) : null}

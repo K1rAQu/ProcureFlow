@@ -36,6 +36,7 @@ export default async function AllRequestsPage({
 
   const currentStatus = readParam(params, "status");
   const activeDepartment = readParam(params, "departmentId");
+  const activePriority = readParam(params, "priority");
 
   const result = await listRequests(user, {
     scope: "all",
@@ -75,6 +76,13 @@ export default async function AllRequestsPage({
     { label: "У закупівлі", value: "purchasing" },
     { label: "Замовлено", value: "ordered" },
     { label: "Виконано", value: "completed" },
+  ];
+
+  const priorityTabs = [
+    { label: t("priority.all"), value: undefined },
+    { label: t("priority.normal"), value: "normal" },
+    { label: t("priority.high"), value: "high" },
+    { label: t("priority.urgent"), value: "urgent" },
   ];
 
   return (
@@ -165,6 +173,32 @@ export default async function AllRequestsPage({
                   active
                     ? "bg-slate-800 text-white shadow-2xs"
                     : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Візуальний розділювач між статусами та пріоритетами */}
+        <div className="hidden lg:block h-6 w-px bg-slate-300 mx-1 shrink-0" aria-hidden="true" />
+
+        {/* Пріоритети (тогл-світч) */}
+        <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+          {priorityTabs.map((tab) => {
+            const active = activePriority === tab.value || (!activePriority && tab.value === undefined);
+            let activeClass = "bg-slate-800 text-white shadow-2xs font-semibold";
+            if (tab.value === "urgent") activeClass = "bg-rose-600 text-white shadow-2xs font-semibold";
+            else if (tab.value === "high") activeClass = "bg-amber-500 text-white shadow-2xs font-semibold";
+            else if (tab.value === "normal") activeClass = "bg-[#12325c] text-white shadow-2xs font-semibold";
+
+            return (
+              <Link
+                key={tab.label}
+                href={buildUrl({ priority: tab.value, page: "1" })}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                  active ? activeClass : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
                 }`}
               >
                 {tab.label}

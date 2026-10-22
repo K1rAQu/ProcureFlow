@@ -142,6 +142,7 @@ export const en: Messages = {
   "request.parent": "Split from Request",
   "request.children": "Child Requests",
   "request.draftRestored": "Unsaved draft restored from browser",
+  "request.searchPlaceholder": "Search by request #, item name, part #, 1C article, or author...",
 
   // Items
   "item.name": "Item Description",
@@ -169,9 +170,9 @@ export const en: Messages = {
   "nom.title": "Nomenclature Catalog",
   "nom.card": "Catalog Item",
   "nom.new": "New Catalog Item",
-  "nom.basCode": "ERP / BAS Code",
-  "nom.basCodeFull": "ERP / BAS Internal Code",
-  "nom.basCodeHint": "Internal code in enterprise accounting system (BAS/1C)",
+  "nom.basCode": "1C Article",
+  "nom.basCodeFull": "1C Article / SKU",
+  "nom.basCodeHint": "Internal item article or SKU in 1C enterprise accounting system",
   "nom.manufacturer": "Manufacturer / Brand",
   "nom.description": "Description",
   "nom.specs": "Technical Specifications",
@@ -233,6 +234,12 @@ export const en: Messages = {
   "audit.user": "User",
   "audit.when": "Timestamp",
   "audit.empty": "No audit entries recorded",
+  "audit.searchPlaceholder": "Search audit entries by summary, ID, action, user, or IP...",
+  "audit.allEntities": "All Entities",
+  "audit.allActions": "All Actions",
+  "audit.allUsers": "All Users",
+  "audit.dateFrom": "Date From",
+  "audit.dateTo": "Date To",
 
   // Statuses
   "status.draft": "Draft",
@@ -246,6 +253,7 @@ export const en: Messages = {
   "status.cancelled": "Cancelled",
 
   // Priorities
+  "priority.all": "All Priorities",
   "priority.normal": "Normal",
   "priority.high": "High",
   "priority.urgent": "Urgent",
@@ -533,6 +541,7 @@ export const uk: Messages = {
   "request.parent": "Виділена із заявки",
   "request.children": "Дочірні заявки",
   "request.draftRestored": "Відновлено незбережену чернетку",
+  "request.searchPlaceholder": "Швидкий пошук за № заявки, назвою, артикулом, артикулом 1С або автором...",
 
   // Позиції
   "item.name": "Найменування",
@@ -560,9 +569,9 @@ export const uk: Messages = {
   "nom.title": "Номенклатура",
   "nom.card": "Картка номенклатури",
   "nom.new": "Нова позиція",
-  "nom.basCode": "Код БАС",
-  "nom.basCodeFull": "Код БАС (внутрішній артикул)",
-  "nom.basCodeHint": "Внутрішній артикул системи БАС",
+  "nom.basCode": "Артикул 1С",
+  "nom.basCodeFull": "Артикул / Код 1С",
+  "nom.basCodeHint": "Внутрішній артикул або код в обліковій системі 1С",
   "nom.manufacturer": "Виробник / бренд",
   "nom.description": "Опис",
   "nom.specs": "Характеристики",
@@ -618,12 +627,18 @@ export const uk: Messages = {
   "admin.maintenance": "Обслуговування та бекап",
 
   // Аудит
-  "audit.title": "Історія дій",
+  "audit.title": "Історія дій (Аудит)",
   "audit.action": "Дія",
   "audit.entity": "Об'єкт",
   "audit.user": "Користувач",
   "audit.when": "Коли",
-  "audit.empty": "Записів немає",
+  "audit.empty": "Записів аудиту немає",
+  "audit.searchPlaceholder": "Швидкий пошук за описом, ID, дією, користувачем або IP...",
+  "audit.allEntities": "Усі об'єкти",
+  "audit.allActions": "Усі дії",
+  "audit.allUsers": "Усі користувачі",
+  "audit.dateFrom": "Дата з",
+  "audit.dateTo": "Дата по",
 
   // Статуси
   "status.draft": "Чернетка",
@@ -637,6 +652,7 @@ export const uk: Messages = {
   "status.cancelled": "Скасована",
 
   // Пріоритети
+  "priority.all": "Усі пріоритети",
   "priority.normal": "Звичайний",
   "priority.high": "Високий",
   "priority.urgent": "Терміновий",
