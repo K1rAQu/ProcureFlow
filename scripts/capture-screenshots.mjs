@@ -35,6 +35,7 @@ async function captureAll() {
     { name: "request-detail.png", path: `/requests/${firstReqId}`, delay: 2500 },
     { name: "new-request.png", path: "/requests/new", delay: 1800 },
     { name: "nomenclature.png", path: "/nomenclature", delay: 2000 },
+    { name: "admin-users.png", path: "/admin?tab=users", delay: 2000 },
     { name: "admin-maintenance.png", path: "/admin?tab=maintenance", delay: 2000 },
     { name: "audit-log.png", path: "/audit", delay: 2000 },
   ];

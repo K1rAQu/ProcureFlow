@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge, Button, Card, CardHeader, Field, Input, Select, Textarea } from "./ui";
-import { IconTrash } from "./icons";
+import { IconBan, IconTrash, IconUnlock } from "./icons";
 import { useLocalizedName, useT } from "./i18n-provider";
 import { useConfirm } from "./confirm-provider";
 import { PERMISSION_GROUPS } from "@/lib/permissions";
@@ -62,15 +62,18 @@ export function UsersPanel({
   roles,
   workshops,
   departments,
+  currentUserId,
 }: {
   users: UserRow[];
   roles: RoleRow[];
   workshops: DirectoryRow[];
   departments: DirectoryRow[];
+  currentUserId?: number;
 }) {
   const t = useT();
   const localized = useLocalizedName();
-  const { busy, error, send } = useApi();
+  const confirm = useConfirm();
+  const { busy, error, send, setError } = useApi();
   const [userList, setUserList] = useState(users);
   const [form, setForm] = useState({
     fullName: "",
@@ -84,6 +87,40 @@ export function UsersPanel({
   useEffect(() => {
     setUserList(users);
   }, [users]);
+
+  const handleToggleBlock = async (targetUser: UserRow, nextActive: boolean) => {
+    if (!nextActive) {
+      const ok = await confirm({
+        title: t("admin.blockConfirmTitle"),
+        message: t("admin.blockConfirmMsg", { name: targetUser.fullName, email: targetUser.email }),
+        confirmText: t("admin.block"),
+        cancelText: t("common.cancel"),
+        tone: "danger",
+      });
+      if (!ok) return;
+    } else {
+      const ok = await confirm({
+        title: t("admin.unblockConfirmTitle"),
+        message: t("admin.unblockConfirmMsg", { name: targetUser.fullName, email: targetUser.email }),
+        confirmText: t("admin.unblock"),
+        cancelText: t("common.cancel"),
+        tone: "primary",
+      });
+      if (!ok) return;
+    }
+
+    const ok = await send(`/api/admin/users/${targetUser.id}`, "PATCH", { isActive: nextActive });
+    if (ok) {
+      setUserList((prev) => prev.map((u) => (u.id === targetUser.id ? { ...u, isActive: nextActive } : u)));
+    }
+  };
+
+  const errorMessage =
+    error === "last_admin"
+      ? t("admin.cannotBlockLastAdmin")
+      : error === "email_taken"
+      ? t("auth.emailTaken")
+      : error;
 
   return (
     <Card>
@@ -157,84 +194,143 @@ export function UsersPanel({
             >
               {t("common.create")}
             </Button>
-            {error ? <span className="ml-3 text-xs text-rose-600">{error}</span> : null}
+            {error ? <span className="ml-3 text-xs text-rose-600">{errorMessage}</span> : null}
           </div>
         </div>
       ) : null}
 
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-medium text-slate-500">
+          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
             <tr>
-              <th className="px-4 py-2">{t("auth.fullName")}</th>
-              <th className="px-4 py-2">{t("auth.email")}</th>
-              <th className="px-4 py-2">{t("admin.role")}</th>
-              <th className="px-4 py-2">{t("request.workshop")}</th>
-              <th className="px-4 py-2">{t("admin.active")}</th>
+              <th className="px-4 py-2.5">{t("auth.fullName")}</th>
+              <th className="px-4 py-2.5">{t("auth.email")}</th>
+              <th className="px-4 py-2.5">{t("admin.role")}</th>
+              <th className="px-4 py-2.5">{t("request.workshop")}</th>
+              <th className="px-4 py-2.5">{t("common.status")}</th>
+              <th className="px-4 py-2.5 text-right">{t("common.actions")}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {userList.map((user) => (
-              <tr key={user.id}>
-                <td className="px-4 py-2 font-medium text-slate-800">{user.fullName}</td>
-                <td className="px-4 py-2 text-slate-600">{user.email}</td>
-                <td className="px-4 py-2">
-                  <Select
-                    value={user.roleId}
-                    className="min-w-36 py-1 text-xs"
-                    onChange={(event) => {
-                      const nextRole = Number(event.target.value);
-                      setUserList((prev) => prev.map((u) => (u.id === user.id ? { ...u, roleId: nextRole } : u)));
-                      void send(`/api/admin/users/${user.id}`, "PATCH", { roleId: nextRole });
-                    }}
-                  >
-                    {roles.map((role) => (
-                      <option key={role.id} value={role.id}>
-                        {localized({ code: role.code, nameUk: role.nameUk, nameRu: role.nameRu })}
-                      </option>
-                    ))}
-                  </Select>
-                </td>
-                <td className="px-4 py-2">
-                  <Select
-                    value={user.workshopId ?? ""}
-                    className="min-w-32 py-1 text-xs"
-                    onChange={(event) => {
-                      const nextWorkshop = event.target.value ? Number(event.target.value) : null;
-                      setUserList((prev) => prev.map((u) => (u.id === user.id ? { ...u, workshopId: nextWorkshop } : u)));
-                      void send(`/api/admin/users/${user.id}`, "PATCH", {
-                        workshopId: nextWorkshop,
-                      });
-                    }}
-                  >
-                    <option value="">—</option>
-                    {workshops.map((workshop) => (
-                      <option key={workshop.id} value={workshop.id}>
-                        {localized({ code: workshop.code, nameUk: workshop.nameUk, nameRu: workshop.nameRu })}
-                      </option>
-                    ))}
-                  </Select>
-                </td>
-                <td className="px-4 py-2">
-                  <label className="inline-flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={user.isActive}
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {userList.map((user) => {
+              const isSelf = user.id === currentUserId;
+              return (
+                <tr
+                  key={user.id}
+                  className={`transition ${!user.isActive ? "bg-slate-50/70" : "hover:bg-slate-50/50"}`}
+                >
+                  <td className="px-4 py-2.5 font-medium">
+                    <div className="flex items-center gap-2">
+                      <span className={user.isActive ? "text-slate-900" : "text-slate-500 line-through"}>
+                        {user.fullName}
+                      </span>
+                      {isSelf ? (
+                        <span className="rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700 ring-1 ring-indigo-200">
+                          {t("common.you")}
+                        </span>
+                      ) : null}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2.5 text-xs text-slate-600">{user.email}</td>
+                  <td className="px-4 py-2.5">
+                    <Select
+                      value={user.roleId}
+                      disabled={!user.isActive}
+                      className="min-w-36 py-1 text-xs"
                       onChange={(event) => {
-                        const nextActive = event.target.checked;
-                        setUserList((prev) => prev.map((u) => (u.id === user.id ? { ...u, isActive: nextActive } : u)));
-                        void send(`/api/admin/users/${user.id}`, "PATCH", { isActive: nextActive });
+                        const nextRole = Number(event.target.value);
+                        setUserList((prev) => prev.map((u) => (u.id === user.id ? { ...u, roleId: nextRole } : u)));
+                        void send(`/api/admin/users/${user.id}`, "PATCH", { roleId: nextRole });
                       }}
-                    />
-                    {user.isActive ? t("common.yes") : t("common.no")}
-                  </label>
-                </td>
-              </tr>
-            ))}
+                    >
+                      {roles.map((role) => (
+                        <option key={role.id} value={role.id}>
+                          {localized({ code: role.code, nameUk: role.nameUk, nameRu: role.nameRu })}
+                        </option>
+                      ))}
+                    </Select>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <Select
+                      value={user.workshopId ?? ""}
+                      disabled={!user.isActive}
+                      className="min-w-32 py-1 text-xs"
+                      onChange={(event) => {
+                        const nextWorkshop = event.target.value ? Number(event.target.value) : null;
+                        setUserList((prev) => prev.map((u) => (u.id === user.id ? { ...u, workshopId: nextWorkshop } : u)));
+                        void send(`/api/admin/users/${user.id}`, "PATCH", {
+                          workshopId: nextWorkshop,
+                        });
+                      }}
+                    >
+                      <option value="">—</option>
+                      {workshops.map((workshop) => (
+                        <option key={workshop.id} value={workshop.id}>
+                          {localized({ code: workshop.code, nameUk: workshop.nameUk, nameRu: workshop.nameRu })}
+                        </option>
+                      ))}
+                    </Select>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {user.isActive ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        {t("admin.active")}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                        {t("admin.blocked")}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    {isSelf ? (
+                      <span className="text-xs text-slate-400 italic" title={t("admin.cannotBlockSelf")}>
+                        —
+                      </span>
+                    ) : user.isActive ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={busy}
+                        onClick={() => handleToggleBlock(user, false)}
+                        className="inline-flex items-center gap-1.5 border-rose-200 text-rose-700 hover:bg-rose-50 hover:border-rose-300 shadow-2xs"
+                        title={t("admin.block")}
+                      >
+                        <IconBan className="h-3.5 w-3.5 text-rose-600" />
+                        <span>{t("admin.block")}</span>
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        disabled={busy}
+                        onClick={() => handleToggleBlock(user, true)}
+                        className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 ring-1 ring-emerald-300 shadow-2xs"
+                        title={t("admin.unblock")}
+                      >
+                        <IconUnlock className="h-3.5 w-3.5 text-emerald-600" />
+                        <span>{t("admin.unblock")}</span>
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
-      {error ? <p className="px-4 py-2 text-xs text-rose-600">{error}</p> : null}
+      {errorMessage ? (
+        <div className="flex items-center justify-between border-t border-rose-200 bg-rose-50 px-4 py-2.5 text-xs text-rose-700">
+          <span>{errorMessage}</span>
+          <button type="button" onClick={() => setError(null)} className="font-bold text-rose-500 hover:text-rose-700">
+            ✕
+          </button>
+        </div>
+      ) : null}
     </Card>
   );
 }

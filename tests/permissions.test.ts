@@ -7,6 +7,15 @@ import {
   PERMISSIONS,
   ROLE_PRESETS,
 } from "../src/lib/permissions.ts";
+import { userUpdateSchema } from "../src/lib/validation.ts";
+
+test("валідація блокування та розблокування користувача", () => {
+  const blockPayload = userUpdateSchema.parse({ isActive: false });
+  assert.equal(blockPayload.isActive, false);
+
+  const unblockPayload = userUpdateSchema.parse({ isActive: true });
+  assert.equal(unblockPayload.isActive, true);
+});
 
 test("адміністратор володіє всіма правами", () => {
   const admin = ROLE_PRESETS.find((role) => role.code === "admin");

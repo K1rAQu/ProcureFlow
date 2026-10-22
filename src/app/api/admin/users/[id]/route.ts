@@ -45,12 +45,21 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       await db.delete(sessions).where(eq(sessions.userId, id));
     }
 
+    const auditAction =
+      payload.isActive === false ? "user.block" : payload.isActive === true ? "user.unblock" : "user.update";
+    const auditSummary =
+      payload.isActive === false
+        ? `${current.fullName} (${current.email}) [blocked]`
+        : payload.isActive === true
+        ? `${current.fullName} (${current.email}) [unblocked]`
+        : current.email;
+
     await writeAudit({
       userId: admin.id,
-      action: "user.update",
+      action: auditAction,
       entityType: "user",
       entityId: id,
-      summary: current.email,
+      summary: auditSummary,
       payload: { ...payload, password: payload.password ? "changed" : undefined },
     });
     return jsonOk({ ok: true });

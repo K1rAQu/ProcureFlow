@@ -58,7 +58,7 @@ export default async function AdminPage({
         ))}
       </nav>
 
-      {tab === "users" ? <UsersTab workshops={workshops} departments={departments} /> : null}
+      {tab === "users" ? <UsersTab workshops={workshops} departments={departments} currentUserId={user.id} /> : null}
       {tab === "roles" ? <RolesTab /> : null}
       {tab === "workshops" ? (
         <DirectoryPanel kind="workshops" title={t("admin.workshops")} items={workshops} />
@@ -87,9 +87,11 @@ export default async function AdminPage({
 async function UsersTab({
   workshops,
   departments,
+  currentUserId,
 }: {
   workshops: Awaited<ReturnType<typeof loadDirectories>>["workshops"];
   departments: Awaited<ReturnType<typeof loadDirectories>>["departments"];
+  currentUserId: number;
 }) {
   const userRows = await db
     .select({
@@ -112,6 +114,7 @@ async function UsersTab({
       roles={roleRows}
       workshops={workshops}
       departments={departments}
+      currentUserId={currentUserId}
     />
   );
 }

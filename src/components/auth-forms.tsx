@@ -17,7 +17,7 @@ function errorMessage(code: string, t: (key: string) => string): string {
     case "google_denied":
       return t("auth.googleDenied");
     case "corporate_domain_required":
-      return "Вхід дозволено лише з корпоративної електронної пошти підприємства.";
+      return t("auth.corporateDomainRequired");
     case "google_auth_failed":
     case "invalid_state":
     case "missing_code":

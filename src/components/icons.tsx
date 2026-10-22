@@ -229,3 +229,21 @@ export function IconLayers(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconBan(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true" className="h-4 w-4" {...props}>
+      <circle cx="10" cy="10" r="7.5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m4.7 4.7 10.6 10.6" />
+    </svg>
+  );
+}
+
+export function IconUnlock(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden="true" className="h-4 w-4" {...props}>
+      <rect x="3.5" y="9" width="13" height="8.5" rx="2" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.5 9V6a3.5 3.5 0 0 1 7-1" />
+    </svg>
+  );
+}
