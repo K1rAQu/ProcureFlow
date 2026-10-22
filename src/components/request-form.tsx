@@ -341,9 +341,11 @@ export function RequestForm({
               <IconCopy className="h-5 w-5" />
             </span>
             <div>
-              <div className="font-semibold text-indigo-950">Створення на основі заявки {copiedFromNumber}</div>
+              <div className="font-semibold text-indigo-950">
+                {t("request.copyNoticeTitle", { number: copiedFromNumber })}
+              </div>
               <div className="text-xs text-indigo-700">
-                Підрозділ, цех, пріоритет та всі {items.length} поз. скопійовано. Ви можете скоригувати кількість, додати чи видалити позиції перед відправкою.
+                {t("request.copyNoticeDesc", { count: items.length })}
               </div>
             </div>
           </div>
@@ -351,7 +353,7 @@ export function RequestForm({
             href="/requests/new"
             className="inline-flex shrink-0 items-center justify-center text-xs font-semibold text-indigo-700 underline hover:text-indigo-900"
           >
-            Очистити й створити з нуля
+            {t("request.copyClear")}
           </Link>
         </div>
       ) : null}
@@ -472,10 +474,10 @@ export function RequestForm({
               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#12325c] text-xs font-bold text-white">
                 2
               </span>
-              <span>Позиції до закупівлі ({items.length})</span>
+              <span>{t("request.items")} ({items.length})</span>
             </span>
           }
-          description="Шукайте позиції за назвою або артикулом. Артикул 1С підтягується автоматично."
+          description={t("nom.basCodeHint")}
           actions={
             <div className="flex flex-wrap items-center gap-2">
               <Button
@@ -485,7 +487,7 @@ export function RequestForm({
                 onClick={() => setBulkPickerOpen(true)}
                 className="border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-900 font-semibold"
               >
-                <IconBox className="h-3.5 w-3.5" /> Додати з номенклатури
+                <IconBox className="h-3.5 w-3.5" /> {t("item.fromCatalog")}
               </Button>
               <Button
                 type="button"
@@ -548,7 +550,7 @@ export function RequestForm({
             <IconPlus className="h-4 w-4" /> Додати ще одну позицію
           </Button>
           <div className="text-right text-xs text-slate-500">
-            Всього позицій: <span className="font-semibold text-slate-800">{items.length}</span>
+            {t("request.items")}: <span className="font-semibold text-slate-800">{items.length}</span>
           </div>
         </div>
       </Card>
@@ -564,13 +566,13 @@ export function RequestForm({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             <div className="text-xs text-slate-500">
-              Позицій: <span className="font-semibold text-slate-800">{items.length}</span>
+              {t("request.items")}: <span className="font-semibold text-slate-800">{items.length}</span>
             </div>
             {savedAt ? (
               <>
                 <div className="h-4 w-px bg-slate-300" />
                 <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-                  <IconCheck className="h-3.5 w-3.5" /> Чернетка збережена о {savedAt}
+                  <IconCheck className="h-3.5 w-3.5" /> {t("request.draftSavedAt", { time: savedAt })}
                 </span>
               </>
             ) : null}
@@ -585,7 +587,7 @@ export function RequestForm({
                 onClick={() => submit(false)}
               >
                 <IconSave className="h-4 w-4" />
-                {busy ? t("common.saving") : "Зберегти зміни"}
+                {busy ? t("common.saving") : t("common.save")}
               </Button>
             ) : (
               <>
@@ -783,7 +785,7 @@ function ItemRow({
           </span>
           {item.nomenclatureId ? (
             <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800 ring-1 ring-emerald-300">
-              <span>✓ З номенклатури #{item.nomenclatureId}</span>
+              <span>✓ {t("item.fromCatalog")} #{item.nomenclatureId}</span>
               <button
                 type="button"
                 className="ml-0.5 rounded text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
@@ -795,7 +797,7 @@ function ItemRow({
             </span>
           ) : (
             <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-              Нова позиція
+              {t("item.newPositionShort")}
             </span>
           )}
           {item.name ? (
@@ -809,11 +811,11 @@ function ItemRow({
           <button
             type="button"
             onClick={onDuplicate}
-            title="Дублювати позицію"
+            title={t("item.duplicate")}
             className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900"
           >
             <IconCopy className="h-3.5 w-3.5 text-slate-500" />
-            <span className="hidden sm:inline">Дублювати</span>
+            <span className="hidden sm:inline">{t("item.duplicate")}</span>
           </button>
           <button
             type="button"
@@ -851,12 +853,12 @@ function ItemRow({
             label={t("item.name")}
             required
             error={errors[`name-${index}`]}
-            hint="Почніть вводити для пошуку в довіднику номенклатури"
+            hint={t("item.searchHint")}
           >
             <div className="relative">
               <Input
                 value={item.name}
-                placeholder="Наприклад: Підшипник кульковий SKF 6204 2RS"
+                placeholder={t("item.namePlaceholder")}
                 autoComplete="off"
                 onFocus={() => setOpen(true)}
                 onBlur={() => setTimeout(() => setOpen(false), 220)}
@@ -930,7 +932,7 @@ function ItemRow({
         >
           <Input
             value={item.partNumber}
-            placeholder="Артикул виробника"
+            placeholder={t("item.partNumberPlaceholder")}
             onChange={(event) => onPatch({ partNumber: event.target.value })}
             autoComplete="off"
           />
@@ -940,7 +942,7 @@ function ItemRow({
         <Field label={t("nom.manufacturer")} className="lg:col-span-3">
           <Input
             value={item.manufacturer}
-            placeholder="Бренд / Завод"
+            placeholder={t("item.manufacturerPlaceholder")}
             onChange={(event) => onPatch({ manufacturer: event.target.value })}
           />
         </Field>
@@ -958,10 +960,10 @@ function ItemRow({
 
         {/* Одиниця виміру + швидкі кнопки */}
         <div className="lg:col-span-4">
-          <Field label={t("item.unit")} hint="Оберіть або введіть">
+          <Field label={t("item.unit")} hint={t("item.unitHint")}>
             <Input
               value={item.unit}
-              placeholder="шт"
+              placeholder="pcs"
               onChange={(event) => onPatch({ unit: event.target.value })}
             />
           </Field>
@@ -1007,7 +1009,7 @@ function ItemRow({
         <Field label={t("item.comment")} className="lg:col-span-12">
           <Input
             value={item.comment}
-            placeholder="Уточнення розміру, кольору або аналогів (необов'язково)"
+            placeholder={t("item.commentPlaceholder")}
             onChange={(event) => onPatch({ comment: event.target.value })}
           />
         </Field>
@@ -1047,7 +1049,7 @@ function ItemRow({
               type="button"
               onClick={() => onPatch({ images: item.images.filter((candidate) => candidate.id !== image.id) })}
               className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-rose-600 text-[10px] text-white shadow-xs transition hover:bg-rose-700"
-              title="Видалити фото"
+              title={t("item.removePhoto")}
             >
               ✕
             </button>

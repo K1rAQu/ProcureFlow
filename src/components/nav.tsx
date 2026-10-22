@@ -30,7 +30,7 @@ export function SidebarNav({
           className="mb-2 flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-xs font-bold text-[#12325c] shadow-sm transition hover:bg-slate-100"
         >
           <span className="text-sm font-bold">＋</span>
-          <span>Нова заявка</span>
+          <span>{t("nav.newRequest")}</span>
         </Link>
       ) : null}
 
@@ -106,7 +106,7 @@ export function SidebarNav({
       >
         <div className="flex shrink-0 items-center gap-2 px-4 py-4">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-sm font-bold text-white">
-            ЗК
+            {t("app.logo")}
           </span>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-white">{t("app.name")}</p>

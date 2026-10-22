@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Field, Input, Select } from "./ui";
 import { IconFilter, IconSearch, IconX } from "./icons";
-import { useT } from "./i18n-provider";
+import { useLocale, useT } from "./i18n-provider";
 
 export type AuditFilterUser = {
   id: number;
@@ -51,6 +51,7 @@ export function AuditFilters({
   users?: AuditFilterUser[];
 }) {
   const t = useT();
+  const locale = useLocale();
   const router = useRouter();
 
   const activeExtraFiltersCount = [
@@ -111,7 +112,7 @@ export function AuditFilters({
                 type="button"
                 onClick={onClearSearch}
                 className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 rounded p-0.5"
-                title="Очистити пошук"
+                title={t("common.reset")}
               >
                 <IconX className="h-3.5 w-3.5" />
               </button>
@@ -121,7 +122,7 @@ export function AuditFilters({
           <div className="flex items-center gap-2 shrink-0">
             <Button type="submit" variant="primary" size="md">
               <IconSearch className="h-4 w-4" />
-              <span>Знайти</span>
+              <span>{t("common.search")}</span>
             </Button>
 
             <button
@@ -132,10 +133,10 @@ export function AuditFilters({
                   ? "border-[#12325c] bg-blue-50 text-[#12325c]"
                   : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
               }`}
-              title="Додаткові фільтри аудиту"
+              title={t("common.filters")}
             >
               <IconFilter className="h-3.5 w-3.5" />
-              <span>Фільтри</span>
+              <span>{t("common.filters")}</span>
               {activeExtraFiltersCount > 0 ? (
                 <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#12325c] px-1 text-[10px] font-bold text-white">
                   {activeExtraFiltersCount}
@@ -148,7 +149,7 @@ export function AuditFilters({
               <Link
                 href={action}
                 className="inline-flex h-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-rose-600 transition"
-                title="Скинути всі фільтри"
+                title={t("common.reset")}
               >
                 <IconX className="h-4 w-4" />
               </Link>
@@ -165,7 +166,7 @@ export function AuditFilters({
                 <option value="all">{t("audit.allEntities")}</option>
                 {AUDIT_ENTITIES.map((item) => (
                   <option key={item.value} value={item.value}>
-                    {item.labelUk} ({item.value})
+                    {locale === "en" ? item.labelEn : item.labelUk} ({item.value})
                   </option>
                 ))}
               </Select>
@@ -177,7 +178,7 @@ export function AuditFilters({
                 <option value="all">{t("audit.allActions")}</option>
                 {AUDIT_ACTIONS.map((item) => (
                   <option key={item.value} value={item.value}>
-                    {item.label}
+                    {locale === "en" ? item.value : item.label}
                   </option>
                 ))}
               </Select>
@@ -208,7 +209,7 @@ export function AuditFilters({
             {/* Кнопка застосувати */}
             <div className="sm:col-span-2 lg:col-span-5 flex items-end justify-end gap-2 pt-1">
               <Button type="submit" variant="secondary" size="md">
-                <span>Застосувати фільтри</span>
+                <span>{t("common.apply")}</span>
               </Button>
             </div>
           </div>

@@ -70,7 +70,8 @@ export function Modal({
               type="button"
               onClick={onClose}
               className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-              title="Закрити"
+              title="Close"
+              aria-label="Close"
             >
               <IconX className="h-5 w-5" />
             </button>

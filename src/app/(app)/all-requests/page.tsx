@@ -69,13 +69,13 @@ export default async function AllRequestsPage({
   }
 
   const statusTabs = [
-    { label: "Усі", value: undefined },
-    { label: "Нові подані", value: "submitted" },
-    { label: "На погодженні", value: "in_review" },
-    { label: "Потребують уточнення", value: "needs_info" },
-    { label: "У закупівлі", value: "purchasing" },
-    { label: "Замовлено", value: "ordered" },
-    { label: "Виконано", value: "completed" },
+    { label: t("common.all"), value: undefined },
+    { label: t("status.submitted"), value: "submitted" },
+    { label: t("status.in_review"), value: "in_review" },
+    { label: t("status.needs_info"), value: "needs_info" },
+    { label: t("status.purchasing"), value: "purchasing" },
+    { label: t("status.ordered"), value: "ordered" },
+    { label: t("status.completed"), value: "completed" },
   ];
 
   const priorityTabs = [
@@ -90,7 +90,7 @@ export default async function AllRequestsPage({
       <AutoRefresher intervalSeconds={20} />
       <PageHeader
         title={t("request.allTitle")}
-        description={`Загальна черга заявок підприємства · Усього: ${result.total}`}
+        description={`${t("request.allQueueDesc")} · ${t("common.total")}: ${result.total}`}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <ExportCsvButton endpoint="/api/export/requests" />
@@ -141,7 +141,7 @@ export default async function AllRequestsPage({
                 : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
             }`}
           >
-            {t("common.all")} напрями
+            {t("filter.allDepartments")}
           </Link>
           {departmentTabs.map((department) => (
             <Link

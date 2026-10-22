@@ -287,17 +287,17 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
           {/* Таблиця номенклатур для друку — чиста таблиця на всю ширину БЕЗ зайвих рамок картки та відступів */}
           <div className="hidden print:block my-4">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">
-              Специфікація товарів та матеріалів ({detail.items.length}):
+              {t("item.specifications")} ({detail.items.length}):
             </h2>
             <table className="w-full text-left text-xs border border-slate-400">
               <thead>
                 <tr className="bg-slate-100 font-bold border-b border-slate-400 text-slate-900">
                   <th className="p-2 border-r border-slate-300 w-10 text-center">№</th>
-                  <th className="p-2 border-r border-slate-300">Найменування та примітки</th>
-                  <th className="p-2 border-r border-slate-300 w-36">Артикул / 1С</th>
-                  <th className="p-2 border-r border-slate-300 w-32">Виробник</th>
-                  <th className="p-2 border-r border-slate-300 w-24 text-right">Кількість</th>
-                  <th className="p-2 w-16 text-center">Од. вим.</th>
+                  <th className="p-2 border-r border-slate-300">{t("item.name")}</th>
+                  <th className="p-2 border-r border-slate-300 w-36">{t("item.partNumber")} / 1С</th>
+                  <th className="p-2 border-r border-slate-300 w-32">{t("nom.manufacturer")}</th>
+                  <th className="p-2 border-r border-slate-300 w-24 text-right">{t("item.quantity")}</th>
+                  <th className="p-2 w-16 text-center">{t("item.unit")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -308,7 +308,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                       <div className="font-semibold text-slate-900">{item.name}</div>
                       {item.comment ? (
                         <div className="mt-0.5 text-[11px] text-slate-500 italic leading-snug">
-                          Примітка: {item.comment}
+                          {t("common.comment")}: {item.comment}
                         </div>
                       ) : null}
                     </td>
@@ -415,7 +415,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                               </Link>
                             ) : (
                               <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
-                                Нова позиція
+                                {t("item.newPositionShort")}
                               </span>
                             )}
                             {item.basCode ? (
@@ -426,7 +426,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
                             ) : null}
                             {item.partNumber ? (
                               <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-700 ring-1 ring-slate-200">
-                                <span>арт:</span>
+                                <span>{t("item.skuShort")}:</span>
                                 <span>{item.partNumber}</span>
                               </span>
                             ) : null}

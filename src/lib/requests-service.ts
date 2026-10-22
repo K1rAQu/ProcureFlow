@@ -768,8 +768,10 @@ export async function listRequests(user: SessionUser, filters: RequestFilters) {
       desiredDate: requests.desiredDate,
       departmentId: requests.departmentId,
       workshopId: requests.workshopId,
+      departmentCode: departments.code,
       departmentNameRu: departments.nameRu,
       departmentNameUk: departments.nameUk,
+      workshopCode: workshops.code,
       workshopNameRu: workshops.nameRu,
       workshopNameUk: workshops.nameUk,
       authorId: requests.authorId,
@@ -830,8 +832,10 @@ export async function getRequestDetail(id: number, user: SessionUser) {
   const [row] = await db
     .select({
       request: requests,
+      departmentCode: departments.code,
       departmentNameRu: departments.nameRu,
       departmentNameUk: departments.nameUk,
+      workshopCode: workshops.code,
       workshopNameRu: workshops.nameRu,
       workshopNameUk: workshops.nameUk,
       authorName: users.fullName,
@@ -929,8 +933,10 @@ export async function getRequestDetail(id: number, user: SessionUser) {
 
   return {
     ...row.request,
+    departmentCode: row.departmentCode,
     departmentNameRu: row.departmentNameRu,
     departmentNameUk: row.departmentNameUk,
+    workshopCode: row.workshopCode,
     workshopNameRu: row.workshopNameRu,
     workshopNameUk: row.workshopNameUk,
     authorName: row.authorName,

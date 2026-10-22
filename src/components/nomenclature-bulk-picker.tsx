@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { Button, Input } from "./ui";
 import { IconBox, IconCheck, IconPlus, IconSearch, IconX } from "./icons";
 import { cn } from "@/lib/format";
+import { useT } from "./i18n-provider";
 
 export type BulkItemPayload = {
   nomenclatureId: number;
@@ -40,6 +41,7 @@ export function NomenclatureBulkPicker({
   onClose: () => void;
   onAdd: (items: BulkItemPayload[]) => void;
 }) {
+  const t = useT();
   const [tab, setTab] = useState<"mine" | "all">("mine");
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<NomenclatureItem[]>([]);
@@ -162,10 +164,10 @@ export function NomenclatureBulkPicker({
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#12325c] text-white">
                 <IconBox className="h-4 w-4" />
               </span>
-              <span>Масове додавання позицій із номенклатури</span>
+              <span>{t("nom.bulkTitle")}</span>
             </h2>
             <p className="mt-1 text-xs text-slate-500">
-              Оберіть позиції з довідника або ваших попередніх замовлень і одразу вкажіть потрібну кількість
+              {t("nom.bulkDesc")}
             </p>
           </div>
           <button
@@ -192,7 +194,7 @@ export function NomenclatureBulkPicker({
                     : "text-slate-600 hover:text-slate-900",
                 )}
               >
-                ⭐️ Мої номенклатури
+                {t("nom.bulkMine")}
               </button>
               <button
                 type="button"
@@ -204,7 +206,7 @@ export function NomenclatureBulkPicker({
                     : "text-slate-600 hover:text-slate-900",
                 )}
               >
-                📚 Весь довідник компанії
+                {t("nom.bulkAll")}
               </button>
             </div>
 
@@ -212,7 +214,7 @@ export function NomenclatureBulkPicker({
             {selectedCount > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
                 <IconCheck className="h-3.5 w-3.5" />
-                Обрано {selectedCount} поз.
+                {t("nom.bulkSelected", { count: selectedCount })}
               </span>
             )}
           </div>
@@ -224,7 +226,7 @@ export function NomenclatureBulkPicker({
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Швидкий пошук за назвою, артикулом, кодом 1С або брендом..."
+              placeholder={t("nom.searchPlaceholder")}
               className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-9 text-xs font-medium text-slate-800 placeholder-slate-400 focus:border-[#12325c] focus:outline-none focus:ring-1 focus:ring-[#12325c]"
             />
             {query ? (
@@ -405,26 +407,26 @@ export function NomenclatureBulkPicker({
             {selectedCount > 0 ? (
               <>
                 <span className="text-xs font-semibold text-slate-700">
-                  Обрано позицій: <strong className="text-indigo-700 text-sm">{selectedCount}</strong>
+                  {t("nom.bulkSelected", { count: selectedCount })}
                 </span>
                 <button
                   type="button"
                   onClick={() => setSelectedMap(new Map())}
                   className="text-xs text-slate-400 hover:text-slate-600 underline"
                 >
-                  Очистити вибір
+                  {t("nom.bulkClear")}
                 </button>
               </>
             ) : (
               <span className="text-xs text-slate-500">
-                Позначте потрібні позиції та вкажіть кількість
+                {t("nom.bulkDesc")}
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-2">
             <Button type="button" variant="secondary" size="sm" onClick={onClose}>
-              Скасувати
+              {t("common.cancel")}
             </Button>
             <Button
               type="button"
@@ -434,7 +436,7 @@ export function NomenclatureBulkPicker({
               onClick={handleConfirm}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
             >
-              Додати до заявки ({selectedCount})
+              {t("nom.bulkAdd", { count: selectedCount })}
             </Button>
           </div>
         </div>

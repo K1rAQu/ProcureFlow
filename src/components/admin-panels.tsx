@@ -427,10 +427,10 @@ export function DirectoryPanel({
   const handleDelete = async (item: DirectoryRow) => {
     const label = item.nameUk || item.nameRu || item.code;
     const ok = await confirm({
-      title: "Підтвердження видалення",
-      message: `Ви дійсно бажаєте видалити "${label}" (${item.code})? Цю дію не можна буде скасувати.`,
-      confirmText: "Видалити",
-      cancelText: "Скасувати",
+      title: t("admin.deleteConfirmTitle"),
+      message: t("admin.deleteConfirmMsg", { label, code: item.code }),
+      confirmText: t("common.delete"),
+      cancelText: t("common.cancel"),
       tone: "danger",
     });
     if (!ok) return;
@@ -655,9 +655,9 @@ export function SettingsPanel({
           <p className="mb-1 text-xs font-medium text-slate-600">{t("admin.settingRequireFields")}</p>
           <div className="flex flex-wrap gap-2">
             {[
-              { id: "partNumber", label: "Артикул" },
-              { id: "url", label: "Посилання" },
-              { id: "photo", label: "Фото" },
+              { id: "partNumber", label: t("item.partNumber") },
+              { id: "url", label: t("item.url") },
+              { id: "photo", label: t("item.photo") },
             ].map(({ id, label }) => (
               <label key={id} className="flex items-center gap-1.5 rounded-md border border-slate-200 px-2.5 py-1 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer">
                 <input

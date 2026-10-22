@@ -50,10 +50,10 @@ export default async function NewRequestPage({
   return (
     <>
       <PageHeader
-        title={copySource ? `Створення на основі заявки ${copySource.number}` : t("request.new")}
+        title={copySource ? t("request.copyTitle", { number: copySource.number }) : t("request.new")}
         description={
           copySource
-            ? `Створення нової заявки з перенесенням підрозділу, цеху та позицій із ${copySource.number}`
+            ? t("request.copyDesc", { number: copySource.number })
             : t("request.rules")
         }
       />

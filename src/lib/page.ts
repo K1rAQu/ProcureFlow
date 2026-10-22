@@ -9,7 +9,7 @@ import { createTranslator, type Locale } from "@/lib/i18n";
 export type PageContext = {
   user: SessionUser;
   locale: Locale;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
 export async function pageContext(): Promise<PageContext> {

@@ -314,8 +314,8 @@ export function NomenclatureRowActions({
           disabled={busy}
           onClick={async () => {
             const ok = await confirm({
-              title: "Архівування позиції",
-              message: "Перемістити цю номенклатурну позицію в архів? Вона більше не буде пропонуватися у виборі при створенні заявок.",
+              title: t("nom.archiveTitle"),
+              message: t("nom.archiveConfirm"),
               confirmText: t("common.archive"),
               cancelText: t("common.close"),
               tone: "danger",
@@ -523,8 +523,8 @@ export function MergePanel({ currentId }: { currentId: number }) {
                 disabled={busy}
                 onClick={async () => {
                   const ok = await confirm({
-                    title: "Об'єднання номенклатури",
-                    message: `${t("nom.merge")}: #${hit.id} (${hit.name}) → #${currentId}? Позиція #${hit.id} буде переведена у статус об'єднаної, а всі заявки перейдуть на поточну картку.`,
+                    title: t("nom.mergeTitle"),
+                    message: t("nom.mergeConfirm", { sourceId: hit.id, targetId: currentId }),
                     confirmText: t("nom.merge"),
                     cancelText: t("common.close"),
                     tone: "primary",

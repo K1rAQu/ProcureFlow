@@ -198,7 +198,7 @@ export default async function AuditPage({
                             </span>
                           )}
                           <span className="font-medium text-slate-800 text-xs">
-                            {row.userName ?? "Система / Гість"}
+                            {row.userName ?? t("audit.systemUser")}
                           </span>
                         </div>
                       </td>
@@ -252,8 +252,8 @@ export default async function AuditPage({
       {pages > 1 ? (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
           <div>
-            Сторінка <span className="font-semibold text-slate-900">{page}</span> з{" "}
-            <span className="font-semibold text-slate-900">{pages}</span> (показано {rows.length} з {total})
+            {t("common.page")} <span className="font-semibold text-slate-900">{page}</span> {t("common.of")}{" "}
+            <span className="font-semibold text-slate-900">{pages}</span> ({total})
           </div>
           <nav className="flex flex-wrap items-center gap-1.5">
             {page > 1 ? (
@@ -261,7 +261,7 @@ export default async function AuditPage({
                 href={buildUrl({ page: String(page - 1) })}
                 className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-medium text-slate-700 hover:bg-slate-50 transition"
               >
-                ← Попередня
+                ← {t("common.prev")}
               </Link>
             ) : null}
 
@@ -293,7 +293,7 @@ export default async function AuditPage({
                 href={buildUrl({ page: String(page + 1) })}
                 className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 font-medium text-slate-700 hover:bg-slate-50 transition"
               >
-                Наступна →
+                {t("common.next")} →
               </Link>
             ) : null}
           </nav>

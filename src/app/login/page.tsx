@@ -35,7 +35,7 @@ export default async function LoginPage({
           <div className="brand-gradient hidden flex-col justify-between p-10 lg:flex">
             <div>
               <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 text-lg font-bold text-white">
-                ЗК
+                {t("app.logo")}
               </span>
               <h1 className="mt-6 text-2xl font-semibold text-white">{t("app.name")}</h1>
               <p className="mt-2 max-w-sm text-sm text-slate-300">{t("app.subtitle")}</p>

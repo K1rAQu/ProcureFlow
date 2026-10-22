@@ -63,7 +63,7 @@ export function NomenclatureFilters({
               name="q"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Швидкий пошук за назвою, артикулом, кодом 1С або виробником..."
+              placeholder={t("nom.searchPlaceholder")}
               className="pl-9 pr-8 py-2 text-sm w-full"
             />
             <span className="pointer-events-none absolute left-3 top-2.5 text-slate-400">
@@ -74,7 +74,7 @@ export function NomenclatureFilters({
                 type="button"
                 onClick={onClearSearch}
                 className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 rounded p-0.5"
-                title="Очистити пошук"
+                title={t("common.reset")}
               >
                 <IconX className="h-3.5 w-3.5" />
               </button>
@@ -84,7 +84,7 @@ export function NomenclatureFilters({
           <div className="flex items-center gap-2 shrink-0">
             <Button type="submit" variant="primary" size="md">
               <IconSearch className="h-4 w-4" />
-              <span>Знайти</span>
+              <span>{t("common.search")}</span>
             </Button>
 
             <button
@@ -95,10 +95,10 @@ export function NomenclatureFilters({
                   ? "border-[#12325c] bg-blue-50 text-[#12325c]"
                   : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
               }`}
-              title="Розширені фільтри та сортування"
+              title={t("common.filters")}
             >
               <IconFilter className="h-3.5 w-3.5" />
-              <span>Фільтри</span>
+              <span>{t("common.filters")}</span>
               {activeExtraFiltersCount > 0 ? (
                 <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#12325c] px-1 text-[10px] font-bold text-white">
                   {activeExtraFiltersCount}
@@ -111,7 +111,7 @@ export function NomenclatureFilters({
               <Link
                 href={action}
                 className="inline-flex h-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-rose-600 transition"
-                title="Скинути всі фільтри"
+                title={t("common.reset")}
               >
                 <IconX className="h-4 w-4" />
               </Link>
@@ -136,26 +136,26 @@ export function NomenclatureFilters({
             </Field>
 
             {/* Джерело / Мої */}
-            <Field label="Джерело позицій">
+            <Field label={t("nom.filterSource")}>
               <Select name="mine" defaultValue={values.mine ?? "0"}>
-                <option value="0">Весь довідник компанії</option>
-                <option value="1">⭐️ Мої номенклатури (створені/замовлені мною)</option>
+                <option value="0">{t("nom.filterAllCompany")}</option>
+                <option value="1">{t("nom.filterMine")}</option>
               </Select>
             </Field>
 
             {/* Сортування */}
             <Field label={t("common.sort")}>
               <Select name="sort" defaultValue={values.sort ?? "updated"}>
-                <option value="updated">За датою оновлення (спочатку свіжі)</option>
-                <option value="name">{t("item.name")} (за алфавітом А-Я)</option>
-                <option value="usage">{t("nom.usage")} (найпопулярніші)</option>
+                <option value="updated">{t("nom.sortUpdated")}</option>
+                <option value="name">{t("nom.sortName")}</option>
+                <option value="usage">{t("nom.sortUsage")}</option>
               </Select>
             </Field>
 
             {/* Кнопка застосувати */}
             <div className="sm:col-span-2 lg:col-span-3 flex items-end justify-end gap-2 pt-1 border-t border-slate-100 mt-1">
               <Button type="submit" variant="secondary" size="md">
-                <span>Застосувати параметри</span>
+                <span>{t("common.apply")}</span>
               </Button>
             </div>
           </div>

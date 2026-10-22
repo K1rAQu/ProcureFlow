@@ -7,8 +7,9 @@ export const LOCALE_COOKIE = "procurement_locale";
 export type Messages = Record<string, string>;
 
 export const en: Messages = {
-  "app.name": "Procurement Hub",
-  "app.subtitle": "Internal Purchase Request & Supply Chain Management",
+  "app.name": "ProcureFlow",
+  "app.subtitle": "Enterprise Procurement & Supply Chain Management",
+  "app.logo": "PF",
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.create": "Create",
@@ -48,6 +49,21 @@ export const en: Messages = {
   "common.exportCsv": "Export CSV (Excel)",
   "common.board": "Board",
   "common.table": "Table",
+  "common.prev": "Previous",
+  "common.next": "Next",
+  "common.dateFrom": "Date From",
+  "common.dateTo": "Date To",
+
+  // Sorting
+  "sort.createdDesc": "Creation date (newest first)",
+  "sort.updatedDesc": "Update date (recently changed)",
+  "sort.priorityDesc": "Priority (urgent first)",
+  "sort.numberDesc": "Request number",
+  "sort.createdAsc": "Creation date (oldest first)",
+
+  // Filters
+  "filter.allDepartments": "All Categories",
+  "filter.allWorkshops": "All Workshops",
 
   // Navigation
   "nav.dashboard": "Dashboard",
@@ -87,6 +103,7 @@ export const en: Messages = {
   "auth.passwordMismatch": "Passwords do not match",
   "auth.setupDone": "Administrator created, please sign in",
   "auth.noUsersHint": "First launch? Initialize administrator",
+  "auth.setupHint": "Workshops, categories, and units can be configured in admin panel after setup.",
   "auth.sessionTimeoutTitle": "Session Expired",
   "auth.sessionTimeoutDesc": "You have been logged out due to inactivity to protect company data.",
 
@@ -142,11 +159,18 @@ export const en: Messages = {
   "request.parent": "Split from Request",
   "request.children": "Child Requests",
   "request.draftRestored": "Unsaved draft restored from browser",
+  "request.draftSavedAt": "Draft saved at {time}",
   "request.searchPlaceholder": "Search by request #, item name, part #, 1C article, or author...",
+  "request.copyTitle": "Create based on Request {number}",
+  "request.copyDesc": "New purchase request copying category, workshop and items from {number}",
+  "request.copyNoticeTitle": "Created based on Request {number}",
+  "request.copyNoticeDesc": "Category, workshop, priority and all {count} items were copied. You can adjust quantities, add or remove items before submitting.",
+  "request.copyClear": "Clear and create from scratch",
+  "request.allQueueDesc": "Enterprise Purchase Requests Queue",
 
   // Items
   "item.name": "Item Description",
-  "item.partNumber": "Part Number / Articul",
+  "item.partNumber": "Part Number / SKU",
   "item.quantity": "Quantity",
   "item.unit": "Unit",
   "item.price": "Estimated Unit Price",
@@ -158,6 +182,17 @@ export const en: Messages = {
   "item.fromCatalog": "From Catalog",
   "item.searchPlaceholder": "Search by item name, SKU, or part number…",
   "item.newPosition": "New Item (will be added to catalog)",
+  "item.newPositionShort": "New Item",
+  "item.skuShort": "SKU",
+  "item.duplicate": "Duplicate",
+  "item.searchHint": "Start typing to search central catalog",
+  "item.namePlaceholder": "e.g. SKF Deep Groove Ball Bearing 6205-2RSH",
+  "item.partNumberPlaceholder": "Manufacturer Part #",
+  "item.manufacturerPlaceholder": "Brand / Manufacturer",
+  "item.unitHint": "Select or enter custom",
+  "item.commentPlaceholder": "Color, dimensions, specifications or acceptable substitutes (optional)",
+  "item.removePhoto": "Remove photo",
+  "item.specifications": "Item Specifications",
   "item.moveUp": "Move Up",
   "item.moveDown": "Move Down",
   "item.remove": "Remove Item",
@@ -170,6 +205,20 @@ export const en: Messages = {
   "nom.title": "Nomenclature Catalog",
   "nom.card": "Catalog Item",
   "nom.new": "New Catalog Item",
+  "nom.filterSource": "Catalog Scope",
+  "nom.filterAllCompany": "Entire Company Catalog",
+  "nom.filterMine": "⭐️ My Catalog Items",
+  "nom.sortUpdated": "Recently updated",
+  "nom.sortName": "Alphabetical (A-Z)",
+  "nom.sortUsage": "Most ordered",
+  "nom.searchPlaceholder": "Quick search by name, part number, 1C article, or brand...",
+  "nom.bulkTitle": "Bulk Item Selection from Catalog",
+  "nom.bulkDesc": "Select items from your recent orders or entire catalog and specify desired quantities",
+  "nom.bulkMine": "⭐️ My Catalog Items",
+  "nom.bulkAll": "📚 Entire Company Catalog",
+  "nom.bulkSelected": "Selected {count} items",
+  "nom.bulkClear": "Clear Selection",
+  "nom.bulkAdd": "Add to Request ({count})",
   "nom.basCode": "1C Article",
   "nom.basCodeFull": "1C Article / SKU",
   "nom.basCodeHint": "Internal item article or SKU in 1C enterprise accounting system",
@@ -191,6 +240,10 @@ export const en: Messages = {
   "nom.mergeTarget": "Primary Target Card",
   "nom.mergeSource": "Source Card to Merge",
   "nom.mergeDone": "Items merged successfully, purchase history preserved",
+  "nom.archiveTitle": "Archive Catalog Item",
+  "nom.archiveConfirm": "Move this catalog item to the archive? It will no longer appear as an active suggestion when creating requests.",
+  "nom.mergeTitle": "Merge Duplicate Items",
+  "nom.mergeConfirm": "Merge item #{sourceId} into #{targetId}? The secondary item will be marked as merged and its procurement history transferred.",
   "nom.approve": "Approve",
   "nom.images": "Photos",
   "nom.createdBy": "Created By",
@@ -220,6 +273,8 @@ export const en: Messages = {
   "admin.passwordHint": "Leave blank to keep current password",
   "admin.permissions": "Permissions",
   "admin.emptyDirectory": "Directory is empty — add initial entries",
+  "admin.deleteConfirmTitle": "Confirm Deletion",
+  "admin.deleteConfirmMsg": "Are you sure you want to delete \"{label}\" ({code})? This action cannot be undone.",
   "admin.settingEditable": "Statuses where author may edit the request",
   "admin.settingRequireFields": "Required item fields",
   "admin.settingAutoApprove": "Automatically approve user-submitted catalog items",
@@ -240,6 +295,7 @@ export const en: Messages = {
   "audit.allUsers": "All Users",
   "audit.dateFrom": "Date From",
   "audit.dateTo": "Date To",
+  "audit.systemUser": "System / Guest",
 
   // Statuses
   "status.draft": "Draft",
@@ -406,8 +462,9 @@ export const en: Messages = {
 };
 
 export const uk: Messages = {
-  "app.name": "Закупівлі",
-  "app.subtitle": "Внутрішня система заявок на закупівлю",
+  "app.name": "ProcureFlow",
+  "app.subtitle": "Система управління закупівлями підприємства",
+  "app.logo": "PF",
   "common.save": "Зберегти",
   "common.cancel": "Скасувати",
   "common.create": "Створити",
@@ -447,6 +504,21 @@ export const uk: Messages = {
   "common.exportCsv": "Експорт CSV (Excel)",
   "common.board": "Дошка",
   "common.table": "Таблиця",
+  "common.prev": "Попередня",
+  "common.next": "Наступна",
+  "common.dateFrom": "Дата з",
+  "common.dateTo": "Дата по",
+
+  // Сортування
+  "sort.createdDesc": "За датою створення (нові спочатку)",
+  "sort.updatedDesc": "За датою оновлення (нещодавно змінені)",
+  "sort.priorityDesc": "За пріоритетом (термінові спочатку)",
+  "sort.numberDesc": "За номером заявки",
+  "sort.createdAsc": "За датою створення (старі спочатку)",
+
+  // Фільтри
+  "filter.allDepartments": "Усі напрями",
+  "filter.allWorkshops": "Усі цехи",
 
   // Навігація
   "nav.dashboard": "Головна",
@@ -486,6 +558,7 @@ export const uk: Messages = {
   "auth.passwordMismatch": "Паролі не збігаються",
   "auth.setupDone": "Адміністратора створено, виконайте вхід",
   "auth.noUsersHint": "Перший запуск? Створіть адміністратора",
+  "auth.setupHint": "Довідники виробничих цехів та одиниць виміру можна налаштувати в адмінці після входу.",
   "auth.sessionTimeoutTitle": "Сесію завершено",
   "auth.sessionTimeoutDesc": "Вихід виконано автоматично через неактивність для захисту ваших даних.",
 
@@ -541,7 +614,14 @@ export const uk: Messages = {
   "request.parent": "Виділена із заявки",
   "request.children": "Дочірні заявки",
   "request.draftRestored": "Відновлено незбережену чернетку",
+  "request.draftSavedAt": "Чернетка збережена о {time}",
   "request.searchPlaceholder": "Швидкий пошук за № заявки, назвою, артикулом, артикулом 1С або автором...",
+  "request.copyTitle": "Створення на основі заявки {number}",
+  "request.copyDesc": "Створення нової заявки з перенесенням підрозділу, цеху та позицій із {number}",
+  "request.copyNoticeTitle": "Створення на основі заявки {number}",
+  "request.copyNoticeDesc": "Підрозділ, цех, пріоритет та всі {count} поз. скопійовано. Ви можете скоригувати кількість, додати чи видалити позиції перед відправкою.",
+  "request.copyClear": "Очистити й створити з нуля",
+  "request.allQueueDesc": "Загальна черга заявок підприємства",
 
   // Позиції
   "item.name": "Найменування",
@@ -557,6 +637,17 @@ export const uk: Messages = {
   "item.fromCatalog": "З номенклатури",
   "item.searchPlaceholder": "Почніть вводити найменування або артикул…",
   "item.newPosition": "Нова позиція (буде додана до номенклатури)",
+  "item.newPositionShort": "Нова позиція",
+  "item.skuShort": "арт",
+  "item.duplicate": "Дублювати",
+  "item.searchHint": "Почніть вводити для пошуку в довіднику номенклатури",
+  "item.namePlaceholder": "Наприклад: Підшипник кульковий SKF 6205-2RSH",
+  "item.partNumberPlaceholder": "Артикул виробника",
+  "item.manufacturerPlaceholder": "Бренд / Завод",
+  "item.unitHint": "Оберіть або введіть",
+  "item.commentPlaceholder": "Уточнення розміру, кольору або аналогів (необов'язково)",
+  "item.removePhoto": "Видалити фото",
+  "item.specifications": "Специфікація товарів та матеріалів",
   "item.moveUp": "Вище",
   "item.moveDown": "Нижче",
   "item.remove": "Видалити позицію",
@@ -569,6 +660,20 @@ export const uk: Messages = {
   "nom.title": "Номенклатура",
   "nom.card": "Картка номенклатури",
   "nom.new": "Нова позиція",
+  "nom.filterSource": "Джерело позицій",
+  "nom.filterAllCompany": "Весь довідник компанії",
+  "nom.filterMine": "⭐️ Мої номенклатури (створені/замовлені мною)",
+  "nom.sortUpdated": "За датою оновлення (спочатку свіжі)",
+  "nom.sortName": "За алфавітом (А-Я)",
+  "nom.sortUsage": "За популярністю (найчастіше замовляли)",
+  "nom.searchPlaceholder": "Швидкий пошук за назвою, артикулом, кодом 1С або виробником...",
+  "nom.bulkTitle": "Масове додавання позицій із номенклатури",
+  "nom.bulkDesc": "Оберіть позиції з довідника або ваших попередніх замовлень і одразу вкажіть потрібну кількість",
+  "nom.bulkMine": "⭐️ Мої номенклатури",
+  "nom.bulkAll": "📚 Весь довідник компанії",
+  "nom.bulkSelected": "Обрано {count} поз.",
+  "nom.bulkClear": "Очистити вибір",
+  "nom.bulkAdd": "Додати до заявки ({count})",
   "nom.basCode": "Артикул 1С",
   "nom.basCodeFull": "Артикул / Код 1С",
   "nom.basCodeHint": "Внутрішній артикул або код в обліковій системі 1С",
@@ -590,6 +695,10 @@ export const uk: Messages = {
   "nom.mergeTarget": "Основна картка",
   "nom.mergeSource": "Приєднувана картка",
   "nom.mergeDone": "Картки об'єднано, історію закупівель збережено",
+  "nom.archiveTitle": "Архівування позиції",
+  "nom.archiveConfirm": "Перемістити цю номенклатурну позицію в архів? Вона більше не буде пропонуватися у виборі при створенні заявок.",
+  "nom.mergeTitle": "Об'єднання дублікатів",
+  "nom.mergeConfirm": "Об'єднати позицію #{sourceId} з #{targetId}? Другорядна картка буде позначена як об'єднана, а вся історія замовлень збережеться.",
   "nom.approve": "Підтвердити",
   "nom.images": "Фотографії",
   "nom.createdBy": "Створив",
@@ -619,6 +728,8 @@ export const uk: Messages = {
   "admin.passwordHint": "Залиште порожнім, щоб не змінювати",
   "admin.permissions": "Права",
   "admin.emptyDirectory": "Довідник порожній — додайте записи",
+  "admin.deleteConfirmTitle": "Підтвердження видалення",
+  "admin.deleteConfirmMsg": "Ви дійсно бажаєте видалити \"{label}\" ({code})? Цю дію не можна буде скасувати.",
   "admin.settingEditable": "Статуси, в яких автор може редагувати заявку",
   "admin.settingRequireFields": "Обов'язкові поля позиції",
   "admin.settingAutoApprove": "Автоматично публікувати нову номенклатуру користувачів",
@@ -639,6 +750,7 @@ export const uk: Messages = {
   "audit.allUsers": "Усі користувачі",
   "audit.dateFrom": "Дата з",
   "audit.dateTo": "Дата по",
+  "audit.systemUser": "Система / Гість",
 
   // Статуси
   "status.draft": "Чернетка",
@@ -868,6 +980,44 @@ const EN_DIRECTORY_MAP: Record<string, string> = {
   roll: "roll",
 };
 
+const EN_NAME_FALLBACKS: Record<string, string> = {
+  "імпорт": "Import Procurement",
+  "импорт": "Import Procurement",
+  "україна": "Domestic Procurement",
+  "украина": "Domestic Procurement",
+  "внутрішній": "Domestic Procurement",
+  "it та зв'язок": "IT & Telecommunications",
+  "it и связи": "IT & Telecommunications",
+  "мтр та розхідники": "MRO & Industrial Supplies",
+  "тоир и снабжение": "MRO & Industrial Supplies",
+  "цех збирання №1": "Assembly Shop #1",
+  "сборочный цех №1": "Assembly Shop #1",
+  "цех верстатів з чпк": "CNC Machining Shop",
+  "цех станков с чпу": "CNC Machining Shop",
+  "цех автоматики та електроніки": "Electronics & Automation Shop",
+  "цех электроники и автоматики": "Electronics & Automation Shop",
+  "ремонтно-механічний відділ": "Maintenance & Repair Unit",
+  "ремонтно-механический отдел": "Maintenance & Repair Unit",
+  "центральний склад": "Central Warehouse",
+  "центральный склад": "Central Warehouse",
+  "адміністратор": "Administrator",
+  "администратор": "Administrator",
+  "закупник": "Procurement Manager",
+  "закупщик": "Procurement Manager",
+  "начальник цеху / майстер": "Shop Floor Supervisor",
+  "начальник цеха / мастер": "Shop Floor Supervisor",
+  "ініціатор": "Requester",
+  "инициатор": "Requester",
+  "шт": "pcs",
+  "м": "m",
+  "кг": "kg",
+  "л": "L",
+  "компл": "set",
+  "пач": "pack",
+  "ящ": "box",
+  "рул": "roll",
+};
+
 /** Локалізована назва довідника */
 export function localizedName(
   locale: string | null | undefined,
@@ -880,6 +1030,22 @@ export function localizedName(
   if (locale === "en") {
     if (entity.code && EN_DIRECTORY_MAP[entity.code.toLowerCase()]) {
       return EN_DIRECTORY_MAP[entity.code.toLowerCase()];
+    }
+    const ukKey = (entity.nameUk || entity.name || "").trim().toLowerCase();
+    if (ukKey && EN_NAME_FALLBACKS[ukKey]) {
+      return EN_NAME_FALLBACKS[ukKey];
+    }
+    const ruKey = (entity.nameRu || "").trim().toLowerCase();
+    if (ruKey && EN_NAME_FALLBACKS[ruKey]) {
+      return EN_NAME_FALLBACKS[ruKey];
+    }
+    for (const [k, v] of Object.entries(EN_NAME_FALLBACKS)) {
+      if (
+        (entity.nameUk && entity.nameUk.toLowerCase().includes(k)) ||
+        (entity.nameRu && entity.nameRu.toLowerCase().includes(k))
+      ) {
+        return v;
+      }
     }
     return entity.name || entity.nameUk || entity.nameRu || "—";
   }

@@ -5,8 +5,11 @@ import { DEFAULT_LOCALE, isLocale, LOCALE_COOKIE } from "@/lib/i18n";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Система заявок на закупівлю",
-  description: "Внутрішня система заявок на закупівлю комплектуючих та матеріалів",
+  title: {
+    default: "ProcureFlow · Enterprise Procurement Management",
+    template: "%s | ProcureFlow",
+  },
+  description: "Internal purchase requisition, approval workflow & supply-chain management system",
   robots: {
     index: false,
     follow: false,

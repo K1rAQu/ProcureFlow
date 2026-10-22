@@ -1,4 +1,4 @@
-# 📦 Procurement Flow — Enterprise Procurement Management System
+# 📦 ProcureFlow — Enterprise Procurement Management System
 
 <div align="center">
 
@@ -20,9 +20,9 @@
 
 ## 🎯 Overview
 
-**Procurement Flow** streamlines the entire internal procurement lifecycle — from an engineer requisitioning a sensor on the shop floor to approval, commercial quotation, supplier PO issuance, and warehouse receipt. 
+**ProcureFlow** streamlines the entire internal procurement lifecycle — from an engineer requisitioning a sensor on the shop floor to approval, commercial quotation, supplier PO issuance, and warehouse receipt. 
 
-Unlike bloated enterprise ERPs, Procurement Flow is **blazing fast, lightweight, and requires zero external database servers** (runs on embedded SQLite / LibSQL with automated schema migrations).
+Unlike bloated enterprise ERPs, ProcureFlow is **blazing fast, lightweight, and requires zero external database servers** (runs on embedded SQLite / LibSQL with automated schema migrations).
 
 ### ✨ Core Features
 

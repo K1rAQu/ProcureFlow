@@ -11,6 +11,7 @@ import {
 } from "react";
 import { Button } from "./ui";
 import { IconAlertTriangle, IconHelpCircle, IconTrash, IconX } from "./icons";
+import { useT } from "./i18n-provider";
 
 export type ConfirmOptions = {
   title?: string;
@@ -29,6 +30,7 @@ export function useConfirm() {
 }
 
 export function ConfirmProvider({ children }: { children: ReactNode }) {
+  const t = useT();
   const [dialog, setDialog] = useState<(ConfirmOptions & { isOpen: boolean }) | null>(null);
   const resolverRef = useRef<((value: boolean) => void) | null>(null);
 
@@ -114,7 +116,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
 
                 <div className="min-w-0 flex-1 pt-0.5">
                   <h3 className="text-base font-bold text-slate-900">
-                    {dialog.title ?? (tone === "danger" ? "Підтвердження дії" : "Підтвердження")}
+                    {dialog.title ?? (tone === "danger" ? t("common.delete") : t("common.confirm"))}
                   </h3>
                   <div className="mt-2 text-xs leading-relaxed text-slate-600 whitespace-pre-wrap">
                     {dialog.message}
@@ -125,7 +127,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                   type="button"
                   onClick={() => handleClose(false)}
                   className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-                  title="Закрити"
+                  title={t("common.close")}
                 >
                   <IconX className="h-4 w-4" />
                 </button>
@@ -141,7 +143,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 onClick={() => handleClose(false)}
                 className="font-medium"
               >
-                {dialog.cancelText ?? "Скасувати"}
+                {dialog.cancelText ?? t("common.cancel")}
               </Button>
               <Button
                 type="button"
@@ -151,7 +153,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 onClick={() => handleClose(true)}
                 className="font-semibold shadow-xs"
               >
-                {dialog.confirmText ?? (tone === "danger" ? "Видалити" : "Підтвердити")}
+                {dialog.confirmText ?? (tone === "danger" ? t("common.delete") : t("common.confirm"))}
               </Button>
             </div>
           </div>

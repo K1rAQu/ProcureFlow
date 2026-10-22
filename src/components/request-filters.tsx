@@ -93,7 +93,7 @@ export function RequestFilters({
                 type="button"
                 onClick={onClearSearch}
                 className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 rounded p-0.5"
-                title="Очистити пошук"
+                title={t("common.reset")}
               >
                 <IconX className="h-3.5 w-3.5" />
               </button>
@@ -103,7 +103,7 @@ export function RequestFilters({
           <div className="flex items-center gap-2 shrink-0">
             <Button type="submit" variant="primary" size="md">
               <IconSearch className="h-4 w-4" />
-              <span>Знайти</span>
+              <span>{t("common.search")}</span>
             </Button>
 
             <button
@@ -114,10 +114,10 @@ export function RequestFilters({
                   ? "border-[#12325c] bg-blue-50 text-[#12325c]"
                   : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
               }`}
-              title="Розширені фільтри та сортування"
+              title={t("common.filters")}
             >
               <IconFilter className="h-3.5 w-3.5" />
-              <span>Фільтри</span>
+              <span>{t("common.filters")}</span>
               {activeExtraFiltersCount > 0 ? (
                 <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#12325c] px-1 text-[10px] font-bold text-white">
                   {activeExtraFiltersCount}
@@ -130,7 +130,7 @@ export function RequestFilters({
               <Link
                 href={action}
                 className="inline-flex h-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-rose-600 transition"
-                title="Скинути всі фільтри"
+                title={t("common.reset")}
               >
                 <IconX className="h-4 w-4" />
               </Link>
@@ -142,20 +142,20 @@ export function RequestFilters({
         {expanded ? (
           <div className="animate-fade-in border-t border-slate-100 pt-3 mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-xs">
             {/* Сортування */}
-            <Field label="Сортування заявок">
+            <Field label={t("common.sort")}>
               <Select name="sort" defaultValue={values.sort ?? "created_desc"}>
-                <option value="created_desc">За датою створення (нові спочатку)</option>
-                <option value="updated_desc">За датою оновлення (нещодавно змінені)</option>
-                <option value="priority_desc">За пріоритетом (термінові спочатку)</option>
-                <option value="number_desc">За номером заявки</option>
-                <option value="created_asc">За датою створення (старі спочатку)</option>
+                <option value="created_desc">{t("sort.createdDesc")}</option>
+                <option value="updated_desc">{t("sort.updatedDesc")}</option>
+                <option value="priority_desc">{t("sort.priorityDesc")}</option>
+                <option value="number_desc">{t("sort.numberDesc")}</option>
+                <option value="created_asc">{t("sort.createdAsc")}</option>
               </Select>
             </Field>
 
             {/* Напрям */}
             <Field label={t("request.department")}>
               <Select name="departmentId" defaultValue={values.departmentId ?? ""}>
-                <option value="">Усі напрями</option>
+                <option value="">{t("filter.allDepartments")}</option>
                 {departments.map((department) => (
                   <option key={department.id} value={department.id}>
                     {localizedName(locale, department)}
@@ -167,7 +167,7 @@ export function RequestFilters({
             {/* Цех */}
             <Field label={t("request.workshop")}>
               <Select name="workshopId" defaultValue={values.workshopId ?? ""}>
-                <option value="">Усі цехи</option>
+                <option value="">{t("filter.allWorkshops")}</option>
                 {workshops.map((workshop) => (
                   <option key={workshop.id} value={workshop.id}>
                     {localizedName(locale, workshop)}
@@ -213,18 +213,18 @@ export function RequestFilters({
             </Field>
 
             {/* Дати */}
-            <Field label="Дата з">
+            <Field label={t("common.dateFrom")}>
               <Input type="date" name="dateFrom" defaultValue={values.dateFrom ?? ""} />
             </Field>
 
-            <Field label="Дата по">
+            <Field label={t("common.dateTo")}>
               <Input type="date" name="dateTo" defaultValue={values.dateTo ?? ""} />
             </Field>
 
             {/* Кнопка застосувати в панелі */}
             <div className="sm:col-span-2 flex items-end justify-end gap-2 pt-1">
               <Button type="submit" variant="secondary" size="md">
-                <span>Застосувати параметри</span>
+                <span>{t("common.apply")}</span>
               </Button>
             </div>
           </div>
