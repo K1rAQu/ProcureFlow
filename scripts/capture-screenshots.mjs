@@ -32,6 +32,7 @@ async function captureAll() {
     { name: "dashboard.png", path: "/", delay: 2000 },
     { name: "kanban-board.png", path: "/all-requests", delay: 2000 },
     { name: "table-view.png", path: "/all-requests?view=table", delay: 2000 },
+    { name: "requests-filter.png", path: "/requests?dateFrom=2026-10-01", delay: 2000 },
     { name: "request-detail.png", path: `/requests/${firstReqId}`, delay: 2500 },
     { name: "new-request.png", path: "/requests/new", delay: 1800 },
     { name: "nomenclature.png", path: "/nomenclature", delay: 2000 },

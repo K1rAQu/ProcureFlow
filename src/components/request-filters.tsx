@@ -139,7 +139,7 @@ export function RequestFilters({
 
         {/* Розкривна панель додаткових параметрів */}
         {expanded ? (
-          <div className="animate-fade-in border-t border-slate-100 pt-3 mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-xs">
+          <div className="animate-fade-in border-t border-slate-100 pt-3 mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-xs">
             {/* Сортування */}
             <Field label={t("common.sort")}>
               <Select name="sort" defaultValue={values.sort ?? "created_desc"}>
@@ -184,11 +184,31 @@ export function RequestFilters({
               <Input type="date" name="dateTo" defaultValue={values.dateTo ?? ""} />
             </Field>
 
-            {/* Кнопка застосувати в панелі */}
-            <div className="sm:col-span-2 flex items-end justify-end gap-2 pt-1">
-              <Button type="submit" variant="secondary" size="md">
-                <span>{t("common.apply")}</span>
-              </Button>
+            {/* Кнопки дій у панелі (Застосувати та Скинути) */}
+            <div className="flex flex-col justify-end">
+              <span className="mb-1.5 hidden text-xs font-medium text-transparent select-none sm:block" aria-hidden="true">
+                &nbsp;
+              </span>
+              <div className="flex items-center justify-end gap-2">
+                {hasAnyFilter ? (
+                  <Link
+                    href={action}
+                    className="inline-flex h-[38px] items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 text-xs font-medium text-slate-700 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 transition shadow-2xs"
+                    title={t("common.reset")}
+                  >
+                    <IconX className="h-3.5 w-3.5 text-slate-400" />
+                    <span>{t("common.reset")}</span>
+                  </Link>
+                ) : null}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  className="h-[38px] px-6 shadow-2xs font-semibold cursor-pointer"
+                >
+                  <span>{t("common.apply")}</span>
+                </Button>
+              </div>
             </div>
           </div>
         ) : null}
