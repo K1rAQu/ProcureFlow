@@ -246,6 +246,7 @@ export const settingsSchema = z.object({
   autoApproveNomenclature: z.boolean().optional(),
   maxUploadMb: z.number().int().min(1).max(50).optional(),
   sessionTimeoutMinutes: z.number().int().min(0).max(1440).optional(),
+  requireUserApproval: z.boolean().optional(),
 });
 
 export type RequestPayload = z.infer<typeof requestPayloadSchema>;

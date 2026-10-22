@@ -37,16 +37,39 @@ test("localizedName dynamically maps directory codes for English and Ukrainian",
   assert.equal(localizedName("uk", workshop), "Цех збирання №1");
 });
 
-test("settingsSchema validates defaultLocale correctly", async () => {
+test("settingsSchema validates defaultLocale and requireUserApproval correctly", async () => {
   const { settingsSchema } = await import("../src/lib/validation.ts");
-  const parsedEn = settingsSchema.parse({ defaultLocale: "en" });
+  const parsedEn = settingsSchema.parse({ defaultLocale: "en", requireUserApproval: true });
   assert.equal(parsedEn.defaultLocale, "en");
+  assert.equal(parsedEn.requireUserApproval, true);
 
-  const parsedUk = settingsSchema.parse({ defaultLocale: "uk" });
+  const parsedUk = settingsSchema.parse({ defaultLocale: "uk", requireUserApproval: false });
   assert.equal(parsedUk.defaultLocale, "uk");
+  assert.equal(parsedUk.requireUserApproval, false);
 
   assert.throws(() => {
     settingsSchema.parse({ defaultLocale: "de" });
   });
+});
+
+test("pending approval and activation keys exist in both en and uk", () => {
+  const requiredKeys = [
+    "auth.pendingApprovalTitle",
+    "auth.pendingApprovalSubtitle",
+    "auth.pendingNoticeTitle",
+    "auth.pendingApprovalNotice",
+    "auth.checkStatus",
+    "admin.statusPending",
+    "admin.activate",
+    "admin.activateConfirmTitle",
+    "admin.activateConfirmMsg",
+    "admin.settingRequireApproval",
+    "admin.settingRequireApprovalHint",
+  ];
+
+  for (const key of requiredKeys) {
+    assert.ok(en[key], `Missing en key: ${key}`);
+    assert.ok(uk[key], `Missing uk key: ${key}`);
+  }
 });
 

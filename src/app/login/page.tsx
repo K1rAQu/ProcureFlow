@@ -14,8 +14,11 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const user = await getCurrentUser();
-  if (user) redirect("/");
+  const user = await getCurrentUser({ allowInactive: true });
+  if (user) {
+    if (user.isActive) redirect("/");
+    else redirect("/pending-approval");
+  }
 
   const initialized = await isSystemInitialized();
   if (!initialized) redirect("/setup");

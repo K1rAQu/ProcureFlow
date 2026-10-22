@@ -11,8 +11,9 @@ import { getSettings } from "@/lib/settings";
 export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const user = await getCurrentUser();
+  const user = await getCurrentUser({ allowInactive: true });
   if (!user) redirect("/login");
+  if (!user.isActive) redirect("/pending-approval");
 
   const locale = await resolveLocale(user);
   const messages = getMessages(locale);

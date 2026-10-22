@@ -8,6 +8,7 @@ import { RequestsKanban } from "@/components/requests-kanban";
 import { RefreshControl } from "@/components/refresh-control";
 import { ViewModeToggle } from "@/components/view-mode-toggle";
 import { ExportCsvButton } from "@/components/export-button";
+import { CategoryFilterSelect } from "@/components/category-filter-select";
 import { listRequests } from "@/lib/requests-service";
 import { loadDirectories, pageContext, readNumberParam, readParam } from "@/lib/page";
 import { localizedName } from "@/lib/i18n";
@@ -127,31 +128,39 @@ export default async function MyRequestsPage({
         {/* Напрями закупівлі */}
         {departments.length > 0 ? (
           <>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <Link
-                href={buildUrl({ departmentId: undefined, page: "1" })}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                  !activeDepartment
-                    ? "bg-[#12325c] text-white shadow-2xs"
-                    : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                {t("filter.allDepartments")}
-              </Link>
-              {departments.map((department) => (
+            {departments.length > 4 ? (
+              <CategoryFilterSelect
+                departments={departments.map((d) => ({ id: d.id, name: localizedName(locale, d) }))}
+                activeDepartmentId={activeDepartment}
+                allLabel={t("filter.allDepartments")}
+              />
+            ) : (
+              <div className="flex flex-wrap items-center gap-1.5">
                 <Link
-                  key={department.id}
-                  href={buildUrl({ departmentId: String(department.id), page: "1" })}
+                  href={buildUrl({ departmentId: undefined, page: "1" })}
                   className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-                    activeDepartment === String(department.id)
+                    !activeDepartment
                       ? "bg-[#12325c] text-white shadow-2xs"
                       : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
                   }`}
                 >
-                  {localizedName(locale, department)}
+                  {t("filter.allDepartments")}
                 </Link>
-              ))}
-            </div>
+                {departments.map((department) => (
+                  <Link
+                    key={department.id}
+                    href={buildUrl({ departmentId: String(department.id), page: "1" })}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                      activeDepartment === String(department.id)
+                        ? "bg-[#12325c] text-white shadow-2xs"
+                        : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    {localizedName(locale, department)}
+                  </Link>
+                ))}
+              </div>
+            )}
             <div className="hidden lg:block h-6 w-px bg-slate-300 mx-1 shrink-0" aria-hidden="true" />
           </>
         ) : null}

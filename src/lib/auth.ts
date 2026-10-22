@@ -90,7 +90,7 @@ export function getClientIp(headerList: Headers): string | null {
   return headerList.get("x-real-ip")?.slice(0, 60) ?? null;
 }
 
-export async function getCurrentUser(): Promise<SessionUser | null> {
+export async function getCurrentUser(options?: { allowInactive?: boolean }): Promise<SessionUser | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
@@ -117,7 +117,8 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     .limit(1);
 
   const row = rows[0];
-  if (!row || !row.isActive) return null;
+  if (!row) return null;
+  if (!row.isActive && !options?.allowInactive) return null;
   return {
     ...row,
     permissions: Array.isArray(row.permissions) ? row.permissions : [],

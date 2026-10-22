@@ -52,7 +52,12 @@ export function LoginForm({
         body: JSON.stringify({ email: "admin@google.com", fullName: "Google Administrator" }),
       });
       if (response.ok) {
-        router.replace("/");
+        const data = (await response.json().catch(() => ({}))) as { pendingApproval?: boolean };
+        if (data.pendingApproval) {
+          router.replace("/pending-approval");
+        } else {
+          router.replace("/");
+        }
         router.refresh();
         return;
       }
@@ -129,7 +134,12 @@ export function SetupForm({ isGoogleConfigured = false }: { isGoogleConfigured?:
         body: JSON.stringify({ email: "admin@google.com", fullName: "Google Головний Адміністратор" }),
       });
       if (response.ok) {
-        router.replace("/");
+        const data = (await response.json().catch(() => ({}))) as { pendingApproval?: boolean };
+        if (data.pendingApproval) {
+          router.replace("/pending-approval");
+        } else {
+          router.replace("/");
+        }
         router.refresh();
         return;
       }

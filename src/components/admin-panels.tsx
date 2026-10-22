@@ -99,10 +99,13 @@ export function UsersPanel({
       });
       if (!ok) return;
     } else {
+      const isPending = !targetUser.lastLoginAt;
       const ok = await confirm({
-        title: t("admin.unblockConfirmTitle"),
-        message: t("admin.unblockConfirmMsg", { name: targetUser.fullName, email: targetUser.email }),
-        confirmText: t("admin.unblock"),
+        title: isPending ? t("admin.activateConfirmTitle") : t("admin.unblockConfirmTitle"),
+        message: isPending
+          ? t("admin.activateConfirmMsg", { name: targetUser.fullName, email: targetUser.email })
+          : t("admin.unblockConfirmMsg", { name: targetUser.fullName, email: targetUser.email }),
+        confirmText: isPending ? t("admin.activate") : t("admin.unblock"),
         cancelText: t("common.cancel"),
         tone: "primary",
       });
@@ -277,6 +280,11 @@ export function UsersPanel({
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                         {t("admin.active")}
                       </span>
+                    ) : !user.lastLoginAt ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-600/20">
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        {t("admin.statusPending")}
+                      </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20">
                         <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
@@ -309,11 +317,15 @@ export function UsersPanel({
                         variant="secondary"
                         disabled={busy}
                         onClick={() => handleToggleBlock(user, true)}
-                        className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 ring-1 ring-emerald-300 shadow-2xs"
-                        title={t("admin.unblock")}
+                        className={`inline-flex items-center gap-1.5 shadow-2xs ${
+                          !user.lastLoginAt
+                            ? "bg-emerald-600 text-white hover:bg-emerald-700 ring-1 ring-emerald-700"
+                            : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 ring-1 ring-emerald-300"
+                        }`}
+                        title={!user.lastLoginAt ? t("admin.activate") : t("admin.unblock")}
                       >
-                        <IconUnlock className="h-3.5 w-3.5 text-emerald-600" />
-                        <span>{t("admin.unblock")}</span>
+                        <IconUnlock className={`h-3.5 w-3.5 ${!user.lastLoginAt ? "text-white" : "text-emerald-600"}`} />
+                        <span>{!user.lastLoginAt ? t("admin.activate") : t("admin.unblock")}</span>
                       </Button>
                     )}
                   </td>
@@ -673,6 +685,7 @@ export function SettingsPanel({
     autoApproveNomenclature: boolean;
     maxUploadMb: number;
     sessionTimeoutMinutes?: number;
+    requireUserApproval?: boolean;
   };
 }) {
   const t = useT();
@@ -681,6 +694,7 @@ export function SettingsPanel({
     ...settings,
     defaultLocale: settings.defaultLocale ?? "en",
     sessionTimeoutMinutes: settings.sessionTimeoutMinutes ?? 30,
+    requireUserApproval: settings.requireUserApproval ?? true,
   });
   const [saved, setSaved] = useState(false);
 
@@ -720,6 +734,26 @@ export function SettingsPanel({
               🇺🇦 {t("admin.settingLangUk")}
             </label>
           </div>
+        </div>
+
+        {/* Require Admin Approval for New Users */}
+        <div className="rounded-lg border border-slate-200 bg-slate-50/70 p-3.5">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={state.requireUserApproval}
+              onChange={(event) => setState((s) => ({ ...s, requireUserApproval: event.target.checked }))}
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-[#12325c] focus:ring-[#12325c]"
+            />
+            <div>
+              <span className="block text-xs font-semibold text-slate-800">
+                {t("admin.settingRequireApproval")}
+              </span>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                {t("admin.settingRequireApprovalHint")}
+              </p>
+            </div>
+          </label>
         </div>
 
         <div>

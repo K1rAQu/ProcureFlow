@@ -12,6 +12,7 @@ export type SystemSettings = {
   autoApproveNomenclature: boolean;
   maxUploadMb: number;
   sessionTimeoutMinutes: number;
+  requireUserApproval: boolean;
 };
 
 export const DEFAULT_SETTINGS: SystemSettings = {
@@ -21,6 +22,7 @@ export const DEFAULT_SETTINGS: SystemSettings = {
   autoApproveNomenclature: true,
   maxUploadMb: 8,
   sessionTimeoutMinutes: 30,
+  requireUserApproval: true,
 };
 
 const SETTINGS_KEY = "system";

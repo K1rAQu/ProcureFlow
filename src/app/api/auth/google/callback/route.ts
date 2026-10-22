@@ -7,6 +7,7 @@ import { createSession, isCorporateEmailAllowed } from "@/lib/auth";
 import { writeAudit } from "@/lib/audit";
 import { countUsers, ensureCoreData } from "@/lib/bootstrap";
 import { exchangeGoogleCode, getGoogleRedirectUri, getGoogleUserProfile } from "@/lib/google-auth";
+import { getSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,8 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL(`/login?error=corporate_domain_required`, request.url));
     }
 
+    const settings = await getSettings();
+
     // Перевіряємо існуючого користувача
     const [existing] = await db
       .select()
@@ -58,16 +61,12 @@ export async function GET(request: Request) {
       .limit(1);
 
     if (existing) {
-      if (!existing.isActive) {
-        return NextResponse.redirect(new URL(`/login?error=user_inactive`, request.url));
-      }
-
       await db
         .update(users)
         .set({
           googleId: profile.sub,
           avatarUrl: profile.picture ?? existing.avatarUrl,
-          lastLoginAt: new Date(),
+          lastLoginAt: existing.isActive ? new Date() : existing.lastLoginAt,
           updatedAt: new Date(),
         })
         .where(eq(users.id, existing.id));
@@ -79,8 +78,12 @@ export async function GET(request: Request) {
         action: "auth.google_login",
         entityType: "user",
         entityId: existing.id,
-        summary: `Вхід через Google: ${normalizedEmail}`,
+        summary: `Вхід через Google: ${normalizedEmail}${existing.isActive ? "" : " [очікує активації]"}`,
       });
+
+      if (!existing.isActive) {
+        return NextResponse.redirect(new URL("/pending-approval", request.url));
+      }
 
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -98,6 +101,9 @@ export async function GET(request: Request) {
       roleId = userRole?.id ?? 1;
     }
 
+    // Перший користувач (адмін) завжди активний; решта регулюється налаштуванням requireUserApproval
+    const isActive = isFirstUser || !settings.requireUserApproval;
+
     const [created] = await db
       .insert(users)
       .values({
@@ -106,9 +112,9 @@ export async function GET(request: Request) {
         googleId: profile.sub,
         avatarUrl: profile.picture ?? null,
         roleId,
-        locale: "uk",
-        isActive: true,
-        lastLoginAt: new Date(),
+        locale: settings.defaultLocale ?? "uk",
+        isActive,
+        lastLoginAt: isActive ? new Date() : null,
       })
       .returning({ id: users.id });
 
@@ -126,11 +132,14 @@ export async function GET(request: Request) {
         action: "auth.google_register",
         entityType: "user",
         entityId: created.id,
-        summary: `Реєстрація нового користувача через Google: ${normalizedEmail}`,
+        summary: `Реєстрація нового користувача через Google: ${normalizedEmail}${isActive ? "" : " [очікує активації]"}`,
       });
     }
 
     await createSession(created.id);
+    if (!isActive) {
+      return NextResponse.redirect(new URL("/pending-approval", request.url));
+    }
     return NextResponse.redirect(new URL("/", request.url));
   } catch (err) {
     console.error("Google OAuth error:", err);
