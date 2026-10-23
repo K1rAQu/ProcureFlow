@@ -9,8 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "seed": "node scripts/seed-clean-demo.mjs",
-    "screenshots": "node scripts/capture-screenshots.mjs"
+    "seed": "node scripts/seed-clean-demo.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

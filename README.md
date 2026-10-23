@@ -299,9 +299,6 @@ npm run build
 
 # Re-seed clean demo database
 npm run seed
-
-# Capture fresh screenshots of all application views
-npm run screenshots
 ```
 
 ---
