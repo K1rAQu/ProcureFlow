@@ -22,6 +22,11 @@ export const INITIAL_UNITS = [
 export async function ensureCoreData(): Promise<void> {
   await initSqliteTables(client);
 
+  const existing = await db.select({ id: roles.id }).from(roles).limit(1);
+  if (existing.length > 0) {
+    return;
+  }
+
   for (const preset of ROLE_PRESETS) {
     await db
       .insert(roles)

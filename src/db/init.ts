@@ -229,6 +229,15 @@ export async function initSqliteTables(client: Client): Promise<void> {
 
   initPromise = (async () => {
     try {
+      const check = await client.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users' LIMIT 1;");
+      if (check.rows.length > 0) {
+        return;
+      }
+    } catch {
+      // Fall through to table creation
+    }
+
+    try {
       await client.execute("PRAGMA journal_mode = WAL;");
       await client.execute("PRAGMA busy_timeout = 10000;");
     } catch {
