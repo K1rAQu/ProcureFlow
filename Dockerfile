@@ -13,6 +13,7 @@ RUN npm ci
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN mkdir -p /app/public
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 RUN npm run build
@@ -28,8 +29,8 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Create persistent storage directories
-RUN mkdir -p /app/data /app/var/uploads && \
-    chown -R nextjs:nodejs /app/data /app/var/uploads
+RUN mkdir -p /app/public /app/data /app/var/uploads && \
+    chown -R nextjs:nodejs /app/public /app/data /app/var/uploads
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
