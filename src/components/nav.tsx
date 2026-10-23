@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { cn, formatRelativeTime, initials } from "@/lib/format";
 import { IconLogout } from "./icons";
 import { useLocale, useT } from "./i18n-provider";
-import { LOCALE_COOKIE, type Locale } from "@/lib/i18n";
+import { LOCALE_COOKIE, localizeNotification, type Locale } from "@/lib/i18n";
 
 export type NavItem = { href: string; labelKey: string; icon: string };
 
@@ -391,39 +391,42 @@ export function NotificationsBell({
                 <p className="mt-1.5 text-xs text-slate-500">{t("notif.empty")}</p>
               </div>
             ) : (
-              items.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.requestId ? `/requests/${item.requestId}` : "#"}
-                  onClick={() => handleItemClick(item)}
-                  className={cn(
-                    "block px-3.5 py-2.5 text-xs transition hover:bg-slate-50",
-                    item.isRead ? "text-slate-600 bg-white" : "bg-blue-50/50 text-slate-900 font-medium",
-                  )}
-                >
-                  <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-xs">
-                      {getNotificationIcon(item.type)}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-1.5">
-                        <p className={cn("truncate text-xs", item.isRead ? "font-medium text-slate-800" : "font-bold text-slate-900")}>
-                          {item.title}
-                        </p>
-                        {!item.isRead ? (
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
+              items.map((item) => {
+                const localized = localizeNotification(item, locale);
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.requestId ? `/requests/${item.requestId}` : "#"}
+                    onClick={() => handleItemClick(item)}
+                    className={cn(
+                      "block px-3.5 py-2.5 text-xs transition hover:bg-slate-50",
+                      item.isRead ? "text-slate-600 bg-white" : "bg-blue-50/50 text-slate-900 font-medium",
+                    )}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-xs">
+                        {getNotificationIcon(item.type)}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <p className={cn("truncate text-xs", item.isRead ? "font-medium text-slate-800" : "font-bold text-slate-900")}>
+                            {localized.title}
+                          </p>
+                          {!item.isRead ? (
+                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
+                          ) : null}
+                        </div>
+                        {localized.body ? (
+                          <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500 leading-snug">{localized.body}</p>
                         ) : null}
+                        <p className="mt-1 text-[10px] text-slate-400">
+                          {formatRelativeTime(item.createdAt, locale)}
+                        </p>
                       </div>
-                      {item.body ? (
-                        <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500 leading-snug">{item.body}</p>
-                      ) : null}
-                      <p className="mt-1 text-[10px] text-slate-400">
-                        {formatRelativeTime(item.createdAt, locale)}
-                      </p>
                     </div>
-                  </div>
-                </Link>
-              ))
+                  </Link>
+                );
+              })
             )}
           </div>
         </div>

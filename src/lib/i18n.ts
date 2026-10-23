@@ -1169,3 +1169,112 @@ export function localizedName(
   }
   return entity.name || entity.nameUk || entity.nameRu || "—";
 }
+
+/** Локалізація заголовка та тексту сповіщень */
+export function localizeNotification(
+  item: { title?: string | null; body?: string | null; type?: string | null },
+  locale: string | null | undefined,
+): { title: string; body: string } {
+  const isEn = locale === "en";
+  let title = item.title || "";
+  let body = item.body || "";
+
+  if (isEn) {
+    title = title
+      .replace(/^Заявка\s+([A-Z0-9_-]+):\s*(.*)$/i, (_, num, rest) => {
+        let translatedRest = rest;
+        if (/Надіслана на розгляд|Надіслано на розгляд/i.test(rest)) translatedRest = "Submitted for review";
+        else if (/Передано в закупівлю/i.test(rest)) translatedRest = "Moved to Purchasing";
+        else if (/В обробці/i.test(rest)) translatedRest = "In Review";
+        else if (/Потребує уточнення/i.test(rest)) translatedRest = "Needs Clarification";
+        else if (/Замовлено/i.test(rest)) translatedRest = "Ordered";
+        else if (/Виконано/i.test(rest)) translatedRest = "Completed";
+        else if (/Відхилено/i.test(rest)) translatedRest = "Rejected";
+        else if (/Скасовано/i.test(rest)) translatedRest = "Cancelled";
+        else if (/Нова заявка/i.test(rest)) translatedRest = "New Request";
+        else if (/новий коментар/i.test(rest)) translatedRest = "New comment";
+        else if (/відповідь на запит/i.test(rest)) translatedRest = "Clarification reply";
+        else if (/вас призначено відповідальним/i.test(rest)) translatedRest = "You were assigned as buyer";
+        else if (/призначено відповідального/i.test(rest)) translatedRest = "Responsible buyer assigned";
+        return `Request ${num}: ${translatedRest}`;
+      })
+      .replace(/^Нова заявка\s+([A-Z0-9_-]+)/i, "New Request $1");
+
+    if (body) {
+      body = body
+        .replace(/(.*?)\s+надіслав\(ла\)\s+заявку на обробку/i, "$1 submitted request for processing")
+        .replace(/Отримано рахунок-фактуру від постачальника\s+(.*)/i, "Invoice received from supplier $1")
+        .replace(/Очікує призначення відповідального закупника/i, "Awaiting buyer assignment")
+        .replace(/Уточніть, будь ласка, модель на 110V чи 230V для робочої станції/i, "Please clarify: 110V or 230V model for the workstation")
+        .replace(/(.*?)\s+змінив\(ла\)\s+статус на\s+[«"']?(.*?)[»"']?$/i, (_, user, st) => {
+          const stMap: Record<string, string> = {
+            "Чернетка": "Draft",
+            "На розгляді": "In Review",
+            "В обробці": "In Review",
+            "Потребує уточнення": "Needs Info",
+            "Закупівля": "Purchasing",
+            "Передано в закупівлю": "Purchasing",
+            "Замовлено": "Ordered",
+            "Виконано": "Completed",
+            "Відхилено": "Rejected",
+            "Скасовано": "Cancelled",
+          };
+          const translatedSt = stMap[st] || st;
+          return `${user} changed status to "${translatedSt}"`;
+        })
+        .replace(/Призначив\(ла\):\s*(.*)/i, "Assigned by: $1")
+        .replace(/Відповідальний за закупівлю:\s*(.*)/i, "Responsible buyer: $1")
+        .replace(/Призначено відповідального\s*#(\d+)/i, "Assigned buyer #$1")
+        .replace(/Відповідального знято/i, "Buyer unassigned");
+    }
+  } else {
+    title = title
+      .replace(/^Request\s+([A-Z0-9_-]+):\s*(.*)$/i, (_, num, rest) => {
+        let translatedRest = rest;
+        if (/Submitted for review/i.test(rest)) translatedRest = "Надіслана на розгляд";
+        else if (/Moved to Purchasing/i.test(rest)) translatedRest = "Передано в закупівлю";
+        else if (/In Review/i.test(rest)) translatedRest = "В обробці";
+        else if (/Needs Clarification|Needs Info/i.test(rest)) translatedRest = "Потребує уточнення";
+        else if (/Ordered/i.test(rest)) translatedRest = "Замовлено";
+        else if (/Completed/i.test(rest)) translatedRest = "Виконано";
+        else if (/Rejected/i.test(rest)) translatedRest = "Відхилено";
+        else if (/Cancelled/i.test(rest)) translatedRest = "Скасовано";
+        else if (/New Request/i.test(rest)) translatedRest = "Нова заявка";
+        else if (/New comment/i.test(rest)) translatedRest = "Новий коментар";
+        else if (/Clarification reply/i.test(rest)) translatedRest = "Відповідь на запит";
+        else if (/You were assigned as buyer/i.test(rest)) translatedRest = "Вас призначено відповідальним";
+        else if (/Responsible buyer assigned/i.test(rest)) translatedRest = "Призначено відповідального";
+        return `Заявка ${num}: ${translatedRest}`;
+      })
+      .replace(/^New Request\s+([A-Z0-9_-]+)/i, "Нова заявка $1");
+
+    if (body) {
+      body = body
+        .replace(/(.*?)\s+submitted request for processing/i, "$1 надіслав(ла) заявку на обробку")
+        .replace(/Invoice received from supplier\s+(.*)/i, "Отримано рахунок-фактуру від постачальника $1")
+        .replace(/Awaiting buyer assignment/i, "Очікує призначення відповідального закупника")
+        .replace(/Please clarify 110V or 230V model for the workstation/i, "Уточніть, будь ласка, модель на 110V чи 230V для робочої станції")
+        .replace(/(.*?)\s+changed status to\s+[«"']?(.*?)[»"']?$/i, (_, user, st) => {
+          const stMap: Record<string, string> = {
+            "Draft": "Чернетка",
+            "In Review": "В обробці",
+            "Needs Info": "Потребує уточнення",
+            "Purchasing": "Закупівля",
+            "Ordered": "Замовлено",
+            "Completed": "Виконано",
+            "Rejected": "Відхилено",
+            "Cancelled": "Скасовано",
+          };
+          const translatedSt = stMap[st] || st;
+          return `${user} змінив(ла) статус на «${translatedSt}»`;
+        })
+        .replace(/Assigned by:\s*(.*)/i, "Призначив(ла): $1")
+        .replace(/Responsible buyer:\s*(.*)/i, "Відповідальний за закупівлю: $1")
+        .replace(/Assigned buyer\s*#(\d+)/i, "Призначено відповідального #$1")
+        .replace(/Buyer unassigned/i, "Відповідального знято");
+    }
+  }
+
+  return { title, body };
+}
+
