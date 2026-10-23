@@ -189,7 +189,7 @@ export function RequestWorkflowPanel({
     <div className="no-print print:hidden space-y-4">
       {/* Головна картка: Стан процесу та дії */}
       <Card className="overflow-hidden border-slate-200 shadow-sm">
-        <div className="border-b border-slate-100 bg-slate-50/80 px-5 py-4">
+        <div className="border-b border-slate-100 bg-slate-50/80 px-4 sm:px-5 py-3.5 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
               {t("workflow.currentStatus")}
@@ -237,7 +237,7 @@ export function RequestWorkflowPanel({
           ) : null}
         </div>
 
-        <div className="p-5 space-y-5">
+        <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
           {/* СЕКЦІЯ 1: Головна дія (Рух вперед) */}
           {forwardTransitions.length > 0 ? (
             <div className="space-y-2">
@@ -347,13 +347,13 @@ export function RequestWorkflowPanel({
           {/* СЕКЦІЯ 4: Винятки, відхилення та скасування */}
           {rejectionTransition || cancellationTransition ? (
             <div className="pt-2 border-t border-slate-100 space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 {rejectionTransition ? (
                   <button
                     type="button"
                     disabled={busy}
                     onClick={() => setActiveModalTransition(rejectionTransition)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/50 hover:bg-rose-100/70 px-3 py-2 text-xs font-semibold text-rose-700 transition cursor-pointer"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/60 hover:bg-rose-100/80 active:bg-rose-100 px-3 py-2.5 sm:py-2 text-xs font-semibold text-rose-700 transition cursor-pointer min-h-[40px]"
                   >
                     <span>✕</span>
                     <span>{t("workflow.rejectRequest")}</span>
@@ -365,7 +365,7 @@ export function RequestWorkflowPanel({
                     type="button"
                     disabled={busy}
                     onClick={() => setActiveModalTransition(cancellationTransition)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600 transition cursor-pointer"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 active:bg-slate-100 px-3 py-2.5 sm:py-2 text-xs font-semibold text-slate-600 transition cursor-pointer min-h-[40px]"
                   >
                     <span>{t("workflow.cancelRequest")}</span>
                   </button>
@@ -585,8 +585,9 @@ export function RequestWorkflowPanel({
                 : t("workflow.commentsTitle")
             }
             description={t("workflow.commentsDesc")}
+            className="px-4 sm:px-5 py-3 sm:py-3.5"
           />
-          <div className="space-y-3 p-5">
+          <div className="space-y-3 p-4 sm:p-5">
             <Textarea
               rows={3}
               value={message}
@@ -596,13 +597,15 @@ export function RequestWorkflowPanel({
                   : t("workflow.commentPlaceholder")
               }
               onChange={(event) => setMessage(event.target.value)}
+              className="text-xs sm:text-sm"
             />
             <div className="flex justify-end">
               <Button
                 type="button"
                 variant="primary"
-                size="sm"
+                size="md"
                 disabled={busy || !message.trim()}
+                className="w-full sm:w-auto font-semibold"
                 onClick={async () => {
                   const done = await post(`/api/requests/${requestId}/comments`, {
                     message,
@@ -612,7 +615,7 @@ export function RequestWorkflowPanel({
                 }}
               >
                 <IconSend className="h-3.5 w-3.5" />
-                {t("common.add")}
+                <span>{t("common.add")}</span>
               </Button>
             </div>
           </div>
