@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.pnp
+.pnp.js
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+data/backups
+var/uploads
+.env
+.env.local
+.vscode
+.idea
+*.log
