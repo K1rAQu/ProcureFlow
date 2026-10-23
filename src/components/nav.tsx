@@ -312,13 +312,17 @@ export function NotificationsBell({
 
   useEffect(() => {
     if (!open) return;
-    const handleOutsideClick = (e: MouseEvent) => {
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
       if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
     document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
   }, [open]);
 
   const handleItemClick = (item: NotificationRow) => {
@@ -355,81 +359,103 @@ export function NotificationsBell({
           </span>
         ) : null}
       </button>
+
       {open ? (
-        <div className="animate-fade-in absolute right-0 z-40 mt-2 w-88 max-w-[92vw] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-3.5 py-2.5">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-800">{t("notif.title")}</span>
-              {unread > 0 ? (
-                <span className="rounded-full bg-rose-100 px-1.5 py-0.2 text-[10px] font-semibold text-rose-700">
-                  {unread}
-                </span>
-              ) : null}
-            </div>
-            {items.some((i) => !i.isRead) ? (
-              <button
-                type="button"
-                className="text-[11px] font-medium text-slate-500 hover:text-[#12325c] transition cursor-pointer"
-                onClick={async () => {
-                  setUnread(0);
-                  setItems((prev) => prev.map((item) => ({ ...item, isRead: true })));
-                  await fetch("/api/notifications", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ all: true }),
-                  });
-                }}
-              >
-                {t("notif.markAll")}
-              </button>
-            ) : null}
-          </div>
-          <div className="max-h-84 overflow-y-auto divide-y divide-slate-100">
-            {items.length === 0 ? (
-              <div className="py-8 text-center">
-                <span className="text-2xl">📭</span>
-                <p className="mt-1.5 text-xs text-slate-500">{t("notif.empty")}</p>
+        <>
+          {/* Мобільний затемнений фон для надійного закриття по дотику */}
+          <div
+            className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-2xs transition-opacity sm:hidden animate-in fade-in duration-150"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Меню сповіщень: на мобільному центрується з відступами, на десктопі — випадає під дзвіночком */}
+          <div className="fixed left-3 right-3 top-14 z-50 max-h-[82vh] flex flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-92 sm:max-w-[92vw] sm:max-h-[32rem] sm:rounded-xl sm:z-40 sm:shadow-xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-50/80 px-3.5 sm:px-4 py-2.5 sm:py-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs sm:text-sm font-bold text-slate-800">{t("notif.title")}</span>
+                {unread > 0 ? (
+                  <span className="rounded-full bg-rose-100 px-1.5 py-0.2 text-[10px] font-semibold text-rose-700">
+                    {unread}
+                  </span>
+                ) : null}
               </div>
-            ) : (
-              items.map((item) => {
-                const localized = localizeNotification(item, locale);
-                return (
-                  <Link
-                    key={item.id}
-                    href={item.requestId ? `/requests/${item.requestId}` : "#"}
-                    onClick={() => handleItemClick(item)}
-                    className={cn(
-                      "block px-3.5 py-2.5 text-xs transition hover:bg-slate-50",
-                      item.isRead ? "text-slate-600 bg-white" : "bg-blue-50/50 text-slate-900 font-medium",
-                    )}
+              <div className="flex items-center gap-2">
+                {items.some((i) => !i.isRead) ? (
+                  <button
+                    type="button"
+                    className="text-[11px] font-medium text-slate-600 hover:text-[#12325c] transition cursor-pointer"
+                    onClick={async () => {
+                      setUnread(0);
+                      setItems((prev) => prev.map((item) => ({ ...item, isRead: true })));
+                      await fetch("/api/notifications", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ all: true }),
+                      });
+                    }}
                   >
-                    <div className="flex items-start gap-2.5">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-xs">
-                        {getNotificationIcon(item.type)}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-1.5">
-                          <p className={cn("truncate text-xs", item.isRead ? "font-medium text-slate-800" : "font-bold text-slate-900")}>
-                            {localized.title}
-                          </p>
-                          {!item.isRead ? (
-                            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
+                    {t("notif.markAll")}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg p-1 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 sm:hidden transition cursor-pointer"
+                  aria-label="Close"
+                >
+                  <span className="text-sm font-bold leading-none">✕</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+              {items.length === 0 ? (
+                <div className="py-8 text-center">
+                  <span className="text-2xl">📭</span>
+                  <p className="mt-1.5 text-xs text-slate-500">{t("notif.empty")}</p>
+                </div>
+              ) : (
+                items.map((item) => {
+                  const localized = localizeNotification(item, locale);
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.requestId ? `/requests/${item.requestId}` : "#"}
+                      onClick={() => handleItemClick(item)}
+                      className={cn(
+                        "block px-3.5 py-3 sm:py-2.5 text-xs transition hover:bg-slate-50 active:bg-slate-100",
+                        item.isRead ? "text-slate-600 bg-white" : "bg-blue-50/50 text-slate-900 font-medium",
+                      )}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <span className="mt-0.5 flex h-7 w-7 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs shadow-2xs">
+                          {getNotificationIcon(item.type)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1.5">
+                            <p className={cn("truncate text-xs", item.isRead ? "font-medium text-slate-800" : "font-bold text-slate-900")}>
+                              {localized.title}
+                            </p>
+                            {!item.isRead ? (
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
+                            ) : null}
+                          </div>
+                          {localized.body ? (
+                            <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500 leading-snug">{localized.body}</p>
                           ) : null}
+                          <p className="mt-1 text-[10px] text-slate-400">
+                            {formatRelativeTime(item.createdAt, locale)}
+                          </p>
                         </div>
-                        {localized.body ? (
-                          <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500 leading-snug">{localized.body}</p>
-                        ) : null}
-                        <p className="mt-1 text-[10px] text-slate-400">
-                          {formatRelativeTime(item.createdAt, locale)}
-                        </p>
                       </div>
-                    </div>
-                  </Link>
-                );
-              })
-            )}
+                    </Link>
+                  );
+                })
+              )}
+            </div>
           </div>
-        </div>
+        </>
       ) : null}
     </div>
   );
