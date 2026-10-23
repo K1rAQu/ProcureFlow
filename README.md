@@ -10,9 +10,11 @@
 [![Drizzle ORM](https://img.shields.io/badge/Drizzle-ORM-C5F74F?style=flat-square)](https://orm.drizzle.team/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-procureflow--jcea.onrender.com-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://procureflow-jcea.onrender.com/)
+
 **A modern, self-hosted, lightweight internal procurement and supply-chain web system designed for manufacturing plants, engineering workshops, and industrial enterprises.**
 
-[English](README.md) • [Українська](README.uk.md) • [Live Demo Guide](#-live-demo-hosting-options) • [Quick Start](#-quick-start)
+[English](README.md) • [Українська](README.uk.md) • [Live Demo](https://procureflow-jcea.onrender.com/) • [Quick Start](#-quick-start)
 
 </div>
 
@@ -137,49 +139,14 @@ Your instance will be available at `http://localhost:3000` with persistent stora
 
 ---
 
-## 🌐 Live Demo Hosting Options
+## 🌐 Live Demo
 
-Here are the easiest platforms to host a live public demo (100% free or low cost):
+A live public demo instance is running at:
+👉 **[https://procureflow-jcea.onrender.com/](https://procureflow-jcea.onrender.com/)**
 
-### 1. Render.com (Free & Simple with Docker / Web Service)
-* **How it works:** Create a free Web Service on [Render](https://render.com) connected to your GitHub repo.
-* **Why it's great:** Free tier runs Docker containers directly. 
-* **Note on SQLite:** Free web services on Render have ephemeral disks that reset when spun down after inactivity. Because our `docker-entrypoint.sh` automatically seeds the database on startup, the demo will always wake up fresh with clean, working demo data!
-* **Configuration:**
-  * Build: Docker
-  * Port: `3000`
-  * Environment variables: `DEFAULT_LOCALE=en`, `APP_URL=https://your-app.onrender.com`, `ENABLE_REALTIME=true`
-
-### 2. Fly.io (Free / Low Cost with NVMe SQLite Disk Volume)
-* **How it works:** Runs the official Docker image on Fly.io with a persistent volume mounted at `/app/data`.
-* **Why it's great:** Real persistent local SQLite performance with single-digit millisecond latency.
-* **Setup:**
-  ```bash
-  fly launch
-  fly volumes create procurement_data --size 1
-  fly deploy
-  ```
-
-### 3. Vercel + Turso (100% Free Serverless)
-* **How it works:** Host Next.js on Vercel's free hobby tier and connect to a free hosted [Turso](https://turso.tech) LibSQL cloud database.
-* **Why it's great:** The codebase natively uses `@libsql/client`, which speaks directly to Turso. Turso provides 9GB free storage and 1 billion row reads/month.
-* **Setup:**
-  1. Create a database on [Turso](https://turso.tech):
-     ```bash
-     turso db create procurement-demo
-     turso db show --url procurement-demo
-     turso db tokens create procurement-demo
-     ```
-  2. Deploy repository to Vercel and set:
-     * `DATABASE_URL=libsql://procurement-demo-[user].turso.io`
-     * `DATABASE_AUTH_TOKEN=[your-token]`
-     * `DEFAULT_LOCALE=en`
-
-### 4. Railway or Koyeb
-* One-click GitHub deployment with persistent volume attachment.
-
-### 5. Self-Hosted VPS (Hetzner / DigitalOcean / Oracle Free Tier)
-* Run `docker compose up -d` behind Caddy or Nginx with automated SSL.
+> [!NOTE]
+> The demo instance is hosted on Render free tier. If the instance has been idle for more than 15 minutes, please allow up to 45–60 seconds for the initial wake-up.
+> Pre-configured demo accounts (**Administrator**, **Buyer**, **Shop Manager**, **Requester**) are available directly on the sign-in page with 1-click login.
 
 ---
 

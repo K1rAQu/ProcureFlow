@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IconGoogle } from "./icons";
 import { useT } from "./i18n-provider";
+import { startNavigationProgress } from "./navigation-progress";
 
 function errorMessage(code: string, t: (key: string) => string): string {
   switch (code) {
@@ -40,9 +41,12 @@ export function LoginForm({
   const router = useRouter();
   const [error, setError] = useState<string | null>(initialError ? errorMessage(initialError, t) : null);
   const [devBusy, setDevBusy] = useState(false);
+  const [loadingEmail, setLoadingEmail] = useState<string | null>(null);
 
   async function handleDevGoogleLogin(email = "admin@company.com", fullName = "Alex Morgan (Admin)") {
     setDevBusy(true);
+    setLoadingEmail(email);
+    startNavigationProgress();
     setError(null);
     try {
       const response = await fetch("/api/auth/google/dev", {
@@ -62,10 +66,12 @@ export function LoginForm({
       }
       const data = (await response.json().catch(() => ({}))) as { error?: string };
       setError(errorMessage(data.error || "error", t));
+      setDevBusy(false);
+      setLoadingEmail(null);
     } catch {
       setError(t("error.generic"));
-    } finally {
       setDevBusy(false);
+      setLoadingEmail(null);
     }
   }
 
@@ -103,54 +109,33 @@ export function LoginForm({
               ⚡ {t("auth.googleDevSignIn")} (1-Click Google Emulator):
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button
-                type="button"
-                disabled={devBusy}
-                onClick={() => handleDevGoogleLogin("admin@company.com", "Alex Morgan (Admin)")}
-                className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-50"
-              >
-                <span className="text-base shrink-0">👑</span>
-                <div className="min-w-0">
-                  <p className="font-semibold leading-tight truncate text-slate-900">Admin</p>
-                  <p className="text-[10px] text-slate-500 truncate">admin@company.com</p>
-                </div>
-              </button>
-              <button
-                type="button"
-                disabled={devBusy}
-                onClick={() => handleDevGoogleLogin("buyer@company.com", "Elena Rostova (Lead Buyer)")}
-                className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-50"
-              >
-                <span className="text-base shrink-0">💼</span>
-                <div className="min-w-0">
-                  <p className="font-semibold leading-tight truncate text-slate-900">Buyer</p>
-                  <p className="text-[10px] text-slate-500 truncate">buyer@company.com</p>
-                </div>
-              </button>
-              <button
-                type="button"
-                disabled={devBusy}
-                onClick={() => handleDevGoogleLogin("shop@company.com", "Taras Shevchenko (Shop Manager)")}
-                className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-50"
-              >
-                <span className="text-base shrink-0">🏭</span>
-                <div className="min-w-0">
-                  <p className="font-semibold leading-tight truncate text-slate-900">Shop Manager</p>
-                  <p className="text-[10px] text-slate-500 truncate">shop@company.com</p>
-                </div>
-              </button>
-              <button
-                type="button"
-                disabled={devBusy}
-                onClick={() => handleDevGoogleLogin("requester@company.com", "David Miller (Hardware Engineer)")}
-                className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-50"
-              >
-                <span className="text-base shrink-0">🔧</span>
-                <div className="min-w-0">
-                  <p className="font-semibold leading-tight truncate text-slate-900">Requester</p>
-                  <p className="text-[10px] text-slate-500 truncate">requester@company.com</p>
-                </div>
-              </button>
+              {[
+                { email: "admin@company.com", name: "Alex Morgan (Admin)", role: "Admin", icon: "👑" },
+                { email: "buyer@company.com", name: "Elena Rostova (Lead Buyer)", role: "Buyer", icon: "💼" },
+                { email: "shop@company.com", name: "Taras Shevchenko (Shop Manager)", role: "Shop Manager", icon: "🏭" },
+                { email: "requester@company.com", name: "David Miller (Hardware Engineer)", role: "Requester", icon: "🔧" },
+              ].map((account) => {
+                const isLoading = loadingEmail === account.email;
+                return (
+                  <button
+                    key={account.email}
+                    type="button"
+                    disabled={devBusy}
+                    onClick={() => handleDevGoogleLogin(account.email, account.name)}
+                    className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-60"
+                  >
+                    <span className="text-base shrink-0">
+                      {isLoading ? <span className="inline-block animate-spin">⟳</span> : account.icon}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold leading-tight truncate text-slate-900">
+                        {isLoading ? "Signing in..." : account.role}
+                      </p>
+                      <p className="text-[10px] text-slate-500 truncate">{account.email}</p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -24,16 +24,31 @@ export function SidebarNav({
   const pathname = usePathname();
   const t = useT();
   const [open, setOpen] = useState(false);
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
 
   const links = (
     <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3">
       {items.find((i) => i.href === "/requests/new") ? (
         <Link
           href="/requests/new"
-          onClick={() => setOpen(false)}
-          className="mb-2 flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-xs font-bold text-[#12325c] shadow-sm transition hover:bg-slate-100"
+          onClick={() => {
+            setOpen(false);
+            if (pathname !== "/requests/new") setPendingHref("/requests/new");
+          }}
+          className={cn(
+            "mb-2 flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-2.5 text-xs font-bold text-[#12325c] shadow-sm transition hover:bg-slate-100",
+            pendingHref === "/requests/new" && "opacity-80 ring-2 ring-white/50",
+          )}
         >
-          <span className="text-sm font-bold">＋</span>
+          {pendingHref === "/requests/new" ? (
+            <span className="inline-block animate-spin text-sm">⟳</span>
+          ) : (
+            <span className="text-sm font-bold">＋</span>
+          )}
           <span>{t("nav.newRequest")}</span>
         </Link>
       ) : null}
@@ -42,22 +57,35 @@ export function SidebarNav({
         .filter((item) => item.href !== "/requests/new")
         .map((item) => {
           const active = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+          const isPending = pendingHref === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setOpen(false)}
+              onClick={() => {
+                setOpen(false);
+                if (pathname !== item.href) setPendingHref(item.href);
+              }}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition",
                 active
                   ? "bg-white/20 font-semibold text-white shadow-2xs"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white",
+                  : isPending
+                    ? "bg-white/15 text-white animate-pulse"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white",
               )}
             >
               <span aria-hidden className="w-5 text-center text-sm">
-                {item.icon}
+                {isPending ? (
+                  <span className="inline-block animate-spin text-xs">⟳</span>
+                ) : (
+                  item.icon
+                )}
               </span>
-              <span className="truncate">{t(item.labelKey)}</span>
+              <span className="truncate flex-1">{t(item.labelKey)}</span>
+              {isPending ? (
+                <span className="h-1.5 w-1.5 rounded-full bg-sky-300 animate-ping" />
+              ) : null}
             </Link>
           );
         })}

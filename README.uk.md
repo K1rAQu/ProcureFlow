@@ -1,5 +1,9 @@
 # 📦 ProcureFlow — Система керування закупівлями підприємства
 
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-procureflow--jcea.onrender.com-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://procureflow-jcea.onrender.com/)
+
+[English](README.md) • [Українська](README.uk.md) • [Live Demo](https://procureflow-jcea.onrender.com/)
+
 Сучасна внутрішня веб-система підприємства для формування, погодження, маршрутизації та виконання заявок на закупівлю комплектуючих, матеріалів та обладнання з єдиним довідником номенклатури.
 
 **Технологічний стек:**
@@ -151,18 +155,14 @@ docker compose up -d --build
 
 ---
 
-## 🌐 7. Варіанти безкоштовного хостингу для Live Demo
+## 🌐 7. Публічне Live Demo
 
-1. **Render.com (Найпростіший варіант):**
-   * Створіть Web Service на Render з підключенням до GitHub репозиторію.
-   * Виберіть середовище Docker.
-   * Завдяки скрипту `docker-entrypoint.sh`, навіть при періодичному перезапуску безкоштовного сервера на Render, демка автоматично підніметься з чистою робочою базою.
-2. **Fly.io (З постійним диском під SQLite):**
-   * Надає безкоштовний Volume (`fly volumes create procurement_data -s 1`), що дозволяє SQLite зберігати всі дані без втрат.
-3. **Vercel + Turso (100% безкоштовний Serverless):**
-   * Оскільки система працює через `@libsql/client`, вона сумісна з безкоштовною хмарною базою Turso (до 9 ГБ). Достатньо вказати `DATABASE_URL=libsql://...turso.io` та токен у Vercel.
-4. **Власний VPS (Hetzner / Oracle Free Tier):**
-   * Запуск `docker compose up -d` на будь-якому сервері з автоматичним SSL через Caddy/Nginx.
+Робоча публічна онлайн-демонстрація системи доступна за адресою:
+👉 **[https://procureflow-jcea.onrender.com/](https://procureflow-jcea.onrender.com/)**
+
+> [!NOTE]
+> Демо розміщено на безкоштовному тарифі Render. Якщо на сайт ніхто не заходив понад 15 хвилин, зачекайте 45–60 секунд на перше «пробудження» контейнера.
+> На сторінці входу доступні готові демо-акаунти (**Адміністратор**, **Менеджер закупівель**, **Начальник цеху**, **Інженер**) для авторизації в 1 клік.
 
 ---
 
