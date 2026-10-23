@@ -7,13 +7,13 @@ import { createClient } from "@libsql/client";
 const EDGE_PATH = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe";
 
 async function login() {
-  const res = await fetch("http://127.0.0.1:3000/api/auth/login", {
+  const res = await fetch("http://127.0.0.1:3000/api/auth/google/dev", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ email: "admin@company.com", password: "admin123" })
+    body: JSON.stringify({ email: "admin@company.com", fullName: "Alex Morgan (Admin)" })
   });
   const cookie = res.headers.get("set-cookie");
-  if (!cookie) throw new Error("No cookie returned");
+  if (!cookie) throw new Error("No cookie returned: status " + res.status);
   const match = cookie.match(/procurement_session=([^;]+)/);
   return match ? match[1] : null;
 }
@@ -132,6 +132,22 @@ async function captureAll() {
       writeFileSync(filePath, buffer);
       console.log(`  ✓ Saved ${page.name} (${Math.round(buffer.length / 1024)} KB)`);
     }
+
+    // Also capture notifications popover open
+    console.log("Capturing notifications popover...");
+    await send("Page.navigate", { url: "http://127.0.0.1:3000/" });
+    await new Promise(r => setTimeout(r, 2000));
+    await send("Runtime.evaluate", {
+      expression: `(() => {
+        const btn = document.querySelector('header .relative button');
+        if (btn) btn.click();
+      })()`
+    });
+    await new Promise(r => setTimeout(r, 800));
+    const notifShot = await send("Page.captureScreenshot", { format: "png" });
+    const notifBuffer = Buffer.from(notifShot.result.data, "base64");
+    writeFileSync(join(outDir, "notifications-open.png"), notifBuffer);
+    console.log(`  ✓ Saved notifications-open.png (${Math.round(notifBuffer.length / 1024)} KB)`);
 
     // Also capture login page without session
     console.log("Capturing login page...");
