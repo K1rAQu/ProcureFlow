@@ -634,8 +634,8 @@ async function seed() {
   for (const n of nomenclatureItems) {
     const res = await client.execute({
       sql: `INSERT INTO nomenclature (
-        name, part_number, bas_code, manufacturer, unit, status, 
-        last_price, last_currency, last_price_at, usage_count, search_key, 
+        name, part_number, bas_code, manufacturer, unit, status,
+        last_price, last_currency, last_price_at, usage_count, search_key,
         description, specs, created_by, updated_by, created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id;`,
       args: [

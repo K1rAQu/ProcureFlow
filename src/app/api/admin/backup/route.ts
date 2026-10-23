@@ -38,7 +38,6 @@ export async function GET(request: Request) {
     const backupsDir = getBackupsDir();
     await mkdir(backupsDir, { recursive: true });
 
-    // Якщо запитано конкретний файл для завантаження
     if (requestedFile) {
       const cleanName = basename(requestedFile);
       if (!isValidBackupFilename(cleanName)) {

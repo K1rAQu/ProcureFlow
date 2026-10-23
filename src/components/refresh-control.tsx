@@ -22,7 +22,7 @@ export function RefreshControl({ className }: { className?: string }) {
   }
 
   useEffect(() => {
-    // Only run in browser
+
     if (typeof window === "undefined" || typeof EventSource === "undefined") return;
 
     let eventSource: EventSource | null = null;
@@ -53,7 +53,6 @@ export function RefreshControl({ className }: { className?: string }) {
           eventSource?.close();
           eventSource = null;
 
-          // Graceful backoff: retry up to maxRetries times, then degrade to manual refresh
           if (retryCount.current < maxRetries) {
             const delay = (retryCount.current + 1) * 10000;
             retryCount.current += 1;
@@ -98,7 +97,7 @@ export function RefreshControl({ className }: { className?: string }) {
         </span>
         <span>{isPending ? t("common.refreshing") : t("common.refresh")}</span>
 
-        {/* Live indicator dot */}
+        {}
         {isLive && !hasNewUpdates ? (
           <span
             className="h-1.5 w-1.5 rounded-full bg-emerald-500"
@@ -106,7 +105,7 @@ export function RefreshControl({ className }: { className?: string }) {
           />
         ) : null}
 
-        {/* New updates badge */}
+        {}
         {hasNewUpdates ? (
           <span className="flex items-center gap-1 rounded-full bg-amber-500/20 px-1.5 py-0.2 text-[10px] font-semibold text-amber-800">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-600" />

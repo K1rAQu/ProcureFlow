@@ -27,14 +27,10 @@ export type Actor = "author" | "processor";
 type Transition = {
   to: RequestStatus;
   actors: Actor[];
-  /** требуется комментарий при переходе */
+
   requiresComment?: boolean;
 };
 
-/**
- * Матрица разрешённых переходов. Проверяется ТОЛЬКО на сервере —
- * интерфейс лишь отражает её состояние.
- */
 export const TRANSITIONS: Record<RequestStatus, Transition[]> = {
   draft: [
     { to: "submitted", actors: ["author"] },
@@ -110,7 +106,6 @@ export function availableTransitions(from: RequestStatus, actors: Actor[]): Tran
   return (TRANSITIONS[from] ?? []).filter((item) => item.actors.some((actor) => actors.includes(actor)));
 }
 
-/** Статусы, в которых автор может редактировать состав заявки (настраивается админом). */
 export const DEFAULT_EDITABLE_STATUSES: RequestStatus[] = ["draft", "submitted", "needs_info"];
 
 export function canEditRequest(options: {
@@ -127,8 +122,6 @@ export function canEditRequest(options: {
   if (status === "draft") return true;
   return editableStatuses.includes(status);
 }
-
-/* ----------------------------- Totals ---------------------------------- */
 
 export type TotalsInput = {
   quantity: number | string | null | undefined;
@@ -149,10 +142,6 @@ export function lineTotal(item: TotalsInput): number | null {
   return Math.round(quantity * price * 10000) / 10000;
 }
 
-/**
- * Суммы считаются отдельно по каждой валюте — пересчёт между валютами
- * намеренно не выполняется.
- */
 export function totalsByCurrency(items: TotalsInput[]): { currency: string; total: number; items: number }[] {
   const map = new Map<string, { currency: string; total: number; items: number }>();
   for (const item of items) {

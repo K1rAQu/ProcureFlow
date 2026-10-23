@@ -25,7 +25,7 @@ export function PendingApprovalCard({
 
   async function handleCheckStatus() {
     setChecking(true);
-    // Спробуємо перейти на головну: якщо адмін вже активував, пустить на дашборд
+
     window.location.href = "/";
   }
 
@@ -40,7 +40,7 @@ export function PendingApprovalCard({
 
   return (
     <Card className="overflow-hidden border-slate-200 shadow-xl bg-white">
-      {/* Верхній градієнтний банер */}
+      {}
       <div className="bg-gradient-to-r from-[#12325c] to-[#1e4b85] p-6 text-white text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-2xl shadow-inner">
           ⏳
@@ -52,10 +52,10 @@ export function PendingApprovalCard({
       </div>
 
       <div className="p-6 space-y-5">
-        {/* Картка користувача */}
+        {}
         <div className="flex items-center gap-3.5 rounded-xl border border-slate-200 bg-slate-50/80 p-3.5">
           {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
+
             <img src={avatarUrl} alt="" className="h-11 w-11 rounded-full object-cover ring-2 ring-white shadow-xs" />
           ) : (
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700">
@@ -75,7 +75,7 @@ export function PendingApprovalCard({
           </div>
         </div>
 
-        {/* Інформаційний блок */}
+        {}
         <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-4 text-xs text-amber-950 space-y-1.5">
           <p className="font-semibold flex items-center gap-1.5 text-amber-900">
             <span>ℹ️</span> {t("auth.pendingNoticeTitle")}
@@ -83,7 +83,7 @@ export function PendingApprovalCard({
           <p className="leading-relaxed text-amber-900/90">{t("auth.pendingApprovalNotice")}</p>
         </div>
 
-        {/* Кнопки дій */}
+        {}
         <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-2">
           <Button
             type="button"

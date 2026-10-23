@@ -66,7 +66,7 @@ export function SidebarNav({
 
   return (
     <>
-      {/* Мобильная шапка */}
+      {}
       <div className="no-print print:hidden sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
         <button
           type="button"
@@ -82,7 +82,7 @@ export function SidebarNav({
         <span className="flex items-center gap-2">
           <NotificationsBell initialItems={initialNotifications} initialUnread={initialUnread} />
           {user.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
+
             <img src={user.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-[#12325c]" />
           ) : (
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#12325c] text-xs font-semibold text-white">
@@ -121,7 +121,7 @@ export function SidebarNav({
           <div className="flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5 min-w-0">
               {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
+
                 <img src={user.avatarUrl} alt="" className="h-8 w-8 shrink-0 rounded-full object-cover ring-1 ring-white/20" />
               ) : (
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-xs font-semibold text-white">

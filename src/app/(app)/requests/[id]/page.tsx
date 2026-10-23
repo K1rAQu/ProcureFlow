@@ -71,7 +71,7 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="space-y-6">
-      {/* Офіційна шапка документа — відображається ТІЛЬКИ при друку */}
+      {}
       <div className="hidden print:block pb-4 mb-4 border-b-2 border-slate-900">
         <div className="flex items-start justify-between">
           <div>

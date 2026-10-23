@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 600, // 10 хвилин
+    maxAge: 600,
   });
 
   const redirectUri = getGoogleRedirectUri(request);

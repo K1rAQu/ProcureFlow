@@ -51,7 +51,6 @@ export default async function AuditPage({
   const dateTo = readParam(params, "dateTo");
   const query = readParam(params, "q");
 
-  // Завантажуємо список користувачів для випадаючого списку фільтра
   const allUsers = await db
     .select({ id: users.id, fullName: users.fullName })
     .from(users)

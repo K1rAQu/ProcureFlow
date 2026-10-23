@@ -1,7 +1,4 @@
-/**
- * Нормализация и поиск возможных дубликатов номенклатуры.
- * Используется и на сервере (жёсткая проверка), и для подсказок в форме.
- */
+
 
 export function normalizeText(value: string | null | undefined): string {
   return (value ?? "")

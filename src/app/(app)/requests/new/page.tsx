@@ -24,7 +24,7 @@ export default async function NewRequestPage({
     try {
       copySource = await getRequestDetail(copyFromId, user);
     } catch {
-      // Ігноруємо, якщо ID недійсний або немає доступу
+
     }
   }
 

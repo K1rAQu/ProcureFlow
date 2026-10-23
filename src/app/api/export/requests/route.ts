@@ -41,7 +41,6 @@ export async function GET(request: Request) {
 
     const conditions: SQL[] = [];
 
-    // Перевірка прав доступу
     if (mineOnly || !user.permissions.includes("requests.view_all")) {
       if (user.permissions.includes("requests.view_workshop") && user.workshopId && !mineOnly) {
         conditions.push(

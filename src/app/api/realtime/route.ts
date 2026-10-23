@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   const stream = new ReadableStream({
     start(controller) {
-      // Send initial connect greeting
+
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "connected", time: Date.now() })}\n\n`));
 
       const onEvent = (event: SystemEvent) => {

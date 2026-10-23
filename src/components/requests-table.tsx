@@ -48,7 +48,7 @@ export function RequestsTable({
 
   return (
     <>
-      {/* Десктоп / планшет таблиця */}
+      {}
       <div className="hidden overflow-x-auto md:block">
         <table className="min-w-full divide-y divide-slate-200 text-sm">
           <thead className="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">

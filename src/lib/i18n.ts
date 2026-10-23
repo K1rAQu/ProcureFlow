@@ -60,18 +60,15 @@ export const en: Messages = {
   "common.dateFrom": "Date From",
   "common.dateTo": "Date To",
 
-  // Sorting
   "sort.createdDesc": "Creation date (newest first)",
   "sort.updatedDesc": "Update date (recently changed)",
   "sort.priorityDesc": "Priority (urgent first)",
   "sort.numberDesc": "Request number",
   "sort.createdAsc": "Creation date (oldest first)",
 
-  // Filters
   "filter.allDepartments": "All Categories",
   "filter.allWorkshops": "All Workshops",
 
-  // Navigation
   "nav.dashboard": "Dashboard",
   "nav.newRequest": "New Request",
   "nav.myRequests": "My Requests",
@@ -81,7 +78,6 @@ export const en: Messages = {
   "nav.audit": "Audit Log",
   "nav.logout": "Sign Out",
 
-  // Auth & Login
   "auth.login": "Sign In",
   "auth.email": "Work Email",
   "auth.password": "Password",
@@ -120,7 +116,6 @@ export const en: Messages = {
   "auth.pendingApprovalNotice": "Access to the procurement workspace is restricted until an administrator activates your account and assigns your department role. You will be able to access the system immediately once approved.",
   "auth.checkStatus": "Check Approval Status",
 
-  // Dashboard
   "dash.title": "Dashboard",
   "dash.quickActions": "Quick Actions",
   "dash.recentEvents": "Recent Activity",
@@ -134,7 +129,6 @@ export const en: Messages = {
   "dash.noEvents": "No recent events",
   "dash.assignedToMe": "Assigned to Me",
 
-  // Request & Items
   "request.one": "Request",
   "request.number": "Number",
   "request.new": "Create Request",
@@ -203,7 +197,6 @@ export const en: Messages = {
   "request.print": "Print Request",
   "request.printTitle": "Print official purchase request",
 
-  // Items
   "item.name": "Item Description",
   "item.partNumber": "Part Number / SKU",
   "item.quantity": "Quantity",
@@ -242,7 +235,6 @@ export const en: Messages = {
   "item.noPhoto": "No photo",
   "item.viewNomenclature": "View central catalog item",
 
-  // Nomenclature
   "nom.title": "Nomenclature Catalog",
   "nom.card": "Catalog Item",
   "nom.new": "New Catalog Item",
@@ -299,7 +291,6 @@ export const en: Messages = {
   "nom.createdBy": "Created By",
   "nom.noneFound": "No catalog items found",
 
-  // Admin
   "admin.title": "Administration",
   "admin.users": "Users",
   "admin.roles": "Roles & Permissions",
@@ -354,7 +345,6 @@ export const en: Messages = {
   "admin.settingSessionTimeout": "Inactivity session timeout, minutes (0 = disabled)",
   "admin.maintenance": "Maintenance & Backups",
 
-  // Audit
   "audit.title": "Audit Log",
   "audit.action": "Action",
   "audit.entity": "Entity",
@@ -369,7 +359,6 @@ export const en: Messages = {
   "audit.dateTo": "Date To",
   "audit.systemUser": "System / Guest",
 
-  // Statuses
   "status.draft": "Draft",
   "status.submitted": "Submitted",
   "status.in_review": "In Review",
@@ -380,13 +369,11 @@ export const en: Messages = {
   "status.rejected": "Rejected",
   "status.cancelled": "Cancelled",
 
-  // Priorities
   "priority.all": "All Priorities",
   "priority.normal": "Normal",
   "priority.high": "High",
   "priority.urgent": "Urgent",
 
-  // Events & Notifications
   "event.created": "Request created",
   "event.submitted": "Request submitted",
   "event.status_change": "Status updated",
@@ -400,7 +387,6 @@ export const en: Messages = {
   "notif.empty": "No new notifications",
   "notif.markAll": "Mark all as read",
 
-  // Errors
   "error.forbidden": "You do not have permission to perform this action",
   "error.notFound": "Object not found",
   "error.generic": "An error occurred while processing the request",
@@ -409,7 +395,6 @@ export const en: Messages = {
   "error.noWorkshops": "Shop floor directory is empty. Please contact an administrator.",
   "error.noDepartments": "Procurement category directory is empty. Please contact an administrator.",
 
-  // Workflow actions & steps
   "workflow.currentStatus": "Current Request Status",
   "workflow.nextAction": "Next Action",
   "workflow.nextStage": "Move to next stage",
@@ -479,7 +464,6 @@ export const en: Messages = {
   "workflow.modalConfirmRejection": "Confirm Rejection",
   "workflow.modalConfirmCancellation": "Confirm Cancellation",
 
-  // Stepper
   "stepper.lifecycle": "Request Lifecycle",
   "stepper.waitingClarification": "⚠️ Waiting for clarification",
   "stepper.rejectedTitle": "Request Rejected",
@@ -487,7 +471,6 @@ export const en: Messages = {
   "stepper.cancelledTitle": "Request Cancelled",
   "stepper.cancelledDesc": "Further procurement stages have been locked.",
 
-  // Admin Maintenance & Backups
   "admin.maintenance.backupSuccess": "Backup snapshot \"{filename}\" ({size}) saved on server.",
   "admin.maintenance.backupError": "Failed to create database backup.",
   "admin.maintenance.deleteTitle": "Delete Backup Snapshot",
@@ -591,18 +574,15 @@ export const uk: Messages = {
   "common.dateFrom": "Дата з",
   "common.dateTo": "Дата по",
 
-  // Сортування
   "sort.createdDesc": "За датою створення (нові спочатку)",
   "sort.updatedDesc": "За датою оновлення (нещодавно змінені)",
   "sort.priorityDesc": "За пріоритетом (термінові спочатку)",
   "sort.numberDesc": "За номером заявки",
   "sort.createdAsc": "За датою створення (старі спочатку)",
 
-  // Фільтри
   "filter.allDepartments": "Усі напрями",
   "filter.allWorkshops": "Усі цехи",
 
-  // Навігація
   "nav.dashboard": "Головна",
   "nav.newRequest": "Створити заявку",
   "nav.myRequests": "Мої заявки",
@@ -612,7 +592,6 @@ export const uk: Messages = {
   "nav.audit": "Історія дій",
   "nav.logout": "Вийти",
 
-  // Авторизація
   "auth.login": "Вхід до системи",
   "auth.email": "Робоча пошта",
   "auth.password": "Пароль",
@@ -651,7 +630,6 @@ export const uk: Messages = {
   "auth.pendingApprovalNotice": "Доступ до робочого простору заблоковано, доки адміністратор підприємства не активує ваш обліковий запис та не призначить права доступу. Після активації ви зможете відразу користуватися системою.",
   "auth.checkStatus": "Перевірити статус",
 
-  // Головна панель
   "dash.title": "Головна панель",
   "dash.quickActions": "Швидкі дії",
   "dash.recentEvents": "Останні події",
@@ -665,7 +643,6 @@ export const uk: Messages = {
   "dash.noEvents": "Подій ще немає",
   "dash.assignedToMe": "Призначені на мене",
 
-  // Заявка та позиції
   "request.one": "Заявка",
   "request.number": "Номер",
   "request.new": "Нова заявка",
@@ -734,7 +711,6 @@ export const uk: Messages = {
   "request.print": "Друк заявки",
   "request.printTitle": "Роздрукувати офіційну заявку",
 
-  // Позиції
   "item.name": "Найменування",
   "item.partNumber": "Артикул / Part Number",
   "item.quantity": "Кількість",
@@ -773,7 +749,6 @@ export const uk: Messages = {
   "item.noPhoto": "Без фото",
   "item.viewNomenclature": "Переглянути картку в довіднику номенклатури",
 
-  // Номенклатура
   "nom.title": "Номенклатура",
   "nom.card": "Картка номенклатури",
   "nom.new": "Нова позиція",
@@ -830,7 +805,6 @@ export const uk: Messages = {
   "nom.createdBy": "Створив",
   "nom.noneFound": "Позиції не знайдено",
 
-  // Адміністрування
   "admin.title": "Адміністративна панель",
   "admin.users": "Користувачі",
   "admin.roles": "Ролі та права",
@@ -885,7 +859,6 @@ export const uk: Messages = {
   "admin.settingSessionTimeout": "Автовихід при неактивності, хвилин (0 = вимкнено)",
   "admin.maintenance": "Обслуговування та бекап",
 
-  // Аудит
   "audit.title": "Історія дій (Аудит)",
   "audit.action": "Дія",
   "audit.entity": "Об'єкт",
@@ -900,7 +873,6 @@ export const uk: Messages = {
   "audit.dateTo": "Дата по",
   "audit.systemUser": "Система / Гість",
 
-  // Статуси
   "status.draft": "Чернетка",
   "status.submitted": "Надіслана",
   "status.in_review": "Прийнята в обробку",
@@ -911,13 +883,11 @@ export const uk: Messages = {
   "status.rejected": "Відхилена",
   "status.cancelled": "Скасована",
 
-  // Пріоритети
   "priority.all": "Усі пріоритети",
   "priority.normal": "Звичайний",
   "priority.high": "Високий",
   "priority.urgent": "Терміновий",
 
-  // Події
   "event.created": "Заявку створено",
   "event.submitted": "Заявку надіслано",
   "event.status_change": "Зміна статусу",
@@ -931,7 +901,6 @@ export const uk: Messages = {
   "notif.empty": "Нових сповіщень немає",
   "notif.markAll": "Позначити все прочитаним",
 
-  // Помилки
   "error.forbidden": "Недостатньо прав для цієї дії",
   "error.notFound": "Об'єкт не знайдено",
   "error.generic": "Не вдалося виконати дію",
@@ -940,7 +909,6 @@ export const uk: Messages = {
   "error.noWorkshops": "Довідник цехів порожній. Зверніться до адміністратора.",
   "error.noDepartments": "Довідник відділів закупівлі порожній. Зверніться до адміністратора.",
 
-  // Workflow actions & steps
   "workflow.currentStatus": "Поточний стан заявки",
   "workflow.nextAction": "Наступний крок",
   "workflow.nextStage": "Перевести заявку на наступний етап",
@@ -1010,7 +978,6 @@ export const uk: Messages = {
   "workflow.modalConfirmRejection": "Підтвердити відхилення",
   "workflow.modalConfirmCancellation": "Підтвердити скасування",
 
-  // Stepper
   "stepper.lifecycle": "Життєвий цикл заявки",
   "stepper.waitingClarification": "⚠️ Очікується відповідь на уточнення",
   "stepper.rejectedTitle": "Заявку відхилено",
@@ -1018,7 +985,6 @@ export const uk: Messages = {
   "stepper.cancelledTitle": "Заявку скасовано",
   "stepper.cancelledDesc": "Перехід до подальших етапів закупівлі заблоковано.",
 
-  // Адміністрування: Резервні копії та обслуговування
   "admin.maintenance.backupSuccess": "Резервну копію «{filename}» ({size}) успішно збережено на сервері.",
   "admin.maintenance.backupError": "Помилка під час створення резервної копії.",
   "admin.maintenance.deleteTitle": "Видалення резервної копії",

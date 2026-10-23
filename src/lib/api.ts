@@ -11,7 +11,6 @@ export function jsonError(status: number, code: string, details?: unknown) {
   return NextResponse.json({ error: code, details: details ?? null }, { status });
 }
 
-/** Единая обработка ошибок всех route handlers. */
 export async function handleRoute<T>(fn: () => Promise<T>): Promise<Response> {
   try {
     const result = await fn();

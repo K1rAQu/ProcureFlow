@@ -157,9 +157,6 @@ function emailTemplate({
   `.trim();
 }
 
-/**
- * 1. Сповіщення про успішне створення нової заявки
- */
 export async function notifyRequestCreated(requestId: number): Promise<void> {
   const [row] = await db
     .select({
@@ -361,7 +358,7 @@ export async function notifyStatusChanged({
     contentHtml: `
       <p style="margin:0 0 16px 0;">Доброго дня!</p>
       <p style="margin:0 0 16px 0;">У заявці на закупівлю <strong>№ ${escapeHtml(row.number)}</strong> відбулася зміна статусу.</p>
-      
+
       <div style="background-color:#f8fafc;border:1px solid #e2e8f0;padding:16px;border-radius:8px;margin:16px 0;">
         <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;">
           <tr>

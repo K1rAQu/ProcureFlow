@@ -65,7 +65,7 @@ function ImageUploader({ images, onChange }: { images: Image[]; onChange: (next:
       {error ? <span className="text-xs text-rose-600">{error}</span> : null}
       {images.map((image) => (
         <span key={image.id} className="relative">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {}
           <img src={image.url} alt="" className="h-12 w-12 rounded object-cover ring-1 ring-slate-200" />
           <button
             type="button"

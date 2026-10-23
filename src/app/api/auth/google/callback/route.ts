@@ -46,14 +46,12 @@ export async function GET(request: Request) {
 
     const normalizedEmail = profile.email.trim().toLowerCase();
 
-    // Перевірка обмеження на єдиний корпоративний домен (якщо задано в .env)
     if (!isCorporateEmailAllowed(normalizedEmail)) {
       return NextResponse.redirect(new URL(`/login?error=corporate_domain_required`, request.url));
     }
 
     const settings = await getSettings();
 
-    // Перевіряємо існуючого користувача
     const [existing] = await db
       .select()
       .from(users)

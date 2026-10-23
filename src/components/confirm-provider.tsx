@@ -49,7 +49,6 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Keyboard navigation: Escape cancels, Enter confirms
   useEffect(() => {
     if (!dialog?.isOpen) return;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -85,14 +84,14 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           aria-modal="true"
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
         >
-          {/* Backdrop with smooth blur */}
+          {}
           <div
             className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
             onClick={() => handleClose(false)}
             aria-hidden="true"
           />
 
-          {/* Dialog Card */}
+          {}
           <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-900/10 transition-all animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6">
               <div className="flex items-start gap-4">

@@ -232,7 +232,7 @@ export async function initSqliteTables(client: Client): Promise<void> {
       await client.execute("PRAGMA journal_mode = WAL;");
       await client.execute("PRAGMA busy_timeout = 10000;");
     } catch {
-      // WAL can fail on in-memory or readonly
+
     }
 
     for (const stmt of SCHEMA_STATEMENTS) {

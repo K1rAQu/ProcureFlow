@@ -45,14 +45,14 @@ export function Modal({
       aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
     >
-      {/* Backdrop with smooth blur */}
+      {}
       <div
         className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      {/* Modal Dialog Card */}
+      {}
       <div
         className={cn(
           "relative w-full rounded-2xl bg-white shadow-2xl ring-1 ring-slate-900/10 transition-all animate-in fade-in zoom-in-95 duration-200 overflow-hidden",

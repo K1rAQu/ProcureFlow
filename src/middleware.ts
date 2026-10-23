@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// Приватні та локальні IP-адреси корпоративної мережі
 const LOCAL_IPS = ["127.0.0.1", "::1", "localhost", "::ffff:127.0.0.1"];
 
 function isPrivateIp(ip: string): boolean {
@@ -11,7 +10,6 @@ function isPrivateIp(ip: string): boolean {
   return false;
 }
 
-// Кеш визначення IP для автономного режиму (в оперативній пам'яті)
 type GeoCacheEntry = { country: string; isVpn: boolean; expires: number };
 const geoCache = new Map<string, GeoCacheEntry>();
 

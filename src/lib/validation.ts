@@ -4,7 +4,6 @@ import { LOCALES } from "./i18n.ts";
 
 const trimmed = (max: number) => z.string().trim().max(max);
 
-/** Необязательная строка: пустые значения превращаются в null, ключ можно не передавать. */
 const optionalText = (max: number) =>
   z
     .union([z.string(), z.number(), z.null()])
@@ -87,9 +86,9 @@ export const requestItemSchema = z.object({
   comment: optionalText(2000),
   manufacturer: optionalText(160),
   fileIds: z.array(z.number().int().positive()).max(8).default([]),
-  /** явное подтверждение обновления карточки номенклатуры данными строки */
+
   updateNomenclatureCard: z.boolean().optional().default(false),
-  /** пользователь подтвердил создание новой карточки, несмотря на похожие позиции */
+
   confirmNewNomenclature: z.boolean().optional().default(false),
 });
 
@@ -146,7 +145,7 @@ export const nomenclatureCreateSchema = z.object({
     .optional()
     .transform((value) => (value ? value : null)),
   fileIds: z.array(z.number().int().positive()).max(8).default([]),
-  /** подтверждение создания, несмотря на найденные дубликаты */
+
   confirmDuplicate: z.boolean().optional().default(false),
 });
 

@@ -19,9 +19,6 @@ export const INITIAL_UNITS = [
   { code: "box", nameRu: "ящ", nameUk: "ящ", description: "Ящики / коробки", sortOrder: 110 },
 ];
 
-/**
- * Створює системні ролі, напрями закупівлі та базовий довідник одиниць виміру.
- */
 export async function ensureCoreData(): Promise<void> {
   await initSqliteTables(client);
 

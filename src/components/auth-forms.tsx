@@ -71,7 +71,7 @@ export function LoginForm({
 
   return (
     <div className="space-y-4 pt-2">
-      {/* Кнопка входу виключно через Google / Gmail */}
+      {}
       <a
         href="/api/auth/google"
         className="flex w-full items-center justify-center gap-3.5 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-xs transition hover:border-slate-400 hover:bg-slate-50 hover:shadow-md active:scale-[0.99]"
@@ -190,7 +190,7 @@ export function SetupForm({ isGoogleConfigured = false }: { isGoogleConfigured?:
 
   return (
     <div className="space-y-4">
-      {/* Створення першого адміністратора виключно через Google */}
+      {}
       <a
         href="/api/auth/google"
         className="flex w-full items-center justify-center gap-3.5 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-xs transition hover:border-slate-400 hover:bg-slate-50 hover:shadow-md active:scale-[0.99]"

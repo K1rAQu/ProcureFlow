@@ -12,7 +12,6 @@ export default async function SetupPage() {
   const initialized = await isSystemInitialized();
   if (initialized) redirect("/login");
 
-  // Створює системні ролі та напрями закупівлі «Імпорт» / «Україна»
   await ensureCoreData();
 
   const isGoogleConfigured = isGoogleOAuthConfigured();

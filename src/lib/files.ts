@@ -15,7 +15,6 @@ const ALLOWED_MIME: Record<string, string> = {
   "image/gif": "gif",
 };
 
-/** Файлы хранятся вне public/ и отдаются только через защищённый роут. */
 export function uploadRoot(): string {
   return process.env.UPLOAD_DIR
     ? path.resolve(process.env.UPLOAD_DIR)
@@ -40,7 +39,7 @@ export async function storeUpload(file: File, user: SessionUser) {
   if (file.size > maxBytes) throw new HttpError(413, "file_too_large");
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  // Тип определяется по содержимому, а не по заголовку клиента.
+
   const mime = detectMime(buffer);
   if (!mime || !ALLOWED_MIME[mime]) throw new HttpError(415, "unsupported_file_type");
 

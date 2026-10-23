@@ -17,7 +17,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     const [current] = await db.select().from(users).where(eq(users.id, id)).limit(1);
     if (!current) throw new HttpError(404, "not_found");
 
-    // Нельзя лишить систему последнего администратора
     if ((payload.roleId && payload.roleId !== current.roleId) || payload.isActive === false) {
       const [adminRole] = await db.select().from(roles).where(eq(roles.code, "admin")).limit(1);
       if (adminRole && current.roleId === adminRole.id) {
@@ -40,7 +39,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
     await db.update(users).set(patch).where(eq(users.id, id));
 
-    // Смена пароля или блокировка завершает активные сессии пользователя
     if (payload.password || payload.isActive === false) {
       await db.delete(sessions).where(eq(sessions.userId, id));
     }

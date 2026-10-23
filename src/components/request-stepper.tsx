@@ -60,7 +60,7 @@ export function RequestLifecycleStepper({ status }: { status: string }) {
       </div>
 
       <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
-        {/* Фонова лінія з'єднання */}
+        {}
         <div className="hidden sm:block absolute left-4 right-4 top-4 -translate-y-1/2 h-1 bg-slate-100 -z-0 overflow-hidden rounded-full">
           <div
             className="h-full bg-[#12325c] transition-all duration-300"

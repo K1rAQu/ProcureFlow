@@ -52,14 +52,12 @@ export function NomenclatureBulkPicker({
     new Map(),
   );
 
-  // При відкритті скидаємо пошук або вибір, якщо потрібно
   useEffect(() => {
     if (!open) return;
     setSelectedMap(new Map());
     setQuery("");
   }, [open]);
 
-  // Завантаження позицій номенклатури при зміні вкладки чи пошуку
   useEffect(() => {
     if (!open) return;
     const controller = new AbortController();

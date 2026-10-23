@@ -3,10 +3,6 @@
 import { useRef, useTransition, type FormEvent, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-/**
- * Клієнтська реактивна фільтрація через Next.js router.push без повного перезавантаження сторінки.
- * Зберігає поточний вигляд (view=kanban / view=table), додає плавний перехід та індикатор оновлення.
- */
 export function FilterForm({ action, children }: { action: string; children: ReactNode }) {
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
@@ -18,7 +14,6 @@ export function FilterForm({ action, children }: { action: string; children: Rea
     const formData = new FormData(formRef.current);
     const params = new URLSearchParams();
 
-    // Preserve active view (table / kanban)
     const view = searchParams.get("view");
     if (view) params.set("view", view);
 

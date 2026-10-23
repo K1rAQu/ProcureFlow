@@ -11,7 +11,7 @@ export type SystemEvent = {
 class SystemEventBus extends EventEmitter {
   constructor() {
     super();
-    // Allow any number of connected SSE clients without MaxListenersExceededWarning
+
     this.setMaxListeners(0);
   }
 }

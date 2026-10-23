@@ -27,7 +27,6 @@ export function RequestFilters({
   const t = useT();
   const router = useRouter();
 
-  // Рахуємо скільки активних розширених фільтрів (окрім рядка пошуку та вкладки статусу)
   const activeExtraFiltersCount = [
     values.departmentId,
     values.workshopId,
@@ -47,7 +46,6 @@ export function RequestFilters({
     const formData = new FormData(event.currentTarget);
     const params = new URLSearchParams();
 
-    // Зберігаємо поточний вигляд, статус та пріоритет, якщо вони є у values
     if (values.view) params.set("view", values.view);
     if (values.status && values.status !== "all") params.set("status", values.status);
     if (values.priority && values.priority !== "all") params.set("priority", values.priority);

@@ -4,10 +4,6 @@ import { HttpError } from "./auth";
 
 export type DirectoryKind = "workshops" | "departments" | "units";
 
-/**
- * Таблицы цехов, отделов и единиц измерения имеют одинаковую структуру, поэтому справочниками
- * управляет один набор обработчиков.
- */
 export function resolveTable(kind: string): typeof workshops {
   if (kind === "workshops") return workshops;
   if (kind === "departments") return departments as unknown as typeof workshops;

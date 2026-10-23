@@ -11,12 +11,11 @@ export function SessionTimeoutWatcher({ timeoutMinutes }: { timeoutMinutes: numb
   useEffect(() => {
     if (!timeoutMinutes || timeoutMinutes <= 0) return;
 
-    // Встановлюємо стартовий час активності
     const recordActivity = () => {
       try {
         localStorage.setItem(STORAGE_KEY, String(Date.now()));
       } catch {
-        // ігноруємо помилки при роботі в приватному режимі
+
       }
     };
 
@@ -25,7 +24,7 @@ export function SessionTimeoutWatcher({ timeoutMinutes }: { timeoutMinutes: numb
     let lastRecord = Date.now();
     const handleUserActivity = () => {
       const now = Date.now();
-      // Оновлюємо не частіше ніж раз на 10 секунд для економії ресурсів
+
       if (now - lastRecord > 10000) {
         lastRecord = now;
         recordActivity();
@@ -47,12 +46,12 @@ export function SessionTimeoutWatcher({ timeoutMinutes }: { timeoutMinutes: numb
           try {
             await fetch("/api/auth/logout", { method: "POST" });
           } catch {
-            // ігноруємо помилки мережі при виході
+
           }
           window.location.href = "/login?reason=timeout";
         }
       } catch {
-        // ігноруємо помилки читання localStorage
+
       }
     }, 15000);
 

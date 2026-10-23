@@ -17,7 +17,6 @@ export function NomenclatureFilters({
   const t = useT();
   const router = useRouter();
 
-  // Рахуємо кількість додаткових активних фільтрів (окрім рядка пошуку)
   const activeExtraFiltersCount = [
     values.status && values.status !== "all_active" ? values.status : null,
     values.mine === "1" ? "mine" : null,

@@ -6,10 +6,6 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
-/* -------------------------------------------------------------------------- */
-/*  Roles & users                                                             */
-/* -------------------------------------------------------------------------- */
-
 export const roles = sqliteTable("roles", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   code: text("code").notNull().unique(),
@@ -21,7 +17,6 @@ export const roles = sqliteTable("roles", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
 
-/** Производственные цеха */
 export const workshops = sqliteTable("workshops", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   code: text("code").notNull().unique(),
@@ -34,7 +29,6 @@ export const workshops = sqliteTable("workshops", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
 
-/** Отделы (направления) закупки: Импорт / Украина */
 export const departments = sqliteTable("departments", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   code: text("code").notNull().unique(),
@@ -47,7 +41,6 @@ export const departments = sqliteTable("departments", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
 
-/** Одиниці виміру (шт, кг, м, л тощо) */
 export const unitsOfMeasurement = sqliteTable("units_of_measurement", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   code: text("code").notNull().unique(),
@@ -99,10 +92,6 @@ export const sessions = sqliteTable(
   (table) => [index("sessions_user_idx").on(table.userId)],
 );
 
-/* -------------------------------------------------------------------------- */
-/*  Files                                                                     */
-/* -------------------------------------------------------------------------- */
-
 export const files = sqliteTable("files", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   storageKey: text("storage_key").notNull().unique(),
@@ -116,10 +105,6 @@ export const files = sqliteTable("files", {
   createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
 
-/* -------------------------------------------------------------------------- */
-/*  Nomenclature                                                              */
-/* -------------------------------------------------------------------------- */
-
 export const nomenclature = sqliteTable(
   "nomenclature",
   {
@@ -132,7 +117,7 @@ export const nomenclature = sqliteTable(
     description: text("description"),
     specs: text("specs"),
     unit: text("unit").notNull().default("шт"),
-    /** active | pending | archived | merged */
+
     status: text("status").notNull().default("active"),
     lastPrice: text("last_price"),
     lastCurrency: text("last_currency"),
@@ -186,10 +171,6 @@ export const nomenclatureHistory = sqliteTable(
   (table) => [index("nomenclature_history_item_idx").on(table.nomenclatureId)],
 );
 
-/* -------------------------------------------------------------------------- */
-/*  Requests                                                                  */
-/* -------------------------------------------------------------------------- */
-
 export const requests = sqliteTable(
   "requests",
   {
@@ -206,9 +187,9 @@ export const requests = sqliteTable(
       .references(() => workshops.id),
     assigneeId: integer("assignee_id").references(() => users.id),
     parentRequestId: integer("parent_request_id"),
-    /** draft | submitted | in_review | needs_info | purchasing | ordered | completed | rejected | cancelled */
+
     status: text("status").notNull().default("draft"),
-    /** normal | high | urgent */
+
     priority: text("priority").notNull().default("normal"),
     comment: text("comment"),
     desiredDate: text("desired_date"),
@@ -263,7 +244,6 @@ export const requestItemImages = sqliteTable(
   (table) => [index("request_item_images_item_idx").on(table.requestItemId)],
 );
 
-/** История/лента событий заявки: смена статуса, комментарии, уточнения, правки */
 export const requestEvents = sqliteTable(
   "request_events",
   {
@@ -272,7 +252,7 @@ export const requestEvents = sqliteTable(
       .notNull()
       .references(() => requests.id, { onDelete: "cascade" }),
     userId: integer("user_id").references(() => users.id),
-    /** created | submitted | status_change | comment | clarification | answer | edit | assign | split */
+
     type: text("type").notNull(),
     fromStatus: text("from_status"),
     toStatus: text("to_status"),
@@ -282,10 +262,6 @@ export const requestEvents = sqliteTable(
   },
   (table) => [index("request_events_request_idx").on(table.requestId)],
 );
-
-/* -------------------------------------------------------------------------- */
-/*  Infrastructure                                                            */
-/* -------------------------------------------------------------------------- */
 
 export const notifications = sqliteTable(
   "notifications",
@@ -329,13 +305,11 @@ export const settings = sqliteTable("settings", {
   updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull().$defaultFn(() => new Date()),
 });
 
-/** Счётчики для генерации номеров заявок */
 export const counters = sqliteTable("counters", {
   key: text("key").primaryKey(),
   value: integer("value").notNull().default(0),
 });
 
-/** Идемпотентность отправки форм (защита от двойного клика) */
 export const idempotencyKeys = sqliteTable("idempotency_keys", {
   key: text("key").primaryKey(),
   userId: integer("user_id")
