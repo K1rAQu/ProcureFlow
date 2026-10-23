@@ -230,7 +230,7 @@ const SCHEMA_STATEMENTS = [
 ];
 
 async function seed() {
-  console.log("Seeding realistic demo data into:", dbPath);
+  console.log("Seeding realistic demo data into:", dbUrl);
 
   const now = Date.now();
   const oneHourAgo = now - 3600 * 1000;
