@@ -10,11 +10,11 @@
 [![Drizzle ORM](https://img.shields.io/badge/Drizzle-ORM-C5F74F?style=flat-square)](https://orm.drizzle.team/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](LICENSE)
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-procureflow--jcea.onrender.com-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://procureflow-jcea.onrender.com/)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-procureflow.fly.dev-24185B?style=for-the-badge&logo=flydotio&logoColor=white)](https://procureflow.fly.dev/)
 
 **A modern, self-hosted, lightweight internal procurement and supply-chain web system designed for manufacturing plants, engineering workshops, and industrial enterprises.**
 
-[English](README.md) • [Українська](README.uk.md) • [Live Demo](https://procureflow-jcea.onrender.com/) • [Quick Start](#-quick-start)
+[English](README.md) • [Українська](README.uk.md) • [Live Demo](https://procureflow.fly.dev/) • [Quick Start](#-quick-start)
 
 </div>
 
@@ -142,10 +142,11 @@ Your instance will be available at `http://localhost:3000` with persistent stora
 ## 🌐 Live Demo
 
 A live public demo instance is running at:
-👉 **[https://procureflow-jcea.onrender.com/](https://procureflow-jcea.onrender.com/)**
+👉 **[https://procureflow.fly.dev/](https://procureflow.fly.dev/)**  
+*(Mirror backup on Render: [procureflow-jcea.onrender.com](https://procureflow-jcea.onrender.com/))*
 
 > [!NOTE]
-> The demo instance is hosted on Render free tier. If the instance has been idle for more than 15 minutes, please allow up to 45–60 seconds for the initial wake-up.
+> The demo runs on Fly.io (Frankfurt region, 1 GB RAM) with single-digit millisecond SQLite response times.
 > Pre-configured demo accounts (**Administrator**, **Buyer**, **Shop Manager**, **Requester**) are available directly on the sign-in page with 1-click login.
 
 ---

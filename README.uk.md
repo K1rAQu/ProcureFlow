@@ -1,8 +1,8 @@
 # 📦 ProcureFlow — Система керування закупівлями підприємства
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-procureflow--jcea.onrender.com-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://procureflow-jcea.onrender.com/)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-procureflow.fly.dev-24185B?style=for-the-badge&logo=flydotio&logoColor=white)](https://procureflow.fly.dev/)
 
-[English](README.md) • [Українська](README.uk.md) • [Live Demo](https://procureflow-jcea.onrender.com/)
+[English](README.md) • [Українська](README.uk.md) • [Live Demo](https://procureflow.fly.dev/)
 
 Сучасна внутрішня веб-система підприємства для формування, погодження, маршрутизації та виконання заявок на закупівлю комплектуючих, матеріалів та обладнання з єдиним довідником номенклатури.
 
@@ -158,10 +158,11 @@ docker compose up -d --build
 ## 🌐 7. Публічне Live Demo
 
 Робоча публічна онлайн-демонстрація системи доступна за адресою:
-👉 **[https://procureflow-jcea.onrender.com/](https://procureflow-jcea.onrender.com/)**
+👉 **[https://procureflow.fly.dev/](https://procureflow.fly.dev/)**  
+*(Резервне дзеркало на Render: [procureflow-jcea.onrender.com](https://procureflow-jcea.onrender.com/))*
 
 > [!NOTE]
-> Демо розміщено на безкоштовному тарифі Render. Якщо на сайт ніхто не заходив понад 15 хвилин, зачекайте 45–60 секунд на перше «пробудження» контейнера.
+> Демо розгорнуто на Fly.io (регіон Франкфурт, 1 ГБ RAM) зі швидким локальним SQLite та миттєвим завантаженням.
 > На сторінці входу доступні готові демо-акаунти (**Адміністратор**, **Менеджер закупівель**, **Начальник цеху**, **Інженер**) для авторизації в 1 клік.
 
 ---
