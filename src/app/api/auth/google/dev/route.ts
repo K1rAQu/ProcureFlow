@@ -5,12 +5,16 @@ import { roles, users } from "@/db/schema";
 import { createSession } from "@/lib/auth";
 import { writeAudit } from "@/lib/audit";
 import { countUsers, ensureCoreData } from "@/lib/bootstrap";
+import { isGoogleOAuthConfigured } from "@/lib/google-auth";
 import { getSettings } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") {
+  const isDemo = process.env.DEMO_MODE === "true";
+  const isGoogleConfigured = isGoogleOAuthConfigured();
+
+  if (process.env.NODE_ENV === "production" && isGoogleConfigured && !isDemo) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

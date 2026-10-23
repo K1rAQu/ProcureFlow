@@ -104,8 +104,6 @@ npm run dev
 ```
 Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
-> **Windows One-Click Launch:** You can also simply double-click `start.bat` or run `.\start.ps1` in PowerShell.
-
 ---
 
 ## 🔑 Demo Accounts & Authentication

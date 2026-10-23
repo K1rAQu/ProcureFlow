@@ -45,3 +45,10 @@ Thumbs.db
 *.swo
 .vscode/
 .idea/
+
+# Local utility scripts
+start.bat
+start.ps1
+stop.bat
+stop.ps1
+

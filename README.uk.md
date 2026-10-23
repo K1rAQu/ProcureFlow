@@ -17,17 +17,7 @@
 ### Вимоги:
 * Node.js версії 20.x або новішої.
 
-### Запуск на Windows:
-Двічі клацніть файл:
-```cmd
-start.bat
-```
-або через PowerShell:
-```powershell
-.\start.ps1
-```
-
-### Ручний запуск у консолі:
+### Швидкий запуск:
 ```bash
 npm install
 npm run dev
