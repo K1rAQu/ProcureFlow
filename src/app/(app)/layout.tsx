@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
+import { desc, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { notifications } from "@/db/schema";
 import { ConfirmProvider } from "@/components/confirm-provider";
 import { I18nProvider } from "@/components/i18n-provider";
 import { NotificationsBell, SidebarNav, type NavItem } from "@/components/nav";
@@ -18,6 +21,27 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const locale = await resolveLocale(user);
   const messages = getMessages(locale);
   const settings = await getSettings();
+
+  const notifRows = await db
+    .select({
+      id: notifications.id,
+      type: notifications.type,
+      title: notifications.title,
+      body: notifications.body,
+      isRead: notifications.isRead,
+      requestId: notifications.requestId,
+      createdAt: notifications.createdAt,
+    })
+    .from(notifications)
+    .where(eq(notifications.userId, user.id))
+    .orderBy(desc(notifications.createdAt))
+    .limit(30);
+
+  const initialNotifications = notifRows.map((row) => ({
+    ...row,
+    createdAt: row.createdAt.toISOString(),
+  }));
+  const initialUnread = initialNotifications.filter((r) => !r.isRead).length;
 
   const items: NavItem[] = [{ href: "/", labelKey: "nav.dashboard", icon: "◧" }];
   if (user.permissions.includes("requests.create")) {
@@ -55,11 +79,13 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               avatarUrl: user.avatarUrl ?? null,
               roleName: localizedName(locale, { nameRu: user.roleNameRu, nameUk: user.roleNameUk }),
             }}
+            initialNotifications={initialNotifications}
+            initialUnread={initialUnread}
           />
           <div className="flex min-w-0 flex-1 flex-col print:block">
             <header className="no-print print:hidden hidden items-center justify-end gap-3 border-b border-slate-200 bg-white px-6 py-3 lg:flex">
               <span className="text-xs text-slate-500">{user.email}</span>
-              <NotificationsBell />
+              <NotificationsBell initialItems={initialNotifications} initialUnread={initialUnread} />
             </header>
             <main className="min-w-0 flex-1 p-4 sm:p-6 print:p-0 print:m-0 print:w-full">{children}</main>
           </div>

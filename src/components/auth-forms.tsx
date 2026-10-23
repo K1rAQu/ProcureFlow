@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button, Field, Input } from "./ui";
 import { IconGoogle } from "./icons";
 import { useT } from "./i18n-provider";
 
@@ -42,14 +41,14 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(initialError ? errorMessage(initialError, t) : null);
   const [devBusy, setDevBusy] = useState(false);
 
-  async function handleDevGoogleLogin() {
+  async function handleDevGoogleLogin(email = "admin@company.com", fullName = "Alex Morgan (Admin)") {
     setDevBusy(true);
     setError(null);
     try {
       const response = await fetch("/api/auth/google/dev", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "admin@google.com", fullName: "Google Administrator" }),
+        body: JSON.stringify({ email, fullName }),
       });
       if (response.ok) {
         const data = (await response.json().catch(() => ({}))) as { pendingApproval?: boolean };
@@ -92,20 +91,67 @@ export function LoginForm({
       </p>
 
       {!isGoogleConfigured ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 space-y-2">
-          <p className="font-semibold">💡 {t("auth.googleNotConfigured")}</p>
-          <p className="text-[11px] text-amber-700 leading-normal">
-            {t("auth.googleEnvHint")}
-          </p>
-          <div className="border-t border-amber-200/80 pt-2.5">
-            <button
-              type="button"
-              disabled={devBusy}
-              onClick={handleDevGoogleLogin}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:opacity-50"
-            >
-              {devBusy ? t("common.loading") : `⚡ ${t("auth.googleDevSignIn")}`}
-            </button>
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 space-y-3">
+          <div>
+            <p className="font-semibold text-amber-950">💡 {t("auth.googleNotConfigured")}</p>
+            <p className="mt-0.5 text-[11px] text-amber-800 leading-normal">
+              {t("auth.googleEnvHint")}
+            </p>
+          </div>
+          <div className="border-t border-amber-200/80 pt-3">
+            <p className="text-[11px] font-semibold text-amber-900 mb-2">
+              ⚡ {t("auth.googleDevSignIn")} (1-Click Google Emulator):
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={devBusy}
+                onClick={() => handleDevGoogleLogin("admin@company.com", "Alex Morgan (Admin)")}
+                className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-50"
+              >
+                <span className="text-base shrink-0">👑</span>
+                <div className="min-w-0">
+                  <p className="font-semibold leading-tight truncate text-slate-900">Admin</p>
+                  <p className="text-[10px] text-slate-500 truncate">admin@company.com</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                disabled={devBusy}
+                onClick={() => handleDevGoogleLogin("buyer@company.com", "Elena Rostova (Lead Buyer)")}
+                className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-50"
+              >
+                <span className="text-base shrink-0">💼</span>
+                <div className="min-w-0">
+                  <p className="font-semibold leading-tight truncate text-slate-900">Buyer</p>
+                  <p className="text-[10px] text-slate-500 truncate">buyer@company.com</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                disabled={devBusy}
+                onClick={() => handleDevGoogleLogin("shop@company.com", "Taras Shevchenko (Shop Manager)")}
+                className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-50"
+              >
+                <span className="text-base shrink-0">🏭</span>
+                <div className="min-w-0">
+                  <p className="font-semibold leading-tight truncate text-slate-900">Shop Manager</p>
+                  <p className="text-[10px] text-slate-500 truncate">shop@company.com</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                disabled={devBusy}
+                onClick={() => handleDevGoogleLogin("requester@company.com", "David Miller (Hardware Engineer)")}
+                className="flex cursor-pointer items-center gap-2.5 rounded-lg bg-white border border-amber-300/80 p-2.5 text-left text-xs font-medium text-slate-800 shadow-2xs hover:bg-amber-100/60 transition disabled:opacity-50"
+              >
+                <span className="text-base shrink-0">🔧</span>
+                <div className="min-w-0">
+                  <p className="font-semibold leading-tight truncate text-slate-900">Requester</p>
+                  <p className="text-[10px] text-slate-500 truncate">requester@company.com</p>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
@@ -116,12 +162,7 @@ export function LoginForm({
 export function SetupForm({ isGoogleConfigured = false }: { isGoogleConfigured?: boolean }) {
   const t = useT();
   const router = useRouter();
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeat, setRepeat] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const [devBusy, setDevBusy] = useState(false);
 
   async function handleDevGoogleSetup() {
@@ -131,15 +172,10 @@ export function SetupForm({ isGoogleConfigured = false }: { isGoogleConfigured?:
       const response = await fetch("/api/auth/google/dev", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "admin@google.com", fullName: "Google Головний Адміністратор" }),
+        body: JSON.stringify({ email: "admin@company.com", fullName: "Alex Morgan (Admin)" }),
       });
       if (response.ok) {
-        const data = (await response.json().catch(() => ({}))) as { pendingApproval?: boolean };
-        if (data.pendingApproval) {
-          router.replace("/pending-approval");
-        } else {
-          router.replace("/");
-        }
+        router.replace("/");
         router.refresh();
         return;
       }
@@ -153,103 +189,44 @@ export function SetupForm({ isGoogleConfigured = false }: { isGoogleConfigured?:
   }
 
   return (
-    <div className="space-y-5">
-      {/* Вхід через Google як швидке початкове налаштування */}
-      <div>
-        <a
-          href="/api/auth/google"
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-2xs transition hover:border-slate-400 hover:bg-slate-50 active:scale-[0.99]"
-        >
-          <IconGoogle className="h-5 w-5" />
-          <span>Створити першого адміністратора через Google</span>
-        </a>
-
-        {!isGoogleConfigured ? (
-          <div className="mt-2.5 rounded-xl border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-900">
-            <p className="font-semibold">💡 {t("auth.googleNotConfigured")}</p>
-            <p className="mt-1 text-[11px] text-amber-700">
-              Вкажіть <code>GOOGLE_CLIENT_ID</code> та <code>GOOGLE_CLIENT_SECRET</code> у файлі <code>.env</code>.
-            </p>
-            <div className="mt-2.5 border-t border-amber-200/80 pt-2">
-              <button
-                type="button"
-                disabled={devBusy || busy}
-                onClick={handleDevGoogleSetup}
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:opacity-50"
-              >
-                {devBusy ? t("common.loading") : "⚡ Створити адміністратора (Dev Mode)"}
-              </button>
-            </div>
-          </div>
-        ) : null}
-      </div>
-
-      <div className="relative flex items-center justify-center">
-        <div className="w-full border-t border-slate-200" />
-        <span className="absolute bg-white px-3 text-xs font-medium text-slate-400">
-          або введіть дані вручну
-        </span>
-      </div>
-
-      <form
-        className="space-y-4"
-        onSubmit={async (event) => {
-          event.preventDefault();
-          if (busy) return;
-          if (password !== repeat) {
-            setError(t("auth.passwordMismatch"));
-            return;
-          }
-          setBusy(true);
-          setError(null);
-          const response = await fetch("/api/setup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ fullName, email, password }),
-          });
-          if (response.ok) {
-            router.replace("/");
-            router.refresh();
-            return;
-          }
-          const data = (await response.json().catch(() => ({ error: "error" }))) as { error: string };
-          setError(data.error === "already_initialized" ? t("error.generic") : errorMessage(data.error, t));
-          setBusy(false);
-        }}
+    <div className="space-y-4">
+      {/* Створення першого адміністратора виключно через Google */}
+      <a
+        href="/api/auth/google"
+        className="flex w-full items-center justify-center gap-3.5 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-800 shadow-xs transition hover:border-slate-400 hover:bg-slate-50 hover:shadow-md active:scale-[0.99]"
       >
-        <Field label={t("auth.fullName")} required>
-          <Input required minLength={2} value={fullName} onChange={(event) => setFullName(event.target.value)} />
-        </Field>
-        <Field label={t("auth.email")} required>
-          <Input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
-        </Field>
-        <Field label={t("auth.password")} required hint="min. 8">
-          <Input
-            type="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </Field>
-        <Field label={t("auth.passwordRepeat")} required>
-          <Input
-            type="password"
-            required
-            minLength={8}
-            autoComplete="new-password"
-            value={repeat}
-            onChange={(event) => setRepeat(event.target.value)}
-          />
-        </Field>
-        {error ? (
-          <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 ring-1 ring-rose-200">{error}</p>
-        ) : null}
-        <Button type="submit" disabled={busy} className="w-full">
-          {busy ? t("common.loading") : t("auth.createAdmin")}
-        </Button>
-      </form>
+        <IconGoogle className="h-5 w-5 shrink-0" />
+        <span className="text-sm font-semibold">{t("auth.googleSignIn")}</span>
+      </a>
+
+      {error ? (
+        <p className="rounded-xl bg-rose-50 p-3.5 text-xs font-medium text-rose-700 ring-1 ring-rose-200">
+          {error}
+        </p>
+      ) : null}
+
+      <p className="text-center text-xs text-slate-500 leading-relaxed px-2">
+        {t("auth.googleOnlyHint")}
+      </p>
+
+      {!isGoogleConfigured ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-4 text-xs text-amber-900 space-y-2.5">
+          <p className="font-semibold">💡 {t("auth.googleNotConfigured")}</p>
+          <p className="text-[11px] text-amber-700 leading-normal">
+            {t("auth.googleEnvHint")}
+          </p>
+          <div className="border-t border-amber-200/80 pt-2.5">
+            <button
+              type="button"
+              disabled={devBusy}
+              onClick={handleDevGoogleSetup}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:opacity-50"
+            >
+              {devBusy ? t("common.loading") : `⚡ ${t("auth.googleDevSignIn")}`}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

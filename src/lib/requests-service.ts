@@ -489,6 +489,19 @@ export async function changeRequestStatus(
     payload: { comment },
   });
 
+  const STATUS_LABELS: Record<string, string> = {
+    draft: "Чернетка",
+    submitted: "Надіслана на розгляд",
+    in_review: "Прийнята в обробку",
+    needs_info: "Потребує уточнення",
+    purchasing: "Передано в закупівлю",
+    ordered: "Замовлено у постачальника",
+    completed: "Виконано",
+    rejected: "Відхилено",
+    cancelled: "Скасовано",
+  };
+  const statusLabel = STATUS_LABELS[nextStatus] ?? nextStatus;
+
   const recipients = new Set<number>();
   if (current.authorId !== user.id) recipients.add(current.authorId);
   if (current.assigneeId && current.assigneeId !== user.id) recipients.add(current.assigneeId);
@@ -497,8 +510,8 @@ export async function changeRequestStatus(
       userId: recipient,
       requestId: id,
       type: "request.status",
-      title: `Заявка ${current.number}: новий статус`,
-      body: comment ?? null,
+      title: `Заявка ${current.number}: ${statusLabel}`,
+      body: comment?.trim() || `${user.fullName} змінив(ла) статус на «${statusLabel}»`,
     })),
   );
 
@@ -537,9 +550,11 @@ export async function addRequestComment(
     [...recipients].map((recipient) => ({
       userId: recipient,
       requestId: id,
-      type: "request.comment",
-      title: `Заявка ${current.number}: новий коментар`,
-      body: message.slice(0, 500),
+      type: type === "answer" ? "request.answer" : "request.comment",
+      title: type === "answer"
+        ? `Заявка ${current.number}: відповідь на запит`
+        : `Заявка ${current.number}: новий коментар`,
+      body: `${user.fullName}: ${message.slice(0, 300)}`,
     })),
   );
 }
@@ -583,7 +598,8 @@ export async function assignRequest(id: number, assigneeId: number | null, user:
       userId: assigneeId,
       requestId: id,
       type: "request.assigned",
-      title: `Вас призначено відповідальним за ${current.number}`,
+      title: `Заявка ${current.number}: вас призначено відповідальним`,
+      body: `Призначив(ла): ${user.fullName}`,
     });
     void notifyRequestAssigned({
       requestId: id,
@@ -592,6 +608,23 @@ export async function assignRequest(id: number, assigneeId: number | null, user:
     }).catch((err) => {
       console.error("[EMAIL ERROR] notifyRequestAssigned failed:", err);
     });
+  }
+
+  if (assigneeId && current.authorId !== user.id && current.authorId !== assigneeId) {
+    const [assignedUser] = await db
+      .select({ fullName: users.fullName })
+      .from(users)
+      .where(eq(users.id, assigneeId))
+      .limit(1);
+    if (assignedUser) {
+      await notify({
+        userId: current.authorId,
+        requestId: id,
+        type: "request.assigned",
+        title: `Заявка ${current.number}: призначено відповідального`,
+        body: `Відповідальний за закупівлю: ${assignedUser.fullName}`,
+      });
+    }
   }
 }
 

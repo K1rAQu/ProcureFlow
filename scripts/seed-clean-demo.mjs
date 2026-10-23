@@ -1,33 +1,262 @@
 import { createClient } from "@libsql/client";
 import { resolve } from "node:path";
-import { randomBytes, scrypt as scryptCallback } from "node:crypto";
-import { promisify } from "node:util";
-
-const scrypt = promisify(scryptCallback);
-
-async function hashPassword(password) {
-  const salt = randomBytes(16);
-  const derived = await scrypt(password, salt, 64);
-  return `scrypt$${salt.toString("hex")}$${derived.toString("hex")}`;
-}
 
 const dbPath = resolve(process.cwd(), "data", "procurement.db");
 const client = createClient({ url: `file:${dbPath}` });
+
+const SCHEMA_STATEMENTS = [
+  `CREATE TABLE IF NOT EXISTS roles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name_ru TEXT NOT NULL,
+    name_uk TEXT NOT NULL,
+    permissions TEXT NOT NULL DEFAULT '[]',
+    is_system INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS workshops (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name_ru TEXT NOT NULL,
+    name_uk TEXT NOT NULL,
+    description TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    sort_order INTEGER NOT NULL DEFAULT 100,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS departments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name_ru TEXT NOT NULL,
+    name_uk TEXT NOT NULL,
+    description TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    sort_order INTEGER NOT NULL DEFAULT 100,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS units_of_measurement (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT NOT NULL UNIQUE,
+    name_ru TEXT NOT NULL,
+    name_uk TEXT NOT NULL,
+    description TEXT,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    sort_order INTEGER NOT NULL DEFAULT 100,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    full_name TEXT NOT NULL,
+    password_hash TEXT,
+    google_id TEXT UNIQUE,
+    avatar_url TEXT,
+    role_id INTEGER NOT NULL REFERENCES roles(id),
+    workshop_id INTEGER REFERENCES workshops(id),
+    department_id INTEGER REFERENCES departments(id),
+    locale TEXT NOT NULL DEFAULT 'uk',
+    is_active INTEGER NOT NULL DEFAULT 1,
+    last_login_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    token_hash TEXT NOT NULL UNIQUE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_agent TEXT,
+    ip TEXT,
+    expires_at INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
+  );`,
+  `CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id);`,
+  `CREATE TABLE IF NOT EXISTS files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    storage_key TEXT NOT NULL UNIQUE,
+    original_name TEXT NOT NULL,
+    mime_type TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    checksum TEXT NOT NULL,
+    uploaded_by INTEGER NOT NULL REFERENCES users(id),
+    created_at INTEGER NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS nomenclature (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    part_number TEXT,
+    bas_code TEXT,
+    manufacturer TEXT,
+    url TEXT,
+    description TEXT,
+    specs TEXT,
+    unit TEXT NOT NULL DEFAULT 'шт',
+    status TEXT NOT NULL DEFAULT 'active',
+    last_price TEXT,
+    last_currency TEXT,
+    last_price_at INTEGER,
+    usage_count INTEGER NOT NULL DEFAULT 0,
+    merged_into_id INTEGER,
+    search_key TEXT NOT NULL DEFAULT '',
+    created_by INTEGER NOT NULL REFERENCES users(id),
+    updated_by INTEGER REFERENCES users(id),
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE INDEX IF NOT EXISTS nomenclature_name_idx ON nomenclature(name);`,
+  `CREATE INDEX IF NOT EXISTS nomenclature_part_idx ON nomenclature(part_number);`,
+  `CREATE INDEX IF NOT EXISTS nomenclature_bas_idx ON nomenclature(bas_code);`,
+  `CREATE INDEX IF NOT EXISTS nomenclature_status_idx ON nomenclature(status);`,
+  `CREATE TABLE IF NOT EXISTS nomenclature_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nomenclature_id INTEGER NOT NULL REFERENCES nomenclature(id) ON DELETE CASCADE,
+    file_id INTEGER NOT NULL REFERENCES files(id),
+    sort_order INTEGER NOT NULL DEFAULT 0
+  );`,
+  `CREATE INDEX IF NOT EXISTS nomenclature_images_item_idx ON nomenclature_images(nomenclature_id);`,
+  `CREATE TABLE IF NOT EXISTS nomenclature_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nomenclature_id INTEGER NOT NULL REFERENCES nomenclature(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id),
+    action TEXT NOT NULL,
+    changes TEXT,
+    note TEXT,
+    created_at INTEGER NOT NULL
+  );`,
+  `CREATE INDEX IF NOT EXISTS nomenclature_history_item_idx ON nomenclature_history(nomenclature_id);`,
+  `CREATE TABLE IF NOT EXISTS requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    number TEXT NOT NULL UNIQUE,
+    author_id INTEGER NOT NULL REFERENCES users(id),
+    department_id INTEGER NOT NULL REFERENCES departments(id),
+    workshop_id INTEGER NOT NULL REFERENCES workshops(id),
+    assignee_id INTEGER REFERENCES users(id),
+    parent_request_id INTEGER,
+    status TEXT NOT NULL DEFAULT 'draft',
+    priority TEXT NOT NULL DEFAULT 'normal',
+    comment TEXT,
+    desired_date TEXT,
+    submitted_at INTEGER,
+    closed_at INTEGER,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE INDEX IF NOT EXISTS requests_author_idx ON requests(author_id);`,
+  `CREATE INDEX IF NOT EXISTS requests_status_idx ON requests(status);`,
+  `CREATE INDEX IF NOT EXISTS requests_department_idx ON requests(department_id);`,
+  `CREATE INDEX IF NOT EXISTS requests_workshop_idx ON requests(workshop_id);`,
+  `CREATE TABLE IF NOT EXISTS request_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_id INTEGER NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+    nomenclature_id INTEGER REFERENCES nomenclature(id),
+    position INTEGER NOT NULL DEFAULT 0,
+    name TEXT NOT NULL,
+    part_number TEXT,
+    quantity TEXT NOT NULL,
+    unit TEXT NOT NULL DEFAULT 'шт',
+    unit_price TEXT,
+    currency TEXT,
+    url TEXT,
+    comment TEXT,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE INDEX IF NOT EXISTS request_items_request_idx ON request_items(request_id);`,
+  `CREATE TABLE IF NOT EXISTS request_item_images (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_item_id INTEGER NOT NULL REFERENCES request_items(id) ON DELETE CASCADE,
+    file_id INTEGER NOT NULL REFERENCES files(id),
+    sort_order INTEGER NOT NULL DEFAULT 0
+  );`,
+  `CREATE INDEX IF NOT EXISTS request_item_images_item_idx ON request_item_images(request_item_id);`,
+  `CREATE TABLE IF NOT EXISTS request_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_id INTEGER NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id),
+    type TEXT NOT NULL,
+    from_status TEXT,
+    to_status TEXT,
+    message TEXT,
+    payload TEXT,
+    created_at INTEGER NOT NULL
+  );`,
+  `CREATE INDEX IF NOT EXISTS request_events_request_idx ON request_events(request_id);`,
+  `CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    request_id INTEGER REFERENCES requests(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    body TEXT,
+    is_read INTEGER NOT NULL DEFAULT 0,
+    created_at INTEGER NOT NULL
+  );`,
+  `CREATE INDEX IF NOT EXISTS notifications_user_idx ON notifications(user_id);`,
+  `CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES users(id),
+    action TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT,
+    summary TEXT,
+    payload TEXT,
+    ip TEXT,
+    created_at INTEGER NOT NULL
+  );`,
+  `CREATE INDEX IF NOT EXISTS audit_log_entity_idx ON audit_log(entity_type, entity_id);`,
+  `CREATE INDEX IF NOT EXISTS audit_log_created_idx ON audit_log(created_at);`,
+  `CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+  );`,
+  `CREATE TABLE IF NOT EXISTS counters (
+    key TEXT PRIMARY KEY,
+    value INTEGER NOT NULL DEFAULT 0
+  );`,
+  `CREATE TABLE IF NOT EXISTS idempotency_keys (
+    key TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    scope TEXT NOT NULL,
+    result TEXT,
+    created_at INTEGER NOT NULL
+  );`
+];
 
 async function seed() {
   console.log("Seeding realistic demo data into:", dbPath);
 
   const now = Date.now();
   const oneHourAgo = now - 3600 * 1000;
+  const twoHoursAgo = now - 2 * 3600 * 1000;
   const oneDayAgo = now - 86400 * 1000;
   const twoDaysAgo = now - 2 * 86400 * 1000;
   const fiveDaysAgo = now - 5 * 86400 * 1000;
   const tenDaysAgo = now - 10 * 86400 * 1000;
 
+  try {
+    await client.execute("PRAGMA journal_mode = WAL;");
+    await client.execute("PRAGMA busy_timeout = 10000;");
+  } catch {}
+
+  // 1. Ensure all schema tables exist
+  for (const stmt of SCHEMA_STATEMENTS) {
+    try {
+      await client.execute(stmt);
+    } catch (err) {
+      if (!String(err).includes("already exists")) {
+        console.warn("Schema warning:", err);
+      }
+    }
+  }
+
   await client.execute("PRAGMA foreign_keys = OFF;");
 
-  // Clear existing transactional tables for clean state
-  console.log("Cleaning old test requests, items, events, notifications, audit logs...");
+  // 2. Clear existing transactional tables for a fresh state
+  console.log("Cleaning old records for clean demo state...");
   await client.execute("DELETE FROM request_item_images;");
   await client.execute("DELETE FROM request_items;");
   await client.execute("DELETE FROM request_events;");
@@ -45,7 +274,7 @@ async function seed() {
     await client.execute("DELETE FROM sqlite_sequence;");
   } catch {}
 
-  // Ensure default roles exist
+  // 3. Ensure Roles
   const rolesData = [
     {
       code: "admin",
@@ -108,7 +337,7 @@ async function seed() {
     roleMap[r.code] = r.id;
   }
 
-  // Ensure Departments
+  // 4. Ensure Departments
   const departmentsData = [
     { code: "import", nameRu: "Импорт", nameUk: "Імпорт", desc: "Імпортні закупівлі обладнання та комплектуючих", sortOrder: 10 },
     { code: "ukraine", nameRu: "Украина", nameUk: "Україна", desc: "Внутрішній ринок України", sortOrder: 20 },
@@ -132,7 +361,7 @@ async function seed() {
     depMap[d.code] = d.id;
   }
 
-  // Ensure Workshops
+  // 5. Ensure Workshops
   const workshopsData = [
     { code: "assembly", nameRu: "Сборочный цех №1", nameUk: "Цех збирання №1", desc: "Головна лінія кінцевого складання", sortOrder: 10 },
     { code: "cnc", nameRu: "Цех станков с ЧПУ", nameUk: "Цех верстатів з ЧПК", desc: "Механічна обробка металів та композитів", sortOrder: 20 },
@@ -157,7 +386,7 @@ async function seed() {
     wsMap[w.code] = w.id;
   }
 
-  // Ensure Units of Measurement
+  // 6. Ensure Units of Measurement
   const unitsData = [
     { code: "pcs", nameRu: "шт", nameUk: "шт", desc: "Штуки", sortOrder: 10 },
     { code: "m", nameRu: "м", nameUk: "м", desc: "Метри", sortOrder: 20 },
@@ -179,11 +408,7 @@ async function seed() {
     }
   }
 
-  // Clean old test users with random timestamps and reset standard users
-  await client.execute("DELETE FROM users WHERE email LIKE 'admin+%' OR email = 'buyer@localhost';");
-
-  const defaultPasswordHash = await hashPassword("admin123");
-
+  // 7. Standard Demo Accounts (Authentication via Google OAuth / Gmail)
   const usersData = [
     {
       email: "admin@company.com",
@@ -202,11 +427,27 @@ async function seed() {
       locale: "en",
     },
     {
+      email: "shop@company.com",
+      fullName: "Taras Shevchenko (Shop Manager)",
+      roleId: roleMap["workshop_master"],
+      workshopId: wsMap["assembly"],
+      departmentId: depMap["ukraine"],
+      locale: "en",
+    },
+    {
       email: "supervisor@company.com",
       fullName: "Taras Shevchenko (Supervisor)",
       roleId: roleMap["workshop_master"],
       workshopId: wsMap["assembly"],
       departmentId: depMap["ukraine"],
+      locale: "en",
+    },
+    {
+      email: "requester@company.com",
+      fullName: "David Miller (Hardware Engineer)",
+      roleId: roleMap["requester"],
+      workshopId: wsMap["electronics"],
+      departmentId: depMap["import"],
       locale: "en",
     },
     {
@@ -232,20 +473,20 @@ async function seed() {
     const ex = await client.execute({ sql: "SELECT id FROM users WHERE email = ?", args: [u.email] });
     if (ex.rows.length > 0) {
       await client.execute({
-        sql: "UPDATE users SET full_name = ?, password_hash = ?, role_id = ?, workshop_id = ?, department_id = ?, locale = ?, is_active = 1, updated_at = ? WHERE email = ?",
-        args: [u.fullName, defaultPasswordHash, u.roleId, u.workshopId, u.departmentId, u.locale, now, u.email]
+        sql: "UPDATE users SET full_name = ?, password_hash = NULL, role_id = ?, workshop_id = ?, department_id = ?, locale = ?, is_active = 1, updated_at = ? WHERE email = ?",
+        args: [u.fullName, u.roleId, u.workshopId, u.departmentId, u.locale, now, u.email]
       });
       userMap[u.email] = ex.rows[0].id;
     } else {
       const ins = await client.execute({
-        sql: "INSERT INTO users (email, full_name, password_hash, role_id, workshop_id, department_id, locale, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?) RETURNING id;",
-        args: [u.email, u.fullName, defaultPasswordHash, u.roleId, u.workshopId, u.departmentId, u.locale, now, now]
+        sql: "INSERT INTO users (email, full_name, password_hash, role_id, workshop_id, department_id, locale, is_active, created_at, updated_at) VALUES (?, ?, NULL, ?, ?, ?, ?, 1, ?, ?) RETURNING id;",
+        args: [u.email, u.fullName, u.roleId, u.workshopId, u.departmentId, u.locale, now, now]
       });
       userMap[u.email] = ins.rows[0].id;
     }
   }
 
-  // Nomenclature items
+  // 8. Realistic Nomenclature items
   const nomenclatureItems = [
     {
       name: "Siemens SIMATIC S7-1200 PLC CPU 1214C DC/DC/DC",
@@ -406,11 +647,11 @@ async function seed() {
     nomMap[n.partNumber] = res.rows[0].id;
   }
 
-  // Create Requests across diverse statuses
+  // 9. Create Requests across diverse workflow statuses
   const requestsData = [
     {
       number: "REQ-2026-001",
-      authorEmail: "supervisor@company.com",
+      authorEmail: "shop@company.com",
       assigneeEmail: "buyer@company.com",
       depCode: "import",
       wsCode: "assembly",
@@ -443,8 +684,8 @@ async function seed() {
         }
       ],
       events: [
-        { type: "created", from: null, to: null, msg: "Request created by supervisor", user: "supervisor@company.com", time: twoDaysAgo },
-        { type: "submitted", from: "draft", to: "submitted", msg: "Request submitted for procurement review", user: "supervisor@company.com", time: twoDaysAgo + 1800000 },
+        { type: "created", from: null, to: null, msg: "Request created by workshop manager", user: "shop@company.com", time: twoDaysAgo },
+        { type: "submitted", from: "draft", to: "submitted", msg: "Request submitted for procurement review", user: "shop@company.com", time: twoDaysAgo + 1800000 },
         { type: "assign", from: null, to: null, msg: "Assigned to Elena Rostova (Lead Buyer)", user: "admin@company.com", time: twoDaysAgo + 3600000 },
         { type: "status_change", from: "submitted", to: "in_review", msg: "Supplier quotes requested from official Siemens distributor", user: "buyer@company.com", time: twoDaysAgo + 7200000 },
         { type: "status_change", from: "in_review", to: "purchasing", msg: "Commercial offer accepted, proforma invoice generated", user: "buyer@company.com", time: oneDayAgo }
@@ -452,7 +693,7 @@ async function seed() {
     },
     {
       number: "REQ-2026-002",
-      authorEmail: "supervisor@company.com",
+      authorEmail: "shop@company.com",
       assigneeEmail: "buyer@company.com",
       depCode: "ukraine",
       wsCode: "maintenance",
@@ -475,15 +716,15 @@ async function seed() {
         }
       ],
       events: [
-        { type: "created", from: null, to: null, msg: "Maintenance request created", user: "supervisor@company.com", time: fiveDaysAgo },
-        { type: "submitted", from: "draft", to: "submitted", msg: "Submitted for processing", user: "supervisor@company.com", time: fiveDaysAgo + 1000000 },
-        { type: "status_change", from: "submitted", to: "purchasing", msg: "Purchase approved by chief engineer", user: "buyer@company.com", time: fourDaysAgo(fiveDaysAgo) },
+        { type: "created", from: null, to: null, msg: "Maintenance request created", user: "shop@company.com", time: fiveDaysAgo },
+        { type: "submitted", from: "draft", to: "submitted", msg: "Submitted for processing", user: "shop@company.com", time: fiveDaysAgo + 1000000 },
+        { type: "status_change", from: "submitted", to: "purchasing", msg: "Purchase approved by chief engineer", user: "buyer@company.com", time: fiveDaysAgo + 86400000 },
         { type: "status_change", from: "purchasing", to: "ordered", msg: "PO #SKF-2026-88 issued. Expected delivery in 3 working days.", user: "buyer@company.com", time: twoDaysAgo }
       ]
     },
     {
       number: "REQ-2026-003",
-      authorEmail: "engineer@company.com",
+      authorEmail: "requester@company.com",
       assigneeEmail: "buyer@company.com",
       depCode: "import",
       wsCode: "cnc",
@@ -516,15 +757,15 @@ async function seed() {
         }
       ],
       events: [
-        { type: "created", from: null, to: null, msg: "Request created", user: "engineer@company.com", time: tenDaysAgo },
-        { type: "submitted", from: "draft", to: "submitted", msg: "Submitted", user: "engineer@company.com", time: tenDaysAgo + 500000 },
+        { type: "created", from: null, to: null, msg: "Request created", user: "requester@company.com", time: tenDaysAgo },
+        { type: "submitted", from: "draft", to: "submitted", msg: "Submitted", user: "requester@company.com", time: tenDaysAgo + 500000 },
         { type: "status_change", from: "submitted", to: "ordered", msg: "Shipped by supplier via DHL Express", user: "buyer@company.com", time: fiveDaysAgo },
         { type: "status_change", from: "ordered", to: "completed", msg: "Goods received at central warehouse and verified by engineer", user: "buyer@company.com", time: oneDayAgo }
       ]
     },
     {
       number: "REQ-2026-004",
-      authorEmail: "engineer@company.com",
+      authorEmail: "requester@company.com",
       assigneeEmail: "buyer@company.com",
       depCode: "ukraine",
       wsCode: "electronics",
@@ -557,14 +798,14 @@ async function seed() {
         }
       ],
       events: [
-        { type: "created", from: null, to: null, msg: "Request drafted", user: "engineer@company.com", time: oneDayAgo },
-        { type: "submitted", from: "draft", to: "submitted", msg: "Submitted for price checking", user: "engineer@company.com", time: oneDayAgo + 600000 },
+        { type: "created", from: null, to: null, msg: "Request drafted", user: "requester@company.com", time: oneDayAgo },
+        { type: "submitted", from: "draft", to: "submitted", msg: "Submitted for price checking", user: "requester@company.com", time: oneDayAgo + 600000 },
         { type: "status_change", from: "submitted", to: "in_review", msg: "Verifying cable drum availability with local distributor", user: "buyer@company.com", time: oneHourAgo }
       ]
     },
     {
       number: "REQ-2026-005",
-      authorEmail: "supervisor@company.com",
+      authorEmail: "shop@company.com",
       assigneeEmail: null,
       depCode: "ukraine",
       wsCode: "assembly",
@@ -587,13 +828,13 @@ async function seed() {
         }
       ],
       events: [
-        { type: "created", from: null, to: null, msg: "Request created", user: "supervisor@company.com", time: oneHourAgo },
-        { type: "submitted", from: "draft", to: "submitted", msg: "Awaiting assignment to buyer", user: "supervisor@company.com", time: oneHourAgo + 120000 }
+        { type: "created", from: null, to: null, msg: "Request created", user: "shop@company.com", time: oneHourAgo },
+        { type: "submitted", from: "draft", to: "submitted", msg: "Awaiting assignment to buyer", user: "shop@company.com", time: oneHourAgo + 120000 }
       ]
     },
     {
       number: "REQ-2026-006",
-      authorEmail: "engineer@company.com",
+      authorEmail: "requester@company.com",
       assigneeEmail: "buyer@company.com",
       depCode: "import",
       wsCode: "cnc",
@@ -616,14 +857,14 @@ async function seed() {
         }
       ],
       events: [
-        { type: "created", from: null, to: null, msg: "Request created", user: "engineer@company.com", time: twoDaysAgo },
-        { type: "submitted", from: "draft", to: "submitted", msg: "Submitted", user: "engineer@company.com", time: twoDaysAgo + 200000 },
+        { type: "created", from: null, to: null, msg: "Request created", user: "requester@company.com", time: twoDaysAgo },
+        { type: "submitted", from: "draft", to: "submitted", msg: "Submitted", user: "requester@company.com", time: twoDaysAgo + 200000 },
         { type: "clarification", from: "submitted", to: "needs_info", msg: "Please specify if 110V or 230V model is required for your workshop station.", user: "buyer@company.com", time: oneDayAgo }
       ]
     },
     {
       number: "REQ-2026-007",
-      authorEmail: "engineer@company.com",
+      authorEmail: "requester@company.com",
       assigneeEmail: null,
       depCode: "import",
       wsCode: "electronics",
@@ -646,14 +887,10 @@ async function seed() {
         }
       ],
       events: [
-        { type: "created", from: null, to: null, msg: "Draft created by engineer", user: "engineer@company.com", time: oneHourAgo }
+        { type: "created", from: null, to: null, msg: "Draft created by engineer", user: "requester@company.com", time: oneHourAgo }
       ]
     }
   ];
-
-  function fourDaysAgo(base) {
-    return base + 86400 * 1000;
-  }
 
   for (const r of requestsData) {
     const authorId = userMap[r.authorEmail];
@@ -699,7 +936,7 @@ async function seed() {
     }
   }
 
-  // Add a few sample audit log records
+  // 10. Sample audit log records
   await client.execute({
     sql: `INSERT INTO audit_log (user_id, action, entity_type, entity_id, summary, created_at)
           VALUES (?, 'auth.login', 'user', ?, 'Successful web login from 127.0.0.1', ?);`,
@@ -711,26 +948,37 @@ async function seed() {
     args: [userMap["buyer@company.com"], oneDayAgo]
   });
 
-  // Notifications for admin & buyer
+  // 11. Initial Notifications
   await client.execute({
     sql: `INSERT INTO notifications (user_id, request_id, type, title, body, is_read, created_at)
-          VALUES (?, 1, 'request_status', 'REQ-2026-001 moved to Purchasing', 'Proforma invoice received for Siemens PLC', 0, ?);`,
-    args: [userMap["supervisor@company.com"], oneDayAgo]
+          VALUES (?, 5, 'request.submitted', 'Заявка REQ-2026-005: Надіслана на розгляд', 'Taras Shevchenko надіслав(ла) заявку на обробку', 0, ?);`,
+    args: [userMap["admin@company.com"], oneHourAgo]
   });
   await client.execute({
     sql: `INSERT INTO notifications (user_id, request_id, type, title, body, is_read, created_at)
-          VALUES (?, 5, 'request_submitted', 'New Request REQ-2026-005 Submitted', 'Awaiting buyer assignment', 0, ?);`,
+          VALUES (?, 1, 'request.status', 'Заявка REQ-2026-001: Передано в закупівлю', 'Отримано рахунок-фактуру від постачальника Siemens', 0, ?);`,
+    args: [userMap["shop@company.com"], oneDayAgo]
+  });
+  await client.execute({
+    sql: `INSERT INTO notifications (user_id, request_id, type, title, body, is_read, created_at)
+          VALUES (?, 5, 'request.submitted', 'Заявка REQ-2026-005: Нова заявка', 'Очікує призначення відповідального закупника', 0, ?);`,
     args: [userMap["buyer@company.com"], oneHourAgo]
   });
+  await client.execute({
+    sql: `INSERT INTO notifications (user_id, request_id, type, title, body, is_read, created_at)
+          VALUES (?, 6, 'request.status', 'Заявка REQ-2026-006: Потребує уточнення', 'Уточніть, будь ласка, модель на 110V чи 230V для робочої станції', 0, ?);`,
+    args: [userMap["requester@company.com"], twoHoursAgo]
+  });
 
-  // Seed default system settings (centralized system language)
+  // 12. Seed default system settings
   const defaultSettings = JSON.stringify({
     defaultLocale: process.env.DEFAULT_LOCALE === "uk" ? "uk" : "en",
     editableStatuses: ["draft", "needs_info"],
     requiredItemFields: [],
     autoApproveNomenclature: true,
     maxUploadMb: 8,
-    sessionTimeoutMinutes: 30
+    sessionTimeoutMinutes: 30,
+    requireUserApproval: false
   });
   await client.execute({
     sql: `INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('system', ?, ?);`,
@@ -738,13 +986,14 @@ async function seed() {
   });
 
   await client.execute("PRAGMA foreign_keys = ON;");
-  console.log("Realistic demo database successfully seeded!");
-  console.log("Demo Accounts:");
-  console.log(" - Admin:      admin@company.com      / admin123");
-  console.log(" - Buyer:      buyer@company.com      / admin123");
-  console.log(" - Supervisor: supervisor@company.com / admin123");
-  console.log(" - Engineer:   engineer@company.com   / admin123");
-  console.log(" - Quick Test: test@localhost         / test");
+  console.log("Realistic clean demo database successfully initialized!");
+  console.log("--------------------------------------------------");
+  console.log("Demo Accounts (Passwordless Google / Gmail authentication):");
+  console.log(" - Admin:        admin@company.com (Alex Morgan)");
+  console.log(" - Buyer:        buyer@company.com (Elena Rostova)");
+  console.log(" - Shop Manager: shop@company.com  (Taras Shevchenko)");
+  console.log(" - Requester:    requester@company.com (David Miller)");
+  console.log("--------------------------------------------------");
 
   client.close();
 }

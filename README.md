@@ -108,23 +108,25 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
 
-## 🔑 Demo Accounts
+## 🔑 Demo Accounts & Authentication
 
-When seeded with `npm run seed`, the following role accounts are ready to use:
+ProcureFlow uses **passwordless authentication exclusively via Google OAuth 2.0 (Gmail / Google Workspace)**. There are no login/password credentials.
 
-| Role | Email | Password | Description |
+* **Production Mode:** Users click **"Sign in with Google"** and authenticate with their corporate Gmail or Google Workspace account.
+* **Local / Demo Mode:** When Google OAuth keys (`GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`) are not yet configured in `.env`, the login page automatically displays **1-click Google emulator buttons** for each role:
+
+| Role | Corporate Email (Google) | Access Level | Description |
 | :--- | :--- | :--- | :--- |
-| **Administrator** | `admin@company.com` | `admin123` | Full system access, users, directories, backups |
-| **Procurement Manager** | `buyer@company.com` | `admin123` | Processes requisitions, assigns POs, completes orders |
-| **Shop Supervisor** | `supervisor@company.com` | `admin123` | Assembly Shop #1 lead, manages workshop requests |
-| **Hardware Engineer** | `engineer@company.com` | `admin123` | Requester, drafts orders for electronics & automation |
-| **Quick Test Account** | `test@localhost` | `test` | Fast administrator test login |
+| **Administrator** | `admin@company.com` | Full Admin | System settings, user activation, audit, backups |
+| **Procurement Manager (Buyer)** | `buyer@company.com` | Buyer | Quotations, supplier orders, requisitions processing |
+| **Shop Manager (Supervisor)** | `shop@company.com` *(or `supervisor@company.com`)* | Workshop Master | Assembly shop requisitions & approvals |
+| **Hardware Engineer (Requester)** | `requester@company.com` *(or `engineer@company.com`)* | Requester | New requisition drafting & item specs |
 
 ---
 
 ## 🐳 Docker Deployment
 
-The application includes an optimized multi-stage `Dockerfile` (`output: "standalone"`) producing a minimal image (~120MB).
+The application includes an optimized multi-stage `Dockerfile` (`output: "standalone"`) and an automated `docker-entrypoint.sh` startup script.
 
 ### Run with Docker Compose:
 ```bash
@@ -132,33 +134,27 @@ docker compose up -d --build
 ```
 Your instance will be available at `http://localhost:3000` with persistent storage mounted in Docker volumes (`procurement-data` and `procurement-uploads`).
 
+* **Automated First-Run Seeding:** If the database volume is empty, the container automatically initializes the schema and loads realistic demo data.
+* **Force Reset Demo:** Set `SEED_DEMO=true` in `docker-compose.yml` to automatically wipe and re-seed clean demo data on restart.
+
 ---
 
 ## 🌐 Live Demo Hosting Options
 
-Here are the best free or cost-effective platforms to host a live public demo:
+Here are the easiest platforms to host a live public demo (100% free or low cost):
 
-### 1. Vercel + Turso (Recommended — 100% Free Serverless)
-* **How it works:** Host the Next.js frontend on Vercel's free hobby tier and connect to a free hosted [Turso](https://turso.tech) LibSQL database.
-* **Why it's great:** 
-  * The codebase uses `@libsql/client`, which natively supports Turso out-of-the-box.
-  * Turso provides 500 free databases, 9GB storage, and 1 billion row reads/month.
-  * Zero server maintenance, instant global CDN deployment.
-* **Setup:**
-  1. Create a free database on [Turso CLI](https://docs.turso.tech/cli/introduction) or Web UI:
-     ```bash
-     turso db create procurement-demo
-     turso db show --url procurement-demo
-     turso db tokens create procurement-demo
-     ```
-  2. Deploy to Vercel and add environment variables:
-     * `DATABASE_URL=libsql://procurement-demo-[user].turso.io`
-     * `DATABASE_AUTH_TOKEN=[your-token]`
-     * `DEFAULT_LOCALE=en`
+### 1. Render.com (Free & Simple with Docker / Web Service)
+* **How it works:** Create a free Web Service on [Render](https://render.com) connected to your GitHub repo.
+* **Why it's great:** Free tier runs Docker containers directly. 
+* **Note on SQLite:** Free web services on Render have ephemeral disks that reset when spun down after inactivity. Because our `docker-entrypoint.sh` automatically seeds the database on startup, the demo will always wake up fresh with clean, working demo data!
+* **Configuration:**
+  * Build: Docker
+  * Port: `3000`
+  * Environment variables: `DEFAULT_LOCALE=en`, `APP_URL=https://your-app.onrender.com`, `ENABLE_REALTIME=true`
 
-### 2. Fly.io (Single Container with NVMe SQLite Disk — Free / $1.94/mo)
+### 2. Fly.io (Free / Low Cost with NVMe SQLite Disk Volume)
 * **How it works:** Runs the official Docker image on Fly.io with a persistent volume mounted at `/app/data`.
-* **Why it's great:** True single-binary local SQLite performance with microsecond latencies.
+* **Why it's great:** Real persistent local SQLite performance with single-digit millisecond latency.
 * **Setup:**
   ```bash
   fly launch
@@ -166,13 +162,26 @@ Here are the best free or cost-effective platforms to host a live public demo:
   fly deploy
   ```
 
-### 3. Railway or Render
-* One-click GitHub repo deployment.
-* Railway provides persistent volume attachments and $5 monthly trial credit.
-* Render offers free web services with Docker support.
+### 3. Vercel + Turso (100% Free Serverless)
+* **How it works:** Host Next.js on Vercel's free hobby tier and connect to a free hosted [Turso](https://turso.tech) LibSQL cloud database.
+* **Why it's great:** The codebase natively uses `@libsql/client`, which speaks directly to Turso. Turso provides 9GB free storage and 1 billion row reads/month.
+* **Setup:**
+  1. Create a database on [Turso](https://turso.tech):
+     ```bash
+     turso db create procurement-demo
+     turso db show --url procurement-demo
+     turso db tokens create procurement-demo
+     ```
+  2. Deploy repository to Vercel and set:
+     * `DATABASE_URL=libsql://procurement-demo-[user].turso.io`
+     * `DATABASE_AUTH_TOKEN=[your-token]`
+     * `DEFAULT_LOCALE=en`
 
-### 4. Self-Hosted VPS (Hetzner / DigitalOcean / Linode)
-* $3–$5/month Linux VPS running `docker compose` with Caddy or Nginx reverse proxy for automated SSL.
+### 4. Railway or Koyeb
+* One-click GitHub deployment with persistent volume attachment.
+
+### 5. Self-Hosted VPS (Hetzner / DigitalOcean / Oracle Free Tier)
+* Run `docker compose up -d` behind Caddy or Nginx with automated SSL.
 
 ---
 
@@ -194,6 +203,12 @@ UPLOAD_DIR=./var/uploads
 # Base Application URL
 APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Public Live Demo Safety Mode (Optional)
+# Set to "true" on public demo hosting to limit backups to max 2 files and enforce a 60s cooldown
+DEMO_MODE=false
+# ALLOW_DATABASE_BACKUPS=false  # Set to false to completely disable backup creation in demo
+# MAX_BACKUPS_COUNT=10          # Maximum retained backups on server (FIFO auto-prune)
 
 # Google OAuth 2.0 (Optional)
 GOOGLE_CLIENT_ID=
@@ -270,17 +285,20 @@ To send automated notification emails through a Gmail account:
 
 ---
 
-## 🧪 Testing & Quality Assurance
+## 🛠️ Code Quality & Maintenance
 
 ```bash
 # Run TypeScript compilation check
 npm run typecheck
 
-# Run unit tests (Workflow transitions, dedupe algorithms, permissions)
-npm test
+# Run ESLint validation
+npm run lint
 
-# Run UI smoke tests against running instance
-npm run test:smoke
+# Build production bundle
+npm run build
+
+# Re-seed clean demo database
+npm run seed
 
 # Capture fresh screenshots of all application views
 npm run screenshots

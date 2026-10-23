@@ -41,6 +41,17 @@ export function MaintenancePanel() {
   const t = useT();
   const [stats, setStats] = useState<Stats | null>(null);
   const [backups, setBackups] = useState<BackupFile[]>([]);
+  const [policy, setPolicy] = useState<{
+    isDemoMode: boolean;
+    backupsAllowed: boolean;
+    maxBackups: number;
+    cooldownSeconds: number;
+  }>({
+    isDemoMode: false,
+    backupsAllowed: true,
+    maxBackups: 10,
+    cooldownSeconds: 15,
+  });
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -58,8 +69,22 @@ export function MaintenancePanel() {
         setStats(data);
       }
       if (backupsRes.ok) {
-        const data = (await backupsRes.json()) as { backups: BackupFile[] };
+        const data = (await backupsRes.json()) as {
+          backups: BackupFile[];
+          isDemoMode?: boolean;
+          backupsAllowed?: boolean;
+          maxBackups?: number;
+          cooldownSeconds?: number;
+        };
         setBackups(data.backups || []);
+        if (data.backupsAllowed !== undefined) {
+          setPolicy({
+            isDemoMode: Boolean(data.isDemoMode),
+            backupsAllowed: Boolean(data.backupsAllowed),
+            maxBackups: data.maxBackups ?? 10,
+            cooldownSeconds: data.cooldownSeconds ?? 15,
+          });
+        }
       }
     } finally {
       setLoading(false);
@@ -85,7 +110,15 @@ export function MaintenancePanel() {
         );
         await loadData();
       } else {
-        setMessage(t("admin.maintenance.backupError"));
+        const errData = (await res.json().catch(() => ({}))) as { error?: string };
+        if (errData.error?.startsWith("cooldown_active:")) {
+          const seconds = errData.error.split(":")[1] || "60";
+          setMessage(`⚠️ ${t("admin.maintenance.demoCooldown", { seconds })}`);
+        } else if (errData.error === "backups_disabled_in_demo") {
+          setMessage(`⚠️ ${t("admin.maintenance.demoRestricted")}`);
+        } else {
+          setMessage(t("admin.maintenance.backupError"));
+        }
       }
     } finally {
       setBusyAction(null);
@@ -172,7 +205,7 @@ export function MaintenancePanel() {
               type="button"
               variant="primary"
               size="sm"
-              disabled={busyAction !== null}
+              disabled={busyAction !== null || !policy.backupsAllowed}
               onClick={handleCreateBackup}
               className="flex items-center gap-1.5"
             >
@@ -186,6 +219,23 @@ export function MaintenancePanel() {
           }
         />
         <div className="p-5 space-y-5">
+          {!policy.backupsAllowed ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/90 p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
+              <span className="text-base shrink-0">💡</span>
+              <p className="leading-relaxed">{t("admin.maintenance.backupsDisabledNotice")}</p>
+            </div>
+          ) : policy.isDemoMode ? (
+            <div className="rounded-xl border border-blue-200 bg-blue-50/90 p-3 text-xs text-blue-900 flex items-start gap-2">
+              <span className="text-sm shrink-0">ℹ️</span>
+              <p className="leading-relaxed">
+                {t("admin.maintenance.demoNotice", {
+                  max: policy.maxBackups,
+                  cooldown: policy.cooldownSeconds,
+                })}
+              </p>
+            </div>
+          ) : null}
+
           {message ? (
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
               ✓ {message}

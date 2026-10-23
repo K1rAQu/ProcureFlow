@@ -33,6 +33,8 @@ RUN mkdir -p /app/data /app/var/uploads && \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --chown=nextjs:nodejs scripts ./scripts
+COPY --chmod=755 docker-entrypoint.sh /app/docker-entrypoint.sh
 
 USER nextjs
 
@@ -40,4 +42,5 @@ EXPOSE 3000
 
 VOLUME ["/app/data", "/app/var/uploads"]
 
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["node", "server.js"]

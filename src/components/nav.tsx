@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
-import { cn, initials } from "@/lib/format";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { cn, formatRelativeTime, initials } from "@/lib/format";
 import { IconLogout } from "./icons";
 import { useLocale, useT } from "./i18n-provider";
 import { LOCALE_COOKIE, type Locale } from "@/lib/i18n";
@@ -13,9 +13,13 @@ export type NavItem = { href: string; labelKey: string; icon: string };
 export function SidebarNav({
   items,
   user,
+  initialNotifications = [],
+  initialUnread = 0,
 }: {
   items: NavItem[];
   user: { fullName: string; email: string; roleName: string; avatarUrl?: string | null };
+  initialNotifications?: NotificationRow[];
+  initialUnread?: number;
 }) {
   const pathname = usePathname();
   const t = useT();
@@ -76,7 +80,7 @@ export function SidebarNav({
         </button>
         <span className="text-sm font-semibold text-slate-800">{t("app.name")}</span>
         <span className="flex items-center gap-2">
-          <NotificationsBell />
+          <NotificationsBell initialItems={initialNotifications} initialUnread={initialUnread} />
           {user.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={user.avatarUrl} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-[#12325c]" />
@@ -210,8 +214,9 @@ export function LogoutButton() {
   );
 }
 
-type NotificationRow = {
+export type NotificationRow = {
   id: number;
+  type?: string;
   title: string;
   body: string | null;
   isRead: boolean;
@@ -219,11 +224,40 @@ type NotificationRow = {
   createdAt: string;
 };
 
-export function NotificationsBell() {
+function getNotificationIcon(type?: string) {
+  switch (type) {
+    case "request.submitted":
+    case "request_submitted":
+      return "📋";
+    case "request.status":
+    case "request_status":
+      return "🔄";
+    case "request.comment":
+    case "request_comment":
+      return "💬";
+    case "request.answer":
+      return "💡";
+    case "request.assigned":
+    case "request_assigned":
+      return "👤";
+    default:
+      return "🔔";
+  }
+}
+
+export function NotificationsBell({
+  initialItems = [],
+  initialUnread = 0,
+}: {
+  initialItems?: NotificationRow[];
+  initialUnread?: number;
+} = {}) {
   const t = useT();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<NotificationRow[]>([]);
-  const [unread, setUnread] = useState(0);
+  const [items, setItems] = useState<NotificationRow[]>(initialItems);
+  const [unread, setUnread] = useState(initialUnread);
+  const bellRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     const response = await fetch("/api/notifications");
@@ -248,8 +282,32 @@ export function NotificationsBell() {
     };
   }, [load]);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [open]);
+
+  const handleItemClick = (item: NotificationRow) => {
+    setOpen(false);
+    if (!item.isRead) {
+      setUnread((count) => Math.max(0, count - 1));
+      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, isRead: true } : i)));
+      void fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [item.id] }),
+      });
+    }
+  };
+
   return (
-    <div className="relative">
+    <div ref={bellRef} className="relative">
       <button
         type="button"
         onClick={() => {
@@ -258,51 +316,84 @@ export function NotificationsBell() {
             return !value;
           });
         }}
-        className="relative rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50"
+        className="relative rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 cursor-pointer shadow-2xs"
+        title={t("notif.title")}
+        aria-label={t("notif.title")}
       >
         <span aria-hidden>🔔</span>
         {unread > 0 ? (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white shadow-xs">
             {unread}
           </span>
         ) : null}
       </button>
       {open ? (
-        <div className="animate-fade-in absolute right-0 z-40 mt-2 w-80 max-w-[90vw] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
-          <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
-            <span className="text-xs font-semibold text-slate-700">{t("notif.title")}</span>
-            <button
-              type="button"
-              className="text-[11px] text-slate-500 hover:text-slate-800"
-              onClick={async () => {
-                setUnread(0);
-                setItems((prev) => prev.map((item) => ({ ...item, isRead: true })));
-                await fetch("/api/notifications", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ all: true }),
-                });
-              }}
-            >
-              {t("notif.markAll")}
-            </button>
+        <div className="animate-fade-in absolute right-0 z-40 mt-2 w-88 max-w-[92vw] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50/70 px-3.5 py-2.5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-800">{t("notif.title")}</span>
+              {unread > 0 ? (
+                <span className="rounded-full bg-rose-100 px-1.5 py-0.2 text-[10px] font-semibold text-rose-700">
+                  {unread}
+                </span>
+              ) : null}
+            </div>
+            {items.some((i) => !i.isRead) ? (
+              <button
+                type="button"
+                className="text-[11px] font-medium text-slate-500 hover:text-[#12325c] transition cursor-pointer"
+                onClick={async () => {
+                  setUnread(0);
+                  setItems((prev) => prev.map((item) => ({ ...item, isRead: true })));
+                  await fetch("/api/notifications", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ all: true }),
+                  });
+                }}
+              >
+                {t("notif.markAll")}
+              </button>
+            ) : null}
           </div>
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-84 overflow-y-auto divide-y divide-slate-100">
             {items.length === 0 ? (
-              <p className="px-3 py-6 text-center text-xs text-slate-500">{t("notif.empty")}</p>
+              <div className="py-8 text-center">
+                <span className="text-2xl">📭</span>
+                <p className="mt-1.5 text-xs text-slate-500">{t("notif.empty")}</p>
+              </div>
             ) : (
               items.map((item) => (
                 <Link
                   key={item.id}
                   href={item.requestId ? `/requests/${item.requestId}` : "#"}
-                  onClick={() => setOpen(false)}
+                  onClick={() => handleItemClick(item)}
                   className={cn(
-                    "block border-b border-slate-100 px-3 py-2 text-xs transition hover:bg-slate-50",
-                    item.isRead ? "text-slate-500" : "bg-blue-50/40 font-medium text-slate-800",
+                    "block px-3.5 py-2.5 text-xs transition hover:bg-slate-50",
+                    item.isRead ? "text-slate-600 bg-white" : "bg-blue-50/50 text-slate-900 font-medium",
                   )}
                 >
-                  <p className="truncate">{item.title}</p>
-                  {item.body ? <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500">{item.body}</p> : null}
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 text-xs">
+                      {getNotificationIcon(item.type)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1.5">
+                        <p className={cn("truncate text-xs", item.isRead ? "font-medium text-slate-800" : "font-bold text-slate-900")}>
+                          {item.title}
+                        </p>
+                        {!item.isRead ? (
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
+                        ) : null}
+                      </div>
+                      {item.body ? (
+                        <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500 leading-snug">{item.body}</p>
+                      ) : null}
+                      <p className="mt-1 text-[10px] text-slate-400">
+                        {formatRelativeTime(item.createdAt, locale)}
+                      </p>
+                    </div>
+                  </div>
                 </Link>
               ))
             )}

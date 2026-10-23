@@ -15,6 +15,20 @@ function isValidBackupFilename(filename: string): boolean {
   return /^procurement-backup-[\w.-]+\.db$/i.test(filename);
 }
 
+function getBackupPolicy() {
+  const isDemoMode = process.env.DEMO_MODE === "true";
+  const backupsAllowed = process.env.ALLOW_DATABASE_BACKUPS !== "false";
+  const maxBackups = Number(process.env.MAX_BACKUPS_COUNT) || (isDemoMode ? 2 : 10);
+  const cooldownSeconds = Number(process.env.BACKUP_COOLDOWN_SECONDS) || (isDemoMode ? 60 : 15);
+
+  return {
+    isDemoMode,
+    backupsAllowed,
+    maxBackups,
+    cooldownSeconds,
+  };
+}
+
 export async function GET(request: Request) {
   return handleRoute(async () => {
     const user = await requirePermission("admin.settings");
@@ -58,33 +72,86 @@ export async function GET(request: Request) {
 
     // Якщо запитано список наявних збережених копій
     const entries = await readdir(backupsDir).catch(() => []);
-    const backups: { filename: string; sizeBytes: number; createdAt: string }[] = [];
+    const backups: { filename: string; sizeBytes: number; createdAt: string; timestamp: number }[] = [];
 
     for (const entry of entries) {
       if (!isValidBackupFilename(entry)) continue;
       const fullPath = resolve(backupsDir, entry);
       const fileStat = await stat(fullPath).catch(() => null);
       if (fileStat && fileStat.isFile()) {
+        const time = fileStat.mtime.getTime();
         backups.push({
           filename: entry,
           sizeBytes: fileStat.size,
-          createdAt: (fileStat.birthtime?.getTime() ? fileStat.birthtime : fileStat.mtime).toISOString(),
+          createdAt: fileStat.mtime.toISOString(),
+          timestamp: time,
         });
       }
     }
 
     // Сортування: найновіші зверху
-    backups.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    backups.sort((a, b) => b.timestamp - a.timestamp);
 
-    return jsonOk({ backups });
+    const policy = getBackupPolicy();
+
+    return jsonOk({
+      backups: backups.map(({ filename, sizeBytes, createdAt }) => ({ filename, sizeBytes, createdAt })),
+      isDemoMode: policy.isDemoMode,
+      backupsAllowed: policy.backupsAllowed,
+      maxBackups: policy.maxBackups,
+      cooldownSeconds: policy.cooldownSeconds,
+    });
   });
 }
 
 export async function POST() {
   return handleRoute(async () => {
     const user = await requirePermission("admin.settings");
+    const policy = getBackupPolicy();
 
-    // 1. Скидаємо WAL-журнал у файл бази перед копіюванням
+    // 1. Перевірка чи дозволено створення копій
+    if (!policy.backupsAllowed) {
+      throw new HttpError(403, "backups_disabled_in_demo");
+    }
+
+    const backupsDir = getBackupsDir();
+    await mkdir(backupsDir, { recursive: true });
+
+    // 2. Зчитуємо наявні файли для перевірки кулдауну та квоти
+    const entries = await readdir(backupsDir).catch(() => []);
+    const existing: { filename: string; fullPath: string; time: number }[] = [];
+
+    for (const entry of entries) {
+      if (!isValidBackupFilename(entry)) continue;
+      const fullPath = resolve(backupsDir, entry);
+      const st = await stat(fullPath).catch(() => null);
+      if (st && st.isFile()) {
+        existing.push({ filename: entry, fullPath, time: st.mtime.getTime() });
+      }
+    }
+
+    existing.sort((a, b) => b.time - a.time); // найновіші спочатку
+
+    // 3. Захист від флуду (cooldown)
+    if (existing.length > 0) {
+      const mostRecentTime = existing[0].time;
+      const elapsedSeconds = Math.floor((Date.now() - mostRecentTime) / 1000);
+      if (elapsedSeconds < policy.cooldownSeconds) {
+        const remaining = policy.cooldownSeconds - elapsedSeconds;
+        throw new HttpError(429, `cooldown_active:${remaining}`);
+      }
+    }
+
+    // 4. Захист диска (Retention / автоочищення найстаріших копій)
+    if (existing.length >= policy.maxBackups) {
+      // Видаляємо найстаріші файли, щоб вмістити нову копію
+      const itemsToDelete = existing.slice(policy.maxBackups - 1);
+      for (const item of itemsToDelete) {
+        await unlink(item.fullPath).catch(() => null);
+      }
+    }
+
+    // 5. Скидаємо WAL-журнал у файл бази перед копіюванням
     try {
       await client.execute("PRAGMA wal_checkpoint(TRUNCATE);");
     } catch (err) {
@@ -97,18 +164,14 @@ export async function POST() {
       throw new Error("Головна база даних data/procurement.db не знайдена");
     }
 
-    // 2. Створюємо папку data/backups поруч із базою
-    const backupsDir = getBackupsDir();
-    await mkdir(backupsDir, { recursive: true });
-
-    // 3. Формуємо унікальну назву з датою та часом: procurement-backup-2026-10-22_01-15-30.db
+    // 6. Формуємо унікальну назву з датою та часом: procurement-backup-2026-10-23_09-15-30.db
     const pad = (n: number) => String(n).padStart(2, "0");
     const d = new Date();
     const dateStamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
     const filename = `procurement-backup-${dateStamp}.db`;
     const targetPath = resolve(backupsDir, filename);
 
-    // 4. Записуємо файл копії на сервері
+    // 7. Записуємо файл копії на сервері
     await copyFile(dbPath, targetPath);
 
     const targetStats = await stat(targetPath).catch(() => null);

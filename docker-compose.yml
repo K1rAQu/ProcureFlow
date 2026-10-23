@@ -16,6 +16,11 @@ services:
       - DEFAULT_LOCALE=en
       - ENABLE_REALTIME=true
       - GEO_RESTRICT_MODE=off
+      # Set to 'true' to force reset/seed demo data on container launch:
+      - SEED_DEMO=false
+      # Public demo safety options (rate-limit/protect backups on public servers):
+      - DEMO_MODE=false
+      - ALLOW_DATABASE_BACKUPS=true
       # Optional: SMTP / Google OAuth variables
       # - GOOGLE_CLIENT_ID=
       # - GOOGLE_CLIENT_SECRET=
