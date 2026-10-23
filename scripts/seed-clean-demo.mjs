@@ -1,8 +1,11 @@
 import { createClient } from "@libsql/client";
 import { resolve } from "node:path";
 
-const dbPath = resolve(process.cwd(), "data", "procurement.db");
-const client = createClient({ url: `file:${dbPath}` });
+const dbUrl = process.env.DATABASE_URL || `file:${resolve(process.cwd(), "data", "procurement.db")}`;
+const client = createClient({
+  url: dbUrl,
+  authToken: process.env.DATABASE_AUTH_TOKEN,
+});
 
 const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS roles (
